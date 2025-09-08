@@ -34,8 +34,7 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 - Protótipo UI/UX definido (quando aplicável).  
 - Dados de teste definidos.   
 - Sem dependências bloqueadoras.  
-- Critérios de aceitação claros e revisados.  
-- User Story estimada.  
+- Critérios de aceitação claros e revisados.
 
 ## Definition of Done (DoD)
 
