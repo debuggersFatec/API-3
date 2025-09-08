@@ -21,11 +21,12 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | Gestão de Tarefas | 5 | Média | Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso | 3 | 1 |
 | Autenticação | 6 | Alta | Como usuário, quero me cadastrar com e-mail e senha para acessar minhas tarefas | 5 | 1 |
 | Autenticação | 7 | Alta | Como usuário, quero fazer login para acessar meu painel de tarefas | 3 | 1 |
-| Gestão de Tarefas | 8 | Baixa | Como usuário, quero filtrar minhas tarefas por status (pendente/concluída) para organizar melhor meu trabalho | 8 | 2 |
-| Gestão de Tarefas | 9 | Baixa | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5 | 2 |
-| Erros/Exceções | 12 | Média | Como usuário, quero receber mensagens claras em caso de falhas (ex.: login inválido) | 3 | 2 |
-| Usabilidade | 10 | Média | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
-| Colaboração | 11 | Baixa | Como usuário, quero compartilhar o link do projeto para convidar outras pessoas | 3 | 3 |
+| Navegação | 8 | Alta | Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades | 8 | 1 |
+| Gestão de Tarefas | 9 | Baixa | Como usuário, quero filtrar minhas tarefas por status (pendente/concluída) para organizar melhor meu trabalho | 8 | 2 |
+| Gestão de Tarefas | 10 | Baixa | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5 | 2 |
+| Erros/Exceções | 11 | Média | Como usuário, quero receber mensagens claras em caso de falhas (ex.: login inválido) | 3 | 2 |
+| Usabilidade | 12 | Média | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
+| Colaboração | 13 | Baixa | Como usuário, quero compartilhar o link do projeto para convidar outras pessoas | 3 | 3 |
 
 ---
 
