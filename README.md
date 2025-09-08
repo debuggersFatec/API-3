@@ -12,6 +12,46 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 
 ## Backlog de Produto
 
+| Épico | Rank | Prioridade | User Story | Estimativa | Sprint |
+|-------|------|------------|------------|------------|--------|
+| Gestão de Tarefas | 1 | Alta | Como usuário, quero criar uma nova tarefa com título e descrição para organizar minhas atividades | 5 | 1 |
+| Gestão de Tarefas | 2 | Média | Como usuário, quero editar uma tarefa existente para atualizar informações | 5 | 1 |
+| Gestão de Tarefas | 3 | Média | Como usuário, quero deletar uma tarefa para remover itens que não são mais necessários | 5 | 1 |
+| Gestão de Tarefas | 4 | Alta | Como usuário, quero visualizar todas as minhas tarefas em uma lista para ter visão geral do que preciso fazer | 8 | 1 |
+| Gestão de Tarefas | 5 | Média | Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso | 3 | 1 |
+| Autenticação | 6 | Alta | Como usuário, quero me cadastrar com e-mail e senha para acessar minhas tarefas | 5 | 1 |
+| Autenticação | 7 | Alta | Como usuário, quero fazer login para acessar meu painel de tarefas | 3 | 1 |
+| Gestão de Tarefas | 8 | Baixa | Como usuário, quero filtrar minhas tarefas por status (pendente/concluída) para organizar melhor meu trabalho | 8 | 2 |
+| Gestão de Tarefas | 9 | Baixa | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5 | 2 |
+| Erros/Exceções | 12 | Média | Como usuário, quero receber mensagens claras em caso de falhas (ex.: login inválido) | 3 | 2 |
+| Usabilidade | 10 | Média | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
+| Colaboração | 11 | Baixa | Como usuário, quero compartilhar o link do projeto para convidar outras pessoas | 3 | 3 |
+
+---
+
+## Definition of Ready (DoR)
+
+- Protótipo UI/UX definido (quando aplicável).  
+- Dados de teste definidos.  
+- Compreensão validada pelo time.  
+- Sem dependências bloqueadoras.  
+- Critérios de aceitação claros e revisados.  
+- User Story estimada.  
+
+## Definition of Done (DoD)
+
+- Código desenvolvido atende aos critérios de aceitação da User Story.  
+- Não há erros críticos ou warnings no build.  
+- Padrões de codificação do time foram seguidos.  
+- Testes funcionais realizados (quando aplicável).  
+- **Testes automatizados implementados (quando aplicável).**  
+- Código integrado ao repositório principal sem conflitos.  
+- Funcionalidade disponível no ambiente de homologação/staging.  
+- O usuário final conseguiria usar a funcionalidade sem precisar de suporte extra.  
+- O valor de negócio descrito na User Story foi atendido.  
+- PO validou a entrega como “aceita”.  
+- **Documentação atualizada (README, Wiki, Notion).**  
+
 ## Cronograma
 | Entrega | Período | Status | Relatório | Vídeo |
 | --- | :--: | --- | :--: | :--: |
@@ -31,7 +71,7 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 
 ## Estrutura do Projeto
 ```
-gsw-task-manager/
+│
 ├── 📁 backend/
 │
 ├── 📁 frontend/
@@ -55,15 +95,15 @@ gsw-task-manager/
 └── README.md
 ```
 
-## 🚀 Como Executar o Projeto
-### 📋 Pré-requisitos
+## Como Executar o Projeto
+### Pré-requisitos
 Certifique-se de ter instalado em sua máquina:
 <!--
 - **Node.js** (versão 18 ou superior)
 - **npm** (gerenciador de pacotes)
 - **Git**
 -->
-### 🔧 Passo a Passo
+### Passo a Passo
 1. **Clone o repositório**:
    ```bash
    # Baixa o código do projeto do GitHub para sua máquina
