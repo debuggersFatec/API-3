@@ -49,6 +49,8 @@ gsw-task-manager/
 │   ├── tsconfig.json
 │   └── vite.config.ts
 │
+├── 📁 docs/
+│   └── 📁 sprint1/
 ├── .gitattributes
 └── README.md
 ```
@@ -116,7 +118,7 @@ Certifique-se de ter instalado em sua máquina:
 - **Variáveis de ambiente**: Configure corretamente as variáveis necessárias
 -->
 ## Documentação
-📂 [Acessar Documentação Completa](https://github.com/)
+📂 [Acessar Documentação Completa](https://github.com/debuggersFatec/API-3/docs)
 <br>
 📄 [Checklist de DoR e DoD](https://github.com/)
 <br>
