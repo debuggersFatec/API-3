@@ -32,8 +32,7 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 ## Definition of Ready (DoR)
 
 - Protótipo UI/UX definido (quando aplicável).  
-- Dados de teste definidos.  
-- Compreensão validada pelo time.  
+- Dados de teste definidos.   
 - Sem dependências bloqueadoras.  
 - Critérios de aceitação claros e revisados.  
 - User Story estimada.  
