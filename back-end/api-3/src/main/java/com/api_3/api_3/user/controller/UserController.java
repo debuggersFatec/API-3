@@ -37,10 +37,10 @@ public class UserController {
         if (userOptional.isPresent()){
             User user = userOptional.get();
             if (user.getPassword().equals(password)){
-                return ResponseEntity.ok("Login realizado com sucesso!");
+                return ResponseEntity.ok(user);
             }
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body ("Email ou Senha invalidos");
     } 
-    
+
 }
