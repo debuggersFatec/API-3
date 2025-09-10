@@ -1,15 +1,11 @@
-import { Button, HStack } from "@chakra-ui/react";
+import { Route, Routes } from "react-router-dom";
+import { Dashboard } from "./page/Dashboard";
 
 export const App = () => {
   return (
-    <>
-      <p>Hello World</p>
-      <HStack>
-        <Button colorScheme={"dark"} color={"black"}>
-          Click me
-        </Button>
-        <Button>Click me</Button>
-      </HStack>
-    </>
+    <Routes>
+      <Route path="/" element={<Dashboard/>} />
+      {/* <Route path="/" element={<App />} /> */}
+    </Routes>
   );
 };
