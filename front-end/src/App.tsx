@@ -1,5 +1,5 @@
-import { Route, Routes } from "react-router-dom";
-import { Dashboard } from "./page/Dashboard";
+import { Route, Routes } from "react-router-dom"
+import { Dashboard } from "./page/Dashboard"
 
 export const App = () => {
   return (
@@ -7,5 +7,5 @@ export const App = () => {
       <Route path="/" element={<Dashboard/>} />
       {/* <Route path="/" element={<App />} /> */}
     </Routes>
-  );
-};
+  )
+}
