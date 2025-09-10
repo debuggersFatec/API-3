@@ -1,12 +1,12 @@
 import { Box } from "@chakra-ui/react";
 import { AvatarUser } from "./AvatarUser";
+import { ColorModeButton } from "./ui/color-mode";
+
 export const Header = () => {
   return (
     <Box>
-      <AvatarUser
-        name="Matheus Karnas"
-        imageUrl=""
-      />
+      <ColorModeButton />
+      <AvatarUser name="Matheus Karnas" imageUrl="" />
     </Box>
   );
 };
