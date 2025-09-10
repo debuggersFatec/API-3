@@ -7,7 +7,7 @@ interface AvatarUserProps {
 
 export const AvatarUser = ({ name, imageUrl }: AvatarUserProps) => {
   return (
-    <Avatar.Root colorPalette="blue">
+    <Avatar.Root size={"md"} colorPalette="blue">
       <Avatar.Fallback name={name} />
       <Avatar.Image src={imageUrl} />
     </Avatar.Root>
