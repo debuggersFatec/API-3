@@ -1,0 +1,31 @@
+<svg width="640" height="832" viewBox="0 0 640 832" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="640" height="832" fill="#0D1A36"/>
+<rect x="32" y="32" width="170" height="168" fill="#00319C"/>
+<path d="M117 94L52.0481 47.5L181.952 47.5L117 94Z" fill="#E0E0E0"/>
+<path d="M94 116L47.5 180.952L47.5 51.0481L94 116Z" fill="#2391FF"/>
+<rect x="32" y="632" width="170" height="168" fill="#00319C"/>
+<path d="M117 694L52.0481 647.5H181.952L117 694Z" fill="#E0E0E0"/>
+<path d="M94 716L47.5 780.952L47.5 651.048L94 716Z" fill="#E0E0E0"/>
+<path d="M117 738L181.952 784.5H52.0481L117 738Z" fill="#2391FF"/>
+<rect x="235" y="32" width="170" height="168" fill="#00319C"/>
+<path d="M320 94L255.048 47.5L384.952 47.5L320 94Z" fill="#2391FF"/>
+<path d="M297 116L250.5 180.952L250.5 51.0481L297 116Z" fill="#2391FF"/>
+<path d="M343 116L389.5 51.0481V180.952L343 116Z" fill="#E0E0E0"/>
+<rect x="32" y="232" width="170" height="168" fill="#00319C"/>
+<path d="M117 294L52.0481 247.5H181.952L117 294Z" fill="#E0E0E0"/>
+<path d="M94 316L47.5 380.952L47.5 251.048L94 316Z" fill="#E0E0E0"/>
+<path d="M140 316L186.5 251.048V380.952L140 316Z" fill="#2391FF"/>
+<rect x="235" y="432" width="170" height="168" fill="#00319C"/>
+<path d="M315 499L250.048 452.5H379.952L315 499Z" fill="#E0E0E0"/>
+<path d="M338 521L384.5 456.048V585.952L338 521Z" fill="#2391FF"/>
+<rect x="438" y="232" width="170" height="168" fill="#00319C"/>
+<path d="M523 294L458.048 247.5H587.952L523 294Z" fill="#E0E0E0"/>
+<path d="M523 338L587.952 384.5L458.048 384.5L523 338Z" fill="#2391FF"/>
+<path d="M546 316L592.5 251.048V380.952L546 316Z" fill="#E0E0E0"/>
+<rect x="438" y="432" width="170" height="168" fill="#E0E0E0"/>
+<path d="M593.973 585.973L483.062 585.994L593.994 475.062L593.973 585.973Z" fill="#9B9B9B"/>
+<rect x="235" y="232" width="170" height="168" fill="#E0E0E0"/>
+<path d="M249.046 246.047L359.957 246.025L249.025 356.957L249.046 246.047Z" fill="#9B9B9B"/>
+<rect x="235" y="632" width="170" height="168" fill="#E0E0E0"/>
+<path d="M249.046 646.046L359.957 646.025L249.025 756.957L249.046 646.046Z" fill="#9B9B9B"/>
+</svg>
