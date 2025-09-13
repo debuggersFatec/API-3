@@ -1,18 +1,6 @@
 import { Box, Text } from "@chakra-ui/react";
 import { TarefasAtribuidasItem } from "./TarefasAtribuidasItem";
-
-// 1. GARANTIR QUE O RESPONSÁVEL TENHA UM UUID
-const tasks = [
-  { uuid: "task-1", responsavel: { uuid: "user-111", name: "Matheus Karnas" } },
-  { uuid: "task-2", responsavel: { uuid: "user-222", name: "Carlos Souza" } },
-  { uuid: "task-3", responsavel: { uuid: "user-333", name: "Maria Silva" } },
-  { uuid: "task-4", responsavel: { uuid: "user-444", name: "Ana Oliveira" } },
-  { uuid: "task-5", responsavel: { uuid: "user-555", name: "João Pereira" } },
-  { uuid: "task-6", responsavel: { uuid: "user-111", name: "Matheus Karnas" } },
-  { uuid: "task-7", responsavel: { uuid: "user-222", name: "Carlos Souza" } },
-  { uuid: "task-8", responsavel: { uuid: "user-444", name: "Ana Oliveira" } },
-  { uuid: "task-9", responsavel: { uuid: "user-222", name: "Carlos Souza" } },
-];
+import { tasks } from "@/data/tasks";
 
 interface UserTaskCount {
   uuiddousuario: string;
@@ -26,9 +14,10 @@ type Accumulator = {
 
 export const TarefasAtribuidas = () => {
   const contagemPorUsuario = tasks.reduce<Accumulator>((acc, task) => {
-    const { uuid, name } = task.responsavel;
+    if (!task.responsavel) return acc;
+    const { name } = task.responsavel;
+    const uuid = task.responsavel.name;
 
- 
     if (!acc[uuid]) {
       acc[uuid] = {
         uuiddousuario: uuid,
@@ -50,7 +39,6 @@ export const TarefasAtribuidas = () => {
       borderRadius={"8px"}
       border={"1px solid #E2E8F0"}
       p={"16px"}
-      
     >
       <Text fontSize={"16px"} fontWeight={"bold"} mb={"16px"}>
         Tarefas Atribuídas
@@ -58,7 +46,10 @@ export const TarefasAtribuidas = () => {
 
       <Box display="flex" flexDirection="column" gap={4}>
         {resultadoFinal.map((usuario) => (
-          <TarefasAtribuidasItem key={usuario.uuiddousuario} usuario={usuario}/>
+          <TarefasAtribuidasItem
+            key={usuario.uuiddousuario}
+            usuario={usuario}
+          />
         ))}
       </Box>
     </Box>
