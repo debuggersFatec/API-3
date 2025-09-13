@@ -1,5 +1,5 @@
 import { Grid } from "@chakra-ui/react";
-import { QuadroDisplay } from "./QuadroDisplay";
+import { QuadroDisplay } from "./Board/QuadroDisplay";
 
 export const TabQuadro = () => {
   return (
