@@ -1,9 +1,11 @@
 package com.api_3.api_3.user.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.util.ArrayList; 
-import java.util.List;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,6 +25,7 @@ public class User {
     private List<Object> equipes = new ArrayList<>();
     private List<Object> tasks = new ArrayList<>();
     private List<Object> lixeira = new ArrayList<>();
+    private List<Object> notificacao = new ArrayList<>();
 
     public User(String name, String email , String password , String img){
         this.name = name;
