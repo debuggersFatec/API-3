@@ -49,13 +49,21 @@ export const Login = () => {
           <form onSubmit={onSubmit}>
             <Stack gap={4}>
               {errorMessage && (
-                <Alert status="error" borderRadius="md">
-                  <AlertIcon />
-                  {errorMessage}
+                <Alert 
+                  status="error"
+                  borderRadius="md"
+                  fontWeight="500"
+                  justifyContent="center"
+                  gap="2"
+                  mb={4}
+                >
+                  <Flex alignItems="center">
+                    <AlertIcon color="red" w="20" h="20" mr="5" minW={'20'} />
+                    <Text color="red.500" fontSize="sm">{errorMessage}</Text>
+                  </Flex>
                 </Alert>
               )}
 
-              {/* Inputs get a subtle gray border per design */}
               <Input type="email" placeholder="Indique seu email" value={email} onChange={(e) => setEmail(e.target.value)} borderColor="gray.200" borderWidth="1px" borderRadius="8px" color="black" _placeholder={{ color: 'black' }} boxShadow="0 6px 18px rgba(13,26,54,0.06)" />
 
               <Input type="password" placeholder="Coloque sua senha" value={password} onChange={(e) => setPassword(e.target.value)} borderColor="gray.200" borderWidth="1px" borderRadius="8px" color="black" _placeholder={{ color: 'black' }} boxShadow="0 6px 18px rgba(13,26,54,0.06)" />
@@ -66,7 +74,6 @@ export const Login = () => {
                 </Link>
               </Flex>
 
-              
               <Button type="submit" w="full" bg="#2F80ED" color="white" _hover={{ bg: '#1E6FD8' }} _active={{ bg: '#155bb5' }} borderRadius="8px">
                 Entrar
               </Button>
@@ -79,12 +86,10 @@ export const Login = () => {
             <Box flex={1} height="1px" bg="gray.200" />
           </Box>
 
-          {/* Google button with border only */}
           <Button w="full" bg="white" color="gray.800" borderRadius="8px" borderWidth="1px" borderColor="gray.200" _hover={{ bg: '#f6f6f6' }} fontFamily="Inter, sans-serif" fontWeight="400" fontStyle="normal" fontSize="14px" lineHeight="100%" letterSpacing="0" boxShadow="0 6px 18px rgba(13,26,54,0.06)"><Image src={googleSrc} alt="Google" boxSize="18px" mr={2} />Continue com Google</Button>
         </Box>
       </Flex>
 
-      
       <Flex w={{ base: '100%', md: '50%' }} minH="100vh" bg="#0D1A36" align="center" justify="center" p={0}>
         
         <Image src={tileSrc} alt="login lateral" objectFit="contain" w="100%" h="100vh" />
