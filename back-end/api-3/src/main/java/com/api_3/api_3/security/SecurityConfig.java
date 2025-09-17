@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(requests -> requests
                     .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/tasks/**").permitAll()
+                    .requestMatchers("/api/tasks/count-by-status").permitAll()
                     .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -46,7 +46,7 @@ public class SecurityConfig {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
+        return authProvider;
     }
 
     @Bean

@@ -3,6 +3,7 @@ package com.api_3.api_3.task.controller;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -48,6 +49,13 @@ public class taskController {
         return task.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
+    // READ -> Obter a contagem de tarefas por status
+    @GetMapping("/count-by-status")
+    public ResponseEntity<List<Map<String, Object>>> getTaskCountByStatus() {
+        List<Map<String, Object>> counts = taskRepository.countByStatus();
+        return ResponseEntity.ok(counts);
+    }
+
     // UPDATE -> Atualiza uma tarefa existente
     @PutMapping("/{uuid}")
     public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask) {
@@ -61,7 +69,7 @@ public class taskController {
 
             Task savedTask = taskRepository.save(task);
             return ResponseEntity.ok(savedTask);
-        }).orElse(ResponseEntity.notFound().build()); // Ponto e vírgula adicionado
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE -> Deletar uma tarefa
