@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import com.api_3.api_3.equipe.model.Equipe;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +22,7 @@ public class User {
     private String password;
     private String img;
  
-    private List<Equipe> equipes = new ArrayList<>();
+    private List<String> equipeIds = new ArrayList<>();
     private List<Object> tasks = new ArrayList<>();
     private List<Object> lixeira = new ArrayList<>();
     private List<Object> notificacao = new ArrayList<>();
