@@ -6,9 +6,10 @@ import { TaskCard } from "./TaskCard";
 interface ColumnProps {
   column: ColumnType;
   tasks: Task[];
+  onDeleteTask: (id: string) => void;
 }
 
-export const Column = ({ column, tasks }: ColumnProps) => {
+export const Column = ({ column, tasks, onDeleteTask }: ColumnProps) => {
   const { setNodeRef } = useDroppable({ id: column.id });
 
   return (
@@ -30,7 +31,7 @@ export const Column = ({ column, tasks }: ColumnProps) => {
         p={1}
       >
         {tasks.map((task) => (
-          <TaskCard key={task.uuid} task={task} />
+          <TaskCard key={task.uuid} task={task} onDelete={onDeleteTask} />
         ))}
       </VStack>
     </Flex>

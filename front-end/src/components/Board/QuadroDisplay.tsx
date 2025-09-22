@@ -66,6 +66,22 @@ export const QuadroDisplay = () => {
     });
   };
 
+  const handleDeleteTask = (id: string) => {
+    setBoardData((prev) => {
+      const newTasks = { ...prev.tasks };
+      delete newTasks[id];
+
+      const newColumns = Object.fromEntries(
+        Object.entries(prev.columns).map(([colId, col]) => [
+          colId,
+          { ...col, taskIds: col.taskIds.filter((tid) => tid !== id) },
+        ])
+      );
+
+      return { ...prev, tasks: newTasks, columns: newColumns };
+    });
+  };
+
   return (
     <DndContext onDragEnd={handleDragEnd}>
       <Flex gap={5} p={5} w="100%">
@@ -75,7 +91,14 @@ export const QuadroDisplay = () => {
           const columnTasks = column.taskIds.map(
             (taskId) => boardData.tasks[taskId]
           );
-          return <Column key={column.id} column={column} tasks={columnTasks} />;
+          return (
+            <Column
+              key={column.id}
+              column={column}
+              tasks={columnTasks}
+              onDeleteTask={handleDeleteTask}
+            />
+          );
         })}
       </Flex>
     </DndContext>
