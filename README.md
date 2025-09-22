@@ -10,23 +10,29 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 * **Anexos de arquivos** (documentos, imagens, vídeos) diretamente nas tarefas.
 * **Notificações internas** para alertas importantes.
 
-## Backlog de Produto
+## Backlog do produto
+ 
+| Rank | Prioridade | User Story | Estimativa | Sprint |
+|------|------------|------------|------------|--------|
+| 1  | Alta   | Como usuário, quero criar uma nova tarefa com título e descrição para organizar minhas atividades | 5  | 1 |
+| 2  | Média  | Como usuário, quero editar uma tarefa existente para atualizar informações | 5  | 1 |
+| 3  | Média  | Como usuário, quero deletar uma tarefa para remover itens que não são mais necessários | 5  | 1 |
+| 4  | Alta   | Como usuário, quero visualizar todas as minhas tarefas em uma lista para ter visão geral do que preciso fazer | 8  | 1 |
+| 5  | Média  | Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso | 3  | 1 |
+| 6  | Alta   | Como usuário, quero me cadastrar com nome, e-mail e senha para acessar minhas tarefas | 5  | 1 |
+| 7  | Alta   | Como usuário, quero fazer login para acessar meu painel de tarefas | 3  | 1 |
+| 8  | Alta   | Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades | 8  | 1 |
+| 9  | Média  | Como usuário, quero recuperar minha senha caso a esqueça, para não perder acesso às minhas tarefas | 13 | 2 |
+| 10 | Média  | Como usuário, quero conseguir criar uma equipe para organizar minhas tarefas | 5  | 2 |
+| 11 | Média  | Como usuário, quero realizar login utilizando minha conta do Google, para ter mais praticidade | 8  | 2 |
+| 12 | Média  | Como usuário, quero ter um botão para convidar alguém para a minha equipe, para facilitar a colaboração | 8  | 2 |
+| 13 | Média  | Como usuário, quero receber notificações quando tarefas forem criadas, editadas ou excluídas, para acompanhar mudanças em tempo real | 13 | 2 |
+| 14 | Baixa  | Como usuário, quero filtrar minhas tarefas por status para visualizar melhor minhas tarefas | 5  | 2 |
+| 15 | Baixa  | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5  | 2 |
+| 16 | Baixa  | Como usuário, quero escolher um avatar para o meu perfil | 3  | 2 |
+| 17 | Baixa  | Como usuário, quero comentar nas tarefas de outros colaboradores | 8  | 2 |
+| 18 | Média  | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
 
-| Épico | Rank | Prioridade | User Story | Estimativa | Sprint |
-|-------|------|------------|------------|------------|--------|
-| Gestão de Tarefas | 1 | Alta | Como usuário, quero criar uma nova tarefa com título e descrição para organizar minhas atividades | 5 | 1 |
-| Gestão de Tarefas | 2 | Média | Como usuário, quero editar uma tarefa existente para atualizar informações | 5 | 1 |
-| Gestão de Tarefas | 3 | Média | Como usuário, quero deletar uma tarefa para remover itens que não são mais necessários | 5 | 1 |
-| Gestão de Tarefas | 4 | Alta | Como usuário, quero visualizar todas as minhas tarefas em uma lista para ter visão geral do que preciso fazer | 8 | 1 |
-| Gestão de Tarefas | 5 | Média | Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso | 3 | 1 |
-| Autenticação | 6 | Alta | Como usuário, quero me cadastrar com e-mail e senha para acessar minhas tarefas | 5 | 1 |
-| Autenticação | 7 | Alta | Como usuário, quero fazer login para acessar meu painel de tarefas | 3 | 1 |
-| Navegação | 8 | Alta | Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades | 8 | 1 |
-| Gestão de Tarefas | 9 | Baixa | Como usuário, quero filtrar minhas tarefas por status (pendente/concluída) para organizar melhor meu trabalho | 8 | 2 |
-| Gestão de Tarefas | 10 | Baixa | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5 | 2 |
-| Erros/Exceções | 11 | Média | Como usuário, quero receber mensagens claras em caso de falhas (ex.: login inválido) | 3 | 2 |
-| Usabilidade | 12 | Média | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
-| Colaboração | 13 | Baixa | Como usuário, quero compartilhar o link do projeto para convidar outras pessoas | 3 | 3 |
 
 ---
 
