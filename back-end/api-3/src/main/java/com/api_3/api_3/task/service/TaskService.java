@@ -9,6 +9,8 @@ import com.api_3.api_3.task.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -51,5 +53,33 @@ public class TaskService {
         }
 
         return savedTask;
+    }
+
+    @Transactional
+    public Optional<Task> deleteTask(String uuid){
+
+    Optional<Task> taskOptional = taskRepository.findById(uuid);
+
+    if (taskOptional.isEmpty()){
+        return Optional.empty();
+    }
+
+    Task task = taskOptional.get();
+    task.setStatus("excluida");
+    Task updatedTask = taskRepository.save(task);
+
+    if (updatedTask.getEquip_uuid() != null && !updatedTask.getEquip_uuid().isEmpty()){
+        equipeRepository.findById(updatedTask.getEquip_uuid()).ifPresent(equipe ->{
+
+            equipe.getTasks().stream()
+                .filter(taskInfo -> taskInfo.getUuid().equals(uuid))
+                .findFirst()
+                .ifPresent(taskInfo ->{
+                    taskInfo.setStatus("excluida");
+                    equipeRepository.save(equipe);
+                });
+        });
+    }
+    return Optional.of(updatedTask);
     }
 }

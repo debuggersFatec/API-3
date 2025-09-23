@@ -76,11 +76,9 @@ public class taskController {
 
     // DELETE -> Deletar uma tarefa
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> deleteTask(@PathVariable String uuid) {
-        if (!taskRepository.existsById(uuid)) {
-            return ResponseEntity.notFound().build();
-        }
-        taskRepository.deleteById(uuid);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Task> deleteTask(@PathVariable String uuid) {
+        return taskService.deleteTask(uuid)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
