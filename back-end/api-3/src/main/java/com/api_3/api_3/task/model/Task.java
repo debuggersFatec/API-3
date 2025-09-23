@@ -28,28 +28,3 @@ public class Task {
     private Responsible responsible;
     private List<Comment> comment;   
 }
-
-@Data
-@NoArgsConstructor
-class Responsible {
-    private String uuid;
-    private String name;
-    private String url_img;
-
-}
-
-@Data
-@NoArgsConstructor
-class Comment{
-    private String content;
-    private Date created_at;
-    private Author author;
-}
-
-@Data
-@NoArgsConstructor
-class Author{
-    private String uuid;
-    private String name;
-    private String url_img;
-}

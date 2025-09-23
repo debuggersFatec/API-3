@@ -5,6 +5,9 @@ target/
 !**/src/test/**/target/
 .env
 
+equipe.json
+task.json
+usuario.json
 ### STS ###
 .apt_generated
 .classpath

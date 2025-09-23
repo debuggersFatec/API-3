@@ -1,9 +1,8 @@
 package com.api_3.api_3.task.controller;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
+import com.api_3.api_3.task.service.TaskService;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -27,11 +27,13 @@ public class taskController {
     @Autowired
     private TaskRepository taskRepository;
 
+    @Autowired
+    private TaskService taskService;
+
     // CREATE -> Criar uma nova task
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task newTask) {
-        newTask.setUuid(UUID.randomUUID().toString());
-        Task savedTask = taskRepository.save(newTask);
+        Task savedTask = taskService.createTask(newTask);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
@@ -76,7 +78,7 @@ public class taskController {
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> deleteTask(@PathVariable String uuid) {
         if (!taskRepository.existsById(uuid)) {
-            throw new ResourceNotFoundException("Tarefa não encontrada com id " + id);
+            return ResponseEntity.notFound().build();
         }
         taskRepository.deleteById(uuid);
         return ResponseEntity.noContent().build();
