@@ -4,9 +4,10 @@ import { ModalNewTask } from "./ModalNewTask";
 
 interface SectionHeaderProps {
   title: string;
+  isTeamSection?: boolean;
 }
 
-export const SectionHeader = ({ title }: SectionHeaderProps) => {
+export const SectionHeader = ({ title, isTeamSection }: SectionHeaderProps) => {
   return (
     <>
       <Box w={"100%"} mb={"24px"} mt={"24px"} px={"32px"}>
@@ -18,12 +19,13 @@ export const SectionHeader = ({ title }: SectionHeaderProps) => {
           flexDirection={"row"}
           justifyContent={"space-between"}
         >
-          <Dialog.Root placement={'center'} >
-            <Dialog.Trigger asChild>              
-            </Dialog.Trigger>
-            <ModalNewTask />
-          </Dialog.Root>
-          <Filtergroup></Filtergroup>
+          {isTeamSection && (
+            <Dialog.Root placement={"center"}>
+              <Dialog.Trigger asChild></Dialog.Trigger>
+              <ModalNewTask />
+            </Dialog.Root>
+          )}
+          <Filtergroup />
         </Box>
         <Separator mt={"24px"} />
       </Box>
