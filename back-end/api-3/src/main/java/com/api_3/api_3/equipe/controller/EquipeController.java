@@ -1,22 +1,29 @@
 package com.api_3.api_3.equipe.controller;
  
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
-import java.util.UUID;
-import com.api_3.api_3.equipe.model.Membro;
-import java .util.ArrayList;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind .annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.equipe.model.Equipe;
+import com.api_3.api_3.equipe.model.Membro;
+import com.api_3.api_3.equipe.repository.EquipeRepository;
 import com.api_3.api_3.user.model.User;
 import com.api_3.api_3.user.repository.UserRepository;
-import com.api_3.api_3.equipe.repository.EquipeRepository;
  
 @RestController
 @RequestMapping("/api/equipes")
@@ -34,11 +41,17 @@ public class EquipeController {
     public ResponseEntity<Equipe> createEquipe(@RequestBody Equipe novaEquipe , Authentication authentication){
         // 1. Verificar se o usuário está autenticado
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User criador = userRepository.findByEmail(userDetails.getUsername())
+        String userEmail = userDetails.getUsername();
+        System.out.println("DEBUG: Criando equipe para o usuário com email: " + userEmail);
+        
+        User criador = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        System.out.println("DEBUG: Usuário criador encontrado: " + criador.getName() + ", UUID: " + criador.getUuid());
+        System.out.println("DEBUG: Equipes do usuário ANTES: " + criador.getEquipeIds());
 
         // 2. Configurar o UUID da nova equipe
         novaEquipe.setUuid(UUID.randomUUID().toString());
+        System.out.println("DEBUG: UUID gerado para a nova equipe: " + novaEquipe.getUuid());
 
         // 3. Criar o primeiro membro da equipe com os dados do criador
         Membro primeiroMembro = new Membro();
@@ -54,10 +67,12 @@ public class EquipeController {
     
     // 5. Salvar a nova equipa na base de dados
     Equipe equipeSalva = equipeRepository.save(novaEquipe);
+    System.out.println("DEBUG: Equipe salva com sucesso. UUID: " + equipeSalva.getUuid());
 
     // 6. ADICIONADO: Atualizar o documento do utilizador para adicionar o ID da nova equipa
     criador.getEquipeIds().add(equipeSalva.getUuid());
     userRepository.save(criador);
+    System.out.println("DEBUG: Equipes do usuário DEPOIS: " + criador.getEquipeIds());
 
     return ResponseEntity.status(HttpStatus.CREATED).body(equipeSalva);
     }

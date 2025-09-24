@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api_3.api_3.equipe.service.EquipeService;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
 import com.api_3.api_3.task.service.TaskService;
@@ -30,11 +33,50 @@ public class taskController {
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private EquipeService equipeService;
+
     // CREATE -> Criar uma nova task
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task newTask) {
-        Task savedTask = taskService.createTask(newTask);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
+    public ResponseEntity<Task> createTask(@RequestBody Task newTask, Authentication authentication) {
+        try {
+            if (authentication == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
+            Object principal = authentication.getPrincipal();
+            if (principal == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
+            if (!(principal instanceof UserDetails)) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            
+            UserDetails userDetails = (UserDetails) principal;
+            String userEmail = userDetails.getUsername();
+
+            if (newTask.getEquip_uuid() == null || newTask.getEquip_uuid().isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
+            
+            // Garantir que não há espaços extras no UUID da equipe
+            String cleanEquipUuid = newTask.getEquip_uuid().trim();
+            if (!cleanEquipUuid.equals(newTask.getEquip_uuid())) {
+                newTask.setEquip_uuid(cleanEquipUuid);
+            }
+            
+            boolean isMember = equipeService.isUserMemberOfEquipe(userEmail, newTask.getEquip_uuid());
+            
+            if (!isMember) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            Task savedTask = taskService.createTask(newTask);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     // READ -> Obter todas as tarefas
@@ -60,23 +102,47 @@ public class taskController {
 
     // UPDATE -> Atualiza uma tarefa existente
     @PutMapping("/{uuid}")
-    public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask) {
-        return taskRepository.findById(uuid).map(task -> {
-            task.setTitle(updatedTask.getTitle());
-            task.setDescription(updatedTask.getDescription());
-            task.setDue_date(updatedTask.getDue_date());
-            task.setStatus(updatedTask.getStatus());
-            task.setPriority(updatedTask.getPriority());
-            // ... Mais campos para atualização posteriormente
+    public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask, Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userEmail = userDetails.getUsername();
 
-            Task savedTask = taskRepository.save(task);
-            return ResponseEntity.ok(savedTask);
-        }).orElse(ResponseEntity.notFound().build());
+        Optional<Task> taskOptional = taskRepository.findById(uuid);
+        if (taskOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        Task task = taskOptional.get();
+        if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        task.setTitle(updatedTask.getTitle());
+        task.setDescription(updatedTask.getDescription());
+        task.setDue_date(updatedTask.getDue_date());
+        task.setStatus(updatedTask.getStatus());
+        task.setPriority(updatedTask.getPriority());
+        // ... Mais campos para atualização posteriormente
+
+        Task savedTask = taskRepository.save(task);
+        return ResponseEntity.ok(savedTask);
     }
 
     // DELETE -> Deletar uma tarefa
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Task> deleteTask(@PathVariable String uuid) {
+    public ResponseEntity<Task> deleteTask(@PathVariable String uuid, Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userEmail = userDetails.getUsername();
+
+        Optional<Task> taskOptional = taskRepository.findById(uuid);
+        if (taskOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Task task = taskOptional.get();
+        if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         return taskService.deleteTask(uuid)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

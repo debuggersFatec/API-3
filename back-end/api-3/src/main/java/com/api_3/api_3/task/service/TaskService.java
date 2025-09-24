@@ -1,17 +1,18 @@
 package com.api_3.api_3.task.service;
 
-import com.api_3.api_3.equipe.model.Equipe;
+import java.util.ArrayList;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.api_3.api_3.equipe.model.ResponsavelTask;
 import com.api_3.api_3.equipe.model.TaskInfo;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class TaskService {
@@ -46,7 +47,12 @@ public class TaskService {
                     responsavelTask.setImg(savedTask.getResponsible().getUrl_img());
                     taskInfo.setResponsavel(responsavelTask);
                 }
-
+                
+                // Check if the tasks list is null and initialize it if needed
+                if (equipe.getTasks() == null) {
+                    equipe.setTasks(new ArrayList<>());
+                }
+                
                 equipe.getTasks().add(taskInfo);
                 equipeRepository.save(equipe);
             });

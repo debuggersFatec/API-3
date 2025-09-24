@@ -1,9 +1,13 @@
 package com.api_3.api_3.user.controller;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +23,24 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
-    // Método registerUser foi movido para o AuthController
+    
+    // Endpoint de diagnóstico para verificar associações de usuários e equipes
+    @GetMapping("/debug/user-teams")
+    public ResponseEntity<?> debugUserTeams() {
+        List<User> users = userRepository.findAll();
+        List<Map<String, Object>> result = new ArrayList<>();
+        
+        for (User user : users) {
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("uuid", user.getUuid());
+            userInfo.put("name", user.getName());
+            userInfo.put("email", user.getEmail());
+            userInfo.put("equipeIds", user.getEquipeIds());
+            result.add(userInfo);
+        }
+        
+        return ResponseEntity.ok(result);
+    }
 
     @PutMapping("/{userId}/equipes")
     public ResponseEntity<User>addEquipeToUser(@PathVariable String userId,@RequestBody Map<String, String> payload){
