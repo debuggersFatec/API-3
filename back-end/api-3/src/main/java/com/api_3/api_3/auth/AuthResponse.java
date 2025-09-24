@@ -4,15 +4,18 @@ import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class AuthResponse {
     private String token;
     private UserInfo user;
     
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class UserInfo {
         private String uuid;
         private String name;
@@ -24,6 +27,7 @@ public class AuthResponse {
     
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class EquipeInfo {
         private String uuid;
         private String name;
@@ -31,6 +35,7 @@ public class AuthResponse {
     
     @Data
     @AllArgsConstructor
+    @NoArgsConstructor
     public static class TaskInfo {
         private String uuid;
         private String title;

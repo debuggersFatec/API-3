@@ -1,5 +1,6 @@
 package com.api_3.api_3.auth;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
+import com.api_3.api_3.exception.EmailAlreadyExistsException;
+import com.api_3.api_3.exception.InvalidCredentialsException;
+import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.security.JwtUtil;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
@@ -49,72 +54,64 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
-        Authentication authentication = authenticationManager.authenticate(
+        Authentication authentication;
+        try {
+            authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
-        );
-
-        if (authentication.isAuthenticated()) {
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String token = jwtUtil.generateToken(userDetails);
-            
-            // Buscar os dados completos do usuário
-            User user = userRepository.findByEmail(authRequest.getEmail())
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-            
-            // Buscar equipes do usuário
-            List<Equipe> equipesCompletas = equipeRepository.findAllById(user.getEquipeIds());
-            List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
-                    .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
-                    .collect(Collectors.toList());
-            
-            // Buscar tarefas atribuídas ao usuário
-            List<Task> tasksDoUsuario = taskRepository.findByResponsibleUuid(user.getUuid());
-            List<AuthResponse.TaskInfo> tasks = tasksDoUsuario.stream()
-                    .map(task -> new AuthResponse.TaskInfo(
-                            task.getUuid(),
-                            task.getTitle(),
-                            task.getStatus(),
-                            task.getPriority(),
-                            task.getEquip_uuid()
-                    ))
-                    .collect(Collectors.toList());
-            
-            // Criar o objeto de resposta com token e dados do usuário
-            AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-                    user.getUuid(),
-                    user.getName(),
-                    user.getEmail(),
-                    user.getImg(),
-                    equipes,
-                    tasks
             );
-            
-            return new AuthResponse(token, userInfo);
-        } else {
-            throw new RuntimeException("Invalid username or password!");
+        } catch (BadCredentialsException e) {
+            throw new InvalidCredentialsException("Credenciais inválidas!");
         }
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String token = jwtUtil.generateToken(userDetails);
+        
+        User user = userRepository.findByEmail(authRequest.getEmail())
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
+        
+        List<Equipe> equipesCompletas = equipeRepository.findAllById(user.getEquipeIds());
+        List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
+                .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
+                .collect(Collectors.toList());
+        
+        List<Task> tasksDoUsuario = taskRepository.findByResponsibleUuid(user.getUuid());
+        List<AuthResponse.TaskInfo> tasks = tasksDoUsuario.stream()
+                .map(task -> new AuthResponse.TaskInfo(
+                        task.getUuid(),
+                        task.getTitle(),
+                        task.getStatus(),
+                        task.getPriority(),
+                        task.getEquip_uuid()
+                ))
+                .collect(Collectors.toList());
+        
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                user.getUuid(),
+                user.getName(),
+                user.getEmail(),
+                user.getImg(),
+                equipes,
+                tasks
+        );
+        
+        return new AuthResponse(token, userInfo);
     }
     
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody com.api_3.api_3.user.model.User newUser) {
-        // Verificar se o e-mail já está em uso
+    public ResponseEntity<AuthResponse> registerUser(@RequestBody User newUser) {
         if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: E-mail já está em uso!");
+            throw new EmailAlreadyExistsException("Erro: E-mail já está em uso!");
         }
         
-        // Preparar o novo usuário
         newUser.setUuid(UUID.randomUUID().toString());
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         
-        // Se o usuário não tiver lista de equipes, inicializar uma lista vazia
         if (newUser.getEquipeIds() == null) {
-            newUser.setEquipeIds(java.util.Collections.emptyList());
+            newUser.setEquipeIds(Collections.emptyList());
         }
         
-        // Salvar o usuário no banco de dados
-        com.api_3.api_3.user.model.User savedUser = userRepository.save(newUser);
+        User savedUser = userRepository.save(newUser);
         
-        // Gerar o token JWT para o usuário recém-registrado
         String token = jwtUtil.generateToken(
                 org.springframework.security.core.userdetails.User
                         .withUsername(savedUser.getEmail())
@@ -123,17 +120,15 @@ public class AuthController {
                         .build()
         );
         
-        // Criar o objeto de resposta com token e dados do usuário (sem equipes e tarefas, pois é um novo usuário)
         AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
                 savedUser.getUuid(),
                 savedUser.getName(),
                 savedUser.getEmail(),
                 savedUser.getImg(),
-                java.util.Collections.emptyList(), // Sem equipes inicialmente
-                java.util.Collections.emptyList()  // Sem tarefas inicialmente
+                Collections.emptyList(),
+                Collections.emptyList()
         );
         
-        // Retornar resposta com token e dados do usuário
         return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, userInfo));
     }
 }
