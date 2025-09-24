@@ -1,9 +1,11 @@
-import { Flex, Tabs, Separator } from "@chakra-ui/react";
+import { Flex, Tabs, Separator, Dialog, Box } from "@chakra-ui/react";
 import { MyTasks } from "./MyTasks";
 import { EquipeDashboard } from "./EquipeDashboard";
 import { VencidasTab } from "./VencidasTab";
 import { CompletasTab } from "./CompletasTab";
 import { LixoTab } from "./LixoTab";
+import { ModalNewTeam } from "./ModalNewTeam";
+import { FaPlus } from "react-icons/fa";
 
 const usuario = {
   uuid: "usuario-matheus-k-9999-8888-777777777777",
@@ -103,7 +105,17 @@ export const Sidebar = () => {
             <h1>Tarefas</h1>
             <Tabs.Trigger value="minhasTasks">Minhas Tasks</Tabs.Trigger>
             <Tabs.Trigger value="vencidas">Vencidas</Tabs.Trigger>
-            <h1>Equipes</h1>
+            <Flex alignItems={"center"} justify={"space-between"}>
+              <h1>Equipes</h1>
+              <Dialog.Root placement={"center"}>
+                <Dialog.Trigger asChild>
+                  <Box bg="blue.500" borderRadius="md" p={0.5} border="none">
+                    <FaPlus color="white" />
+                  </Box>
+                </Dialog.Trigger>
+                <ModalNewTeam />
+              </Dialog.Root>
+            </Flex>
             {usuario.equipes.map((equipe) => (
               <Tabs.Trigger key={equipe.uuid} value={equipe.uuid}>
                 {equipe.name}
