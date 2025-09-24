@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.UUID;
+import com.api_3.api_3.equipe.model.Membro;
+import java .util.ArrayList;
 
 import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.user.model.User;
@@ -29,10 +31,35 @@ public class EquipeController {
 
     // CREATE -> Criar uma nova equipe
     @PostMapping
-    public ResponseEntity<Equipe> createEquipe(@RequestBody Equipe novaEquipe) {
+    public ResponseEntity<Equipe> createEquipe(@RequestBody Equipe novaEquipe , Authentication authentication){
+        // 1. Verificar se o usuário está autenticado
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        User criador = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        // 2. Configurar o UUID da nova equipe
         novaEquipe.setUuid(UUID.randomUUID().toString());
-        Equipe equipeSalva = equipeRepository.save(novaEquipe);
-        return ResponseEntity.status(HttpStatus.CREATED).body(equipeSalva);
+
+        // 3. Criar o primeiro membro da equipe com os dados do criador
+        Membro primeiroMembro = new Membro();
+        primeiroMembro.setUuid(criador.getUuid());
+        primeiroMembro.setName(criador.getName());
+        primeiroMembro.setImg(criador.getImg());
+        primeiroMembro.setAtribuidas_tasks(0);
+        primeiroMembro.setConcluidas_tasks(0);
+        primeiroMembro.setVencidas_tasks(0);
+
+        // 4. Adicionar o criador como o primeiro membro da equipa
+    novaEquipe.setMembros(new ArrayList<>(List.of(primeiroMembro)));
+    
+    // 5. Salvar a nova equipa na base de dados
+    Equipe equipeSalva = equipeRepository.save(novaEquipe);
+
+    // 6. ADICIONADO: Atualizar o documento do utilizador para adicionar o ID da nova equipa
+    criador.getEquipeIds().add(equipeSalva.getUuid());
+    userRepository.save(criador);
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(equipeSalva);
     }
 
     // READ -> Obter as equipes do usuario
