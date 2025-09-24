@@ -1,18 +1,20 @@
 export interface Responsavel {
   name: string;
   img: string;
+  uuid: string;
 }
 
 export type TaskStatus = "not-started" | "in-progress" | "completed";
-export type TaskPrioridade = "baixa" | "media" | "alta" | "critica";
+export type TaskPriority = "baixa" | "media" | "alta" | "critica";
 
 export interface Task {
   uuid: string;
   title: string;
   description?: string;
-  due_date: string;
+  due_date: Date | null;
   status: TaskStatus;
-  prioridade: TaskPrioridade;
+  priority: TaskPriority;
+  equip_uuid: string;
   responsavel?: Responsavel;
 }
 
