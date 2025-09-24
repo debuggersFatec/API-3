@@ -96,13 +96,44 @@ public class AuthController {
     }
     
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User newUser) {
+    public ResponseEntity<?> registerUser(@RequestBody com.api_3.api_3.user.model.User newUser) {
+        // Verificar se o e-mail já está em uso
         if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Erro: E-mail já está em uso!");
         }
+        
+        // Preparar o novo usuário
         newUser.setUuid(UUID.randomUUID().toString());
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
-        User savedUser = userRepository.save(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        
+        // Se o usuário não tiver lista de equipes, inicializar uma lista vazia
+        if (newUser.getEquipeIds() == null) {
+            newUser.setEquipeIds(java.util.Collections.emptyList());
+        }
+        
+        // Salvar o usuário no banco de dados
+        com.api_3.api_3.user.model.User savedUser = userRepository.save(newUser);
+        
+        // Gerar o token JWT para o usuário recém-registrado
+        String token = jwtUtil.generateToken(
+                org.springframework.security.core.userdetails.User
+                        .withUsername(savedUser.getEmail())
+                        .password(savedUser.getPassword())
+                        .authorities("USER")
+                        .build()
+        );
+        
+        // Criar o objeto de resposta com token e dados do usuário (sem equipes e tarefas, pois é um novo usuário)
+        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+                savedUser.getUuid(),
+                savedUser.getName(),
+                savedUser.getEmail(),
+                savedUser.getImg(),
+                java.util.Collections.emptyList(), // Sem equipes inicialmente
+                java.util.Collections.emptyList()  // Sem tarefas inicialmente
+        );
+        
+        // Retornar resposta com token e dados do usuário
+        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, userInfo));
     }
 }
