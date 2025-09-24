@@ -10,7 +10,7 @@ interface Equipe {
 export const EquipeDashboard = ({ equipe }: { equipe: Equipe }) => {
   return (
     <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
-      <SectionHeader title={equipe.name} />
+      <SectionHeader title={equipe.name} isTeamSection={true} />
       <EquipeTabs />
     </Box>
   );
