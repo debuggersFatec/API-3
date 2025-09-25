@@ -4,11 +4,14 @@ import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
+import axios from "axios";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const PasswordStrengthMeter = ({ value }: { value: number }) => {
   const color = value < 3 ? "red.500" : value < 5 ? "yellow.500" : "green.500";
   const text = value === 0 ? "" : value < 3 ? "Fraca" : value < 5 ? "Boa" : "Forte";
-  
+
   return (
     <Box mt={2}>
       <Flex w="full" bg="gray.200" borderRadius="md" h="4px">
@@ -38,8 +41,10 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const { setUser, setToken } = useAuth();
+  const navigate = useNavigate();
 
   const strongPasswordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -74,27 +79,34 @@ export default function Register() {
     }
 
     try {
-      setLoading(true);
+      // setLoading(true);
 
-      const response = await fetch(`http://localhost:3000/users/check-email?email=${email}`);
-      const data = await response.json();
-
-      if (data.exists) {
-        setError("Este email já está em uso.");
-        setLoading(false);
-        return;
-      }
-
-      console.log("Usuário registrado:", { name, email, password });
-
-      setLoading(false);
+      axios
+        .post("http://localhost:8080/api/auth/register", {
+          email: email,
+          password: password,
+          name: name,
+        })
+        .then((response) => {
+          setToken(response.data.token);
+          setUser(response.data.user);
+          navigate("/");
+        })
+        .catch((error) => {
+          setError(
+            error?.response?.data?.message ||
+              error.message ||
+              "Erro ao registrar."
+          );
+          console.log(error);
+        });
+      // setLoading(false);
     } catch (err) {
       setError("Erro ao verificar email. Tente novamente.");
       console.log(err);
-      setLoading(false);
+      // setLoading(false);
     }
   };
-  console.log(loading)
   return (
     <Flex w="100vw" minH="100vh" direction={{ base: 'column', md: 'row' }} align="stretch" bg="gray.900">
       <Flex w={{ base: '100%', md: '50%' }} minH="100vh" align="center" justify="center" bg="white">
@@ -104,7 +116,7 @@ export default function Register() {
           <Text fontSize="2xl" fontWeight="bold" mb={1} color="gray.800">Bem vindo ao FASTASK</Text>
 
           <Text fontSize="sm" color="gray.600" mb={6}>
-            Já tem uma conta? {' '}
+            Já tem uma conta?
             <Link color="blue.500" href="/login">Faça login</Link>
           </Text>
 
@@ -150,7 +162,7 @@ export default function Register() {
                 _placeholder={{ color: 'black' }}
                 boxShadow="0 6px 18px rgba(13,26,54,0.06)"
               />
-              
+
               <Input
                 type="password"
                 placeholder="Coloque sua senha"
