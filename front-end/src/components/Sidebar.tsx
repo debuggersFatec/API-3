@@ -6,89 +6,18 @@ import { CompletasTab } from "./CompletasTab";
 import { LixoTab } from "./LixoTab";
 import { ModalNewTeam } from "./ModalNewTeam";
 import { FaPlus } from "react-icons/fa";
-
-const usuario = {
-  uuid: "usuario-matheus-k-9999-8888-777777777777",
-  name: "Matheus Karnas",
-  email: "matheus.karnas@email.com",
-  password: "hashed_password_example",
-  img: "https://i.pravatar.cc/150?u=matheus_karnas",
-  equipes: [
-    {
-      uuid: "equipe-123e4567-e89b-12d3-a456-426614174000",
-      name: "Debuggers",
-    },
-    {
-      uuid: "equipe-facul-a1b2-c3d4-e5f6a7b8c9d0",
-      name: "Faculdade",
-    },
-    {
-      uuid: "equipe-work-b2c3-d4e5-f6a7b8c9d0e1",
-      name: "Trabalho",
-    },
-    {
-      uuid: "equipe-team2-c3d4-e5f6-a7b8c9d0e1f2",
-      name: "Equipe 2",
-    },
-  ],
-  tasks: [
-    {
-      uuid: "task-123e4567-e89b-12d3-a456-426614174000",
-      title: "Criar protótipo de interface",
-      due_date: "2025-09-15",
-      status: "in-progress",
-      prioridade: "alta",
-      equipe_uuid: "equipe-123e4567-e89b-12d3-a456-426614174000",
-    },
-    {
-      uuid: "task-facul-002",
-      title: "Estudar para prova de Redes",
-      due_date: "2025-09-25",
-      status: "not-started",
-      prioridade: "alta",
-      equipe_uuid: "equipe-facul-a1b2-c3d4-e5f6a7b8c9d0",
-    },
-    {
-      uuid: "task-work-003",
-      title: "Reunião com Cliente X",
-      due_date: "2025-09-15",
-      status: "not-started",
-      prioridade: "média",
-      equipe_uuid: "equipe-work-b2c3-d4e5-f6a7b8c9d0e1",
-    },
-    {
-      uuid: "task-team2-002",
-      title: "Atualizar documentação do projeto",
-      due_date: "2025-09-28",
-      status: "in-progress",
-      prioridade: "baixa",
-      equipe_uuid: "equipe-team2-c3d4-e5f6-a7b8c9d0e1f2",
-    },
-  ],
-  lixeira: [
-    {
-      uuid: "task-deleted-example-001",
-      title: "Configurar ambiente de dev antigo",
-      description:
-        "Instalar versão legada do Java e configurar variáveis de ambiente.",
-      due_date: "2025-08-30",
-      status: "completed",
-      prioridade: "baixa",
-      equipe_uuid: "equipe-work-b2c3-d4e5-f6a7b8c9d0e1",
-      responsavel: {
-        uuid: "usuario-matheus-k-9999-8888-777777777777",
-        name: "Matheus Karnas",
-        img: "https://i.pravatar.cc/150?u=matheus_karnas",
-      },
-    },
-  ],
-};
+import { useAuth } from "@/context/AuthContext";
+import { useState } from "react";
 
 export const Sidebar = () => {
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>("minhasTasks");
   return (
     <>
       <Flex>
         <Tabs.Root
+          value={activeTab}
+          onValueChange={(details) => setActiveTab(details.value)}
           defaultValue="minhasTasks"
           variant={"plain"}
           flexDir={"row"}
@@ -116,11 +45,12 @@ export const Sidebar = () => {
                 <ModalNewTeam />
               </Dialog.Root>
             </Flex>
-            {usuario.equipes.map((equipe) => (
-              <Tabs.Trigger key={equipe.uuid} value={equipe.uuid}>
-                {equipe.name}
-              </Tabs.Trigger>
-            ))}
+            {user?.equipes &&
+              user.equipes.map((equipe) => (
+                <Tabs.Trigger key={equipe.uuid} value={equipe.uuid}>
+                  {equipe.name}
+                </Tabs.Trigger>
+              ))}
             <Separator maxW={"200px"} />
             <Tabs.Trigger value="completas">Completas</Tabs.Trigger>
             <Tabs.Trigger value="lixo">Lixo</Tabs.Trigger>
@@ -137,11 +67,13 @@ export const Sidebar = () => {
           <Tabs.Content value="lixo">
             <LixoTab />
           </Tabs.Content>
-          {usuario.equipes.map((equipe) => (
-            <Tabs.Content key={equipe.uuid} value={equipe.uuid}>
-              <EquipeDashboard equipe={equipe} />
-            </Tabs.Content>
-          ))}
+
+          {user?.equipes &&
+            user.equipes.map((equipe) => (
+              <Tabs.Content key={equipe.uuid} value={equipe.uuid}>
+                <EquipeDashboard equipe={equipe} isActive={activeTab === equipe.uuid} />
+              </Tabs.Content>
+            ))}
         </Tabs.Root>
       </Flex>
     </>
