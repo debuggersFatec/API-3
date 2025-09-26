@@ -2,7 +2,6 @@ package com.api_3.api_3.equipe.controller;
  
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.equipe.model.Membro;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
+import com.api_3.api_3.exception.EquipeBadRequestException;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.MemberAlreadyExistsException;
+import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.user.model.User;
 import com.api_3.api_3.user.repository.UserRepository;
  
@@ -35,335 +38,159 @@ public class EquipeController {
     @Autowired
     private EquipeRepository equipeRepository;
 
-
-    // CREATE -> Criar uma nova equipe
+    //MÉTODOS DE GESTÃO DA EQUIPE
     @PostMapping
     public ResponseEntity<Equipe> createEquipe(@RequestBody Equipe novaEquipe, Authentication authentication) {
-        // Validar entrada
         if (novaEquipe == null || novaEquipe.getName() == null || novaEquipe.getName().trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        // 1. Verificar se o usuário está autenticado
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            throw new EquipeBadRequestException("O nome da equipa é obrigatório.");
         }
         
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
-        
-        // 2. Buscar o usuário criador
-        User criador = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        User criador = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("Utilizador criador não foi encontrado."));
 
-        // 3. Configurar o UUID da nova equipe
         novaEquipe.setUuid(UUID.randomUUID().toString());
 
-        // 4. Criar o primeiro membro da equipe com os dados do criador
         Membro primeiroMembro = new Membro();
         primeiroMembro.setUuid(criador.getUuid());
         primeiroMembro.setName(criador.getName());
         primeiroMembro.setImg(criador.getImg());
-        primeiroMembro.setAtribuidas_tasks(0);
-        primeiroMembro.setConcluidas_tasks(0);
-        primeiroMembro.setVencidas_tasks(0);
 
-        // 5. Adicionar o criador como o primeiro membro da equipe
         novaEquipe.setMembros(new ArrayList<>(List.of(primeiroMembro)));
         
-        // 6. Salvar a nova equipe na base de dados
         Equipe equipeSalva = equipeRepository.save(novaEquipe);
 
-        // 7. Atualizar o documento do usuário para adicionar o ID da nova equipe
         criador.getEquipeIds().add(equipeSalva.getUuid());
         userRepository.save(criador);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(equipeSalva);
     }
 
-    // READ -> Obter as equipes do usuario
     @GetMapping
     public ResponseEntity<List<Equipe>> getEquipesDoUsuario(Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
-
-        // Buscar o usuário para obter os IDs das equipes
-        Optional<User> userOptional = userRepository.findByEmail(userEmail);
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        } 
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado."));
         
-        User user = userOptional.get();
-        List<String> equipeIds = user.getEquipeIds();
-        
-        // Verificar se o usuário tem equipes
-        if (equipeIds == null || equipeIds.isEmpty()) {
-            return ResponseEntity.ok(new ArrayList<>()); // Retornar lista vazia em vez de null
+        if (user.getEquipeIds() == null || user.getEquipeIds().isEmpty()) {
+            return ResponseEntity.ok(new ArrayList<>());
         }
         
-        // Buscar todas as equipes com base nos IDs
-        List<Equipe> equipes = equipeRepository.findAllById(equipeIds);
+        List<Equipe> equipes = equipeRepository.findAllById(user.getEquipeIds());
         return ResponseEntity.ok(equipes);
     }
 
-    // READ -> Obter uma equipe específica por UUID
     @GetMapping("/{uuid}")
-    public ResponseEntity<?> getEquipeById(@PathVariable String uuid, Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body("Autenticação necessária para acessar os detalhes da equipe");
-        }
+    public ResponseEntity<Equipe> getEquipeById(@PathVariable String uuid, Authentication authentication) {
+        Equipe equipe = equipeRepository.findById(uuid)
+                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + uuid));
         
-        // Verificar se o ID fornecido é válido
-        if (uuid == null || uuid.isBlank()) {
-            return ResponseEntity.badRequest()
-                .body("ID da equipe inválido");
-        }
-        
-        // Buscar a equipe no repositório
-        Optional<Equipe> equipeOptional = equipeRepository.findById(uuid);
-        if (equipeOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Equipe não encontrada com o ID: " + uuid);
-        }
-        
-        // Verificar se o usuário atual é membro da equipe
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
-        Optional<User> userOptional = userRepository.findByEmail(userEmail);
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado."));
         
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Não foi possível verificar o usuário atual");
-        }
-        
-        User user = userOptional.get();
         boolean isMembro = user.getEquipeIds() != null && user.getEquipeIds().contains(uuid);
-        
-        // Se não for membro, retornar acesso negado
         if (!isMembro) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body("Você não tem permissão para acessar os detalhes desta equipe");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         
-        // Retornar a equipe encontrada
-        return ResponseEntity.ok(equipeOptional.get());
+        return ResponseEntity.ok(equipe);
     }
 
-    //  UPDATE -> Atualiza uma equipe existente (tasks,membros)
     @PutMapping("/{uuid}")
-    public ResponseEntity<Equipe> updateEquipe(@PathVariable String uuid, @RequestBody Equipe equipeAtualizada, Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Equipe> updateEquipe(@PathVariable String uuid, @RequestBody Equipe equipeAtualizada) {
+        Equipe equipeExistente = equipeRepository.findById(uuid)
+                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada para atualizar com o ID: " + uuid));
+            
+        equipeExistente.setName(equipeAtualizada.getName());
+        equipeExistente.setMembros(equipeAtualizada.getMembros());
+        equipeExistente.setTasks(equipeAtualizada.getTasks());
         
-        // Verificar se o ID fornecido é válido
-        if (uuid == null || uuid.isBlank()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        // Validar dados da equipe atualizada
-        if (equipeAtualizada == null || equipeAtualizada.getName() == null || equipeAtualizada.getName().trim().isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        // Buscar a equipe existente
-        return equipeRepository.findById(uuid).map(equipeExistente -> {
-            // Manter o UUID original
-            equipeAtualizada.setUuid(uuid);
-            
-            // Atualizar campos específicos
-            equipeExistente.setName(equipeAtualizada.getName());
-            
-            // Tratar membros com cuidado para não perder informações
-            if (equipeAtualizada.getMembros() != null) {
-                equipeExistente.setMembros(equipeAtualizada.getMembros());
-            }
-            
-            // Tratar tasks com cuidado para não perder informações
-            if (equipeAtualizada.getTasks() != null) {
-                equipeExistente.setTasks(equipeAtualizada.getTasks());
-            }
-            
-            // Salvar a equipe atualizada
-            Equipe savedEquipe = equipeRepository.save(equipeExistente);
-            return ResponseEntity.ok(savedEquipe);
-        }).orElse(ResponseEntity.notFound().build());
+        Equipe savedEquipe = equipeRepository.save(equipeExistente);
+        return ResponseEntity.ok(savedEquipe);
     }
 
-    // DELETE -> Deletar uma equipe existente
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> deleteEquipe(@PathVariable String uuid, Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Void> deleteEquipe(@PathVariable String uuid) {
+        Equipe equipe = equipeRepository.findById(uuid)
+                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada para apagar com o ID: " + uuid));
         
-        // Verificar se o ID fornecido é válido
-        if (uuid == null || uuid.isBlank()) {
-            return ResponseEntity.badRequest().build();
-        }
-        
-        // Verificar se a equipe existe
-        Optional<Equipe> equipeOptional = equipeRepository.findById(uuid);
-        if (equipeOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        Equipe equipe = equipeOptional.get();
-        
-        // Remover a equipe das listas de equipes de todos os membros
-        if (equipe.getMembros() != null && !equipe.getMembros().isEmpty()) {
+        if (equipe.getMembros() != null) {
             for (Membro membro : equipe.getMembros()) {
-                Optional<User> userOptional = userRepository.findById(membro.getUuid());
-                if (userOptional.isPresent()) {
-                    User user = userOptional.get();
+                userRepository.findById(membro.getUuid()).ifPresent(user -> {
                     if (user.getEquipeIds() != null) {
                         user.getEquipeIds().remove(uuid);
                         userRepository.save(user);
                     }
-                }
+                });
             }
         }
         
-        // Deletar a equipe
         equipeRepository.deleteById(uuid);
         return ResponseEntity.noContent().build();
     }
-    
-    // UPDATE -> Adicionar membro na equipe
-    @PostMapping("/{id}/membros/{membroId}")
-    public ResponseEntity<String> createEquipeMembro(@PathVariable String id, @PathVariable String membroId, Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Autenticação necessária");
-        }
-        
-        // Verificar se os IDs fornecidos são válidos
-        if (id == null || id.isBlank() || membroId == null || membroId.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("IDs de equipe e membro são obrigatórios");
-        }
-        
-        // Buscar a equipe pelo ID
-        Optional<Equipe> equipeExistenteOptional = equipeRepository.findById(id);
-        if (equipeExistenteOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipe não encontrada com o ID fornecido");
-        }
-        Equipe equipe = equipeExistenteOptional.get();
 
-        // Verificar se o membro já existe na equipe (verificando na lista de membros)
+    // MÉTODOS DE GESTÃO DE MEMBROS
+
+    @PostMapping("/{equipeId}/membros/{membroId}")
+    public ResponseEntity<String> createEquipeMembro(@PathVariable String equipeId, @PathVariable String membroId) {
+        Equipe equipe = equipeRepository.findById(equipeId)
+            .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + equipeId));
+
+        User membro = userRepository.findById(membroId)
+            .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o ID: " + membroId));
+
         boolean membroJaExiste = equipe.getMembros() != null && 
-                                equipe.getMembros().stream()
-                                .anyMatch(membro -> membro.getUuid().equals(membroId));
+                                equipe.getMembros().stream().anyMatch(m -> m.getUuid().equals(membroId));
         
         if (membroJaExiste) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("O usuário já é membro desta equipe");
+            throw new MemberAlreadyExistsException("O utilizador já é membro desta equipa.");
         }
 
-        // Verificar se o ID do membro existe
-        Optional<User> membroExistenteOptional = userRepository.findById(membroId);
-        if (membroExistenteOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado com o ID fornecido");
-        }
-        
-        User membro = membroExistenteOptional.get();
-
-        // Criar novo objeto Membro
         Membro novoMembro = new Membro();
         novoMembro.setUuid(membro.getUuid());
         novoMembro.setName(membro.getName());
         novoMembro.setImg(membro.getImg());
-        novoMembro.setAtribuidas_tasks(0);
-        novoMembro.setConcluidas_tasks(0);
-        novoMembro.setVencidas_tasks(0);
         
-        // Inicializar a lista de membros se for nula
         if (equipe.getMembros() == null) {
             equipe.setMembros(new ArrayList<>());
         }
-        
-        // Adicionar o membro à equipe
         equipe.getMembros().add(novoMembro);
         equipeRepository.save(equipe);
 
-        // Inicializar a lista de equipes do usuário se for nula
         if (membro.getEquipeIds() == null) {
             membro.setEquipeIds(new ArrayList<>());
         }
-        
-        // Adicionar a equipe ao usuário
-        if (!membro.getEquipeIds().contains(id)) {
-            membro.getEquipeIds().add(id);
+        if (!membro.getEquipeIds().contains(equipeId)) {
+            membro.getEquipeIds().add(equipeId);
             userRepository.save(membro);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body("Membro adicionado com sucesso");
     }
-    
-    // DELETE -> Remover membro da equipe
-    @DeleteMapping("/{id}/membros/{membroId}")
-    public ResponseEntity<String> removeEquipeMembro(@PathVariable String id, @PathVariable String membroId, Authentication authentication) {
-        // Validar autenticação
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Autenticação necessária");
-        }
-        
-        // Verificar se os IDs fornecidos são válidos
-        if (id == null || id.isBlank() || membroId == null || membroId.isBlank()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("IDs de equipe e membro são obrigatórios");
-        }
-        
-        // Buscar a equipe pelo ID
-        Optional<Equipe> equipeOptional = equipeRepository.findById(id);
-        if (equipeOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Equipe não encontrada com o ID fornecido");
-        }
-        
-        Equipe equipe = equipeOptional.get();
-        
-        // Verificar se existem membros na equipe
-        if (equipe.getMembros() == null || equipe.getMembros().isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A equipe não possui membros");
-        }
-        
-        // Verificar se o membro existe na equipe
-        boolean membroEncontrado = false;
-        List<Membro> membrosAtualizados = new ArrayList<>();
-        
-        for (Membro membro : equipe.getMembros()) {
-            if (membro.getUuid().equals(membroId)) {
-                membroEncontrado = true;
-            } else {
-                membrosAtualizados.add(membro);
-            }
-        }
+
+    @DeleteMapping("/{equipeId}/membros/{membroId}")
+    public ResponseEntity<String> removeEquipeMembro(@PathVariable String equipeId, @PathVariable String membroId) {
+        Equipe equipe = equipeRepository.findById(equipeId)
+            .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + equipeId));
+
+        User membroParaRemover = userRepository.findById(membroId)
+            .orElseThrow(() -> new UserNotFoundException("Utilizador a remover não encontrado com o ID: " + membroId));
+
+        boolean membroEncontrado = equipe.getMembros() != null && 
+                                   equipe.getMembros().removeIf(m -> m.getUuid().equals(membroId));
         
         if (!membroEncontrado) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Membro não encontrado na equipe");
+            throw new UserNotFoundException("Membro não encontrado na equipa.");
         }
         
-        // Atualizar a lista de membros da equipe
-        equipe.setMembros(membrosAtualizados);
         equipeRepository.save(equipe);
         
-        // Remover a equipe da lista de equipes do usuário
-        Optional<User> userOptional = userRepository.findById(membroId);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            if (user.getEquipeIds() != null) {
-                user.getEquipeIds().remove(id);
-                userRepository.save(user);
-            }
+        if (membroParaRemover.getEquipeIds() != null) {
+            membroParaRemover.getEquipeIds().remove(equipeId);
+            userRepository.save(membroParaRemover);
         }
         
         return ResponseEntity.status(HttpStatus.OK).body("Membro removido com sucesso");
     }
-
 }

@@ -20,23 +20,25 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.auth.AuthResponse;
 import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
+import com.api_3.api_3.exception.UserNotFoundException; 
+import com.api_3.api_3.exception.InvalidRequestException;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
 import com.api_3.api_3.user.model.User;
 import com.api_3.api_3.user.repository.UserRepository;
 
 @RestController
-@RequestMapping("/api/users") 
+@RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
     
     @Autowired
-    private EquipeRepository equipeRepository; // buscar equipas
+    private EquipeRepository equipeRepository;
 
     @Autowired
-    private TaskRepository taskRepository; //  buscar tarefas
+    private TaskRepository taskRepository;
     
     // Endpoint de diagnóstico para verificar associações de usuários e equipes
     @GetMapping("/debug/user-teams")
@@ -56,16 +58,15 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
-    // Rota para buscar os dados do utilizador autenticado
+    
     @GetMapping("/me")
     public ResponseEntity<AuthResponse.UserInfo> getCurrentUser(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String userEmail = userDetails.getUsername();
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new RuntimeException("Utilizador não encontrado"));
+                .orElseThrow(() -> new UserNotFoundException("Utilizador autenticado não encontrado com o email: " + userEmail));
 
-        // Busca as equipas e tarefas associadas ao utilizador
         List<Equipe> equipesCompletas = equipeRepository.findAllById(user.getEquipeIds());
         List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
                 .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
@@ -82,7 +83,6 @@ public class UserController {
                 ))
                 .collect(Collectors.toList());
         
-        // Monta o objeto de resposta com todas as informações
         AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
                 user.getUuid(),
                 user.getName(),
@@ -95,19 +95,20 @@ public class UserController {
         return ResponseEntity.ok(userInfo);
     }
 
-    // Rota para adicionar uma equipa a um utilizador
     @PutMapping("/{userId}/equipes")
     public ResponseEntity<User> addEquipeToUser(@PathVariable String userId, @RequestBody Map<String, String> payload) {
         String equipeId = payload.get("equipeId");
-        if (equipeId == null) {
-            return ResponseEntity.badRequest().build();
+        if (equipeId == null || equipeId.trim().isEmpty()) {
+            throw new InvalidRequestException("O campo 'equipeId' é obrigatório no corpo do pedido.");
         }
-        return userRepository.findById(userId).map(user -> {
-            if (!user.getEquipeIds().contains(equipeId)) {
-                user.getEquipeIds().add(equipeId);
-                userRepository.save(user);
-            }
-            return ResponseEntity.ok(user);
-        }).orElse(ResponseEntity.notFound().build());
+
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o ID: " + userId));
+            
+        if (!user.getEquipeIds().contains(equipeId)) {
+            user.getEquipeIds().add(equipeId);
+            userRepository.save(user);
+        }
+        return ResponseEntity.ok(user);
     }
 }
