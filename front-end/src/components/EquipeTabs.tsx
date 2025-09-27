@@ -2,8 +2,15 @@ import { Tabs } from "@chakra-ui/react";
 import { TabDashboard } from "./TabDashboard";
 import { TabQuadro } from "./TabQuadro";
 import { TabTarefasEquipes } from "./TabTarefasEquipes";
+import type { EquipeData } from "@/types/equipe";
 
-export const EquipeTabs = () => {
+interface EquipeTabsProps {
+  equipeData: EquipeData;
+}
+export const EquipeTabs = ({ equipeData }: EquipeTabsProps) => {
+  if (!equipeData.tasks || equipeData.tasks.length === 0) {
+    return <div>Sem tarefas para mostrar</div>;
+  }
   return (
     <Tabs.Root
       w={"100%"}
@@ -17,10 +24,10 @@ export const EquipeTabs = () => {
         <Tabs.Trigger value="Quadro">Quadro</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="dashboard">
-        <TabDashboard />
+        <TabDashboard equipeData={equipeData} />
       </Tabs.Content>
       <Tabs.Content value="tarefas">
-        <TabTarefasEquipes />
+        <TabTarefasEquipes tasks={equipeData.tasks} />
       </Tabs.Content>
       <Tabs.Content value="Quadro">
         <TabQuadro />
