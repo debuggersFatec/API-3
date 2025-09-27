@@ -1,4 +1,4 @@
-import { Flex, Tabs, Separator, Dialog, Box } from "@chakra-ui/react";
+import { Flex, Tabs, Separator, Dialog, Box, Button } from "@chakra-ui/react";
 import { MyTasks } from "./MyTasks";
 import { EquipeDashboard } from "./EquipeDashboard";
 import { VencidasTab } from "./VencidasTab";
@@ -6,11 +6,12 @@ import { CompletasTab } from "./CompletasTab";
 import { LixoTab } from "./LixoTab";
 import { ModalNewTeam } from "./ModalNewTeam";
 import { FaPlus } from "react-icons/fa";
-import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
+import { useAuth } from "@/context/useAuth";
+import { RiLogoutCircleRLine } from "react-icons/ri";
 
 export const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
   return (
     <>
@@ -54,6 +55,13 @@ export const Sidebar = () => {
             <Separator maxW={"200px"} />
             <Tabs.Trigger value="completas">Completas</Tabs.Trigger>
             <Tabs.Trigger value="lixo">Lixo</Tabs.Trigger>
+            <Button
+              onClick={() => logout()}
+              colorScheme="blue"
+              variant="ghost"
+            >
+              Log out <RiLogoutCircleRLine />
+            </Button>
           </Tabs.List>
           <Tabs.Content value="minhasTasks">
             <MyTasks />
@@ -62,7 +70,7 @@ export const Sidebar = () => {
             <VencidasTab />
           </Tabs.Content>
           <Tabs.Content value="completas">
-            <CompletasTab />
+            <CompletasTab tasks={user?.tasks} />
           </Tabs.Content>
           <Tabs.Content value="lixo">
             <LixoTab />
