@@ -1,36 +1,39 @@
-import type { Task } from "@/data/tasks";
-import { Box, Text } from "@chakra-ui/react";
-import { parseISO, isBefore, startOfToday } from "date-fns";
+import * as Chakra from "@chakra-ui/react";
+import type { Task } from "../types/task";
 
-type ProximasTasksItemProps = {
-  task: Task;
-};
-
-export const ProximasTasksItem = ({ task }: ProximasTasksItemProps) => {
-  const hoje = startOfToday();
-  const dataDaTask = parseISO(task.due_date);
-  const estaAtrasada = isBefore(dataDaTask, hoje);
-
+export const ProximasTasksItem = ({ task }: { task: Task }) => {
+  // Aceita due_date como Date | string | null
+  let dataTask: Date | null = null;
+  if (task.due_date) {
+    dataTask = task.due_date instanceof Date ? task.due_date : new Date(task.due_date);
+    if (isNaN(dataTask.getTime())) dataTask = null;
+  }
+  let estaAtrasada = false;
+  if (dataTask) {
+    const hoje = new Date();
+    const dataHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+    const dataTaskSoData = new Date(dataTask.getFullYear(), dataTask.getMonth(), dataTask.getDate());
+    estaAtrasada = dataTaskSoData < dataHoje;
+  }
   return (
-    <Box
-      key={task.uuid}
+    <Chakra.Box
       display="flex"
       justifyContent="space-between"
       alignItems="center"
-      bg={estaAtrasada ? "red.100" : "transparent"}
+      bg={estaAtrasada ? "red.300" : "transparent"}
       p={2}
       borderRadius="md"
     >
-      <Text fontSize="12px">
-        {task.responsavel?.name || task.title}
-      </Text>
-      <Text fontSize="12px" color="gray.600">
-        {new Date(task.due_date).toLocaleDateString("pt-BR", {
-          day: "2-digit",
-          month: "2-digit",
-          timeZone: "UTC",
-        })}
-      </Text>
-    </Box>
+      <Chakra.Text fontSize="12px">{task.responsible?.name || task.title}</Chakra.Text>
+      <Chakra.Text fontSize="12px" color="gray.600">
+        {dataTask
+          ? dataTask.toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              timeZone: "UTC",
+            })
+          : "Sem data"}
+      </Chakra.Text>
+    </Chakra.Box>
   );
 };
