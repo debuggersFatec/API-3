@@ -26,6 +26,15 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./ChakraDatePicker";
 import type { Task, TaskPriority } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
+import { useEquipe } from "@/context/EquipeContext";
+
+function useEquipeSafe() {
+  try {
+    return useEquipe();
+  } catch {
+    return undefined;
+  }
+}
 
 interface Member {
   uuid: string;
@@ -39,7 +48,7 @@ interface ModalNewTaskProps {
   task?: Task;
 }
 
-export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) => {
+export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) {
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<Task>({
     uuid: task?.uuid || "",
@@ -55,7 +64,9 @@ export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) 
     responsible: task?.responsible || undefined,
   });
 
-  const {token, } = useAuth();
+  const { token } = useAuth();
+  const equipe = useEquipeSafe();
+  const fetchEquipe = equipe?.fetchEquipe;
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
@@ -85,7 +96,6 @@ export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) 
       due_date: date,
     }));
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -100,13 +110,15 @@ export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) 
         'Content-Type': 'application/json',
       },
     })
-      .then((response) => {
-        console.log("Dados enviados com sucesso!", response.data);
+      .then(() => {       
+        if (fetchEquipe) fetchEquipe();
       })
       .catch((error) => {
         console.error("Ocorreu um erro:", error);
+      })
+      .finally(() => {
+        onClose();
       });
-    onClose();
   };
 
   const handleInputChange = (
@@ -362,4 +374,5 @@ export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) 
       </Dialog.Root>
     </>
   );
-};
+}
+

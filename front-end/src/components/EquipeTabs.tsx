@@ -2,13 +2,11 @@ import { Tabs } from "@chakra-ui/react";
 import { TabDashboard } from "./TabDashboard";
 import { TabQuadro } from "./TabQuadro";
 import { TabTarefasEquipes } from "./TabTarefasEquipes";
-import type { EquipeData } from "@/types/equipe";
+import { useEquipe } from "@/context/EquipeContext";
 
-interface EquipeTabsProps {
-  equipeData: EquipeData;
-}
-export const EquipeTabs = ({ equipeData }: EquipeTabsProps) => {
-  if (!equipeData.tasks || equipeData.tasks.length === 0) {
+export const EquipeTabs = () => {
+  const { equipeData } = useEquipe();
+  if (!equipeData || !equipeData.tasks || equipeData.tasks.length === 0) {
     return <div>Sem tarefas para mostrar</div>;
   }
   return (

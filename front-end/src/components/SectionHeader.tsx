@@ -4,16 +4,12 @@ import { ModalNewTask } from "./ModalNewTask";
 import type { EquipeData } from "@/types/equipe";
 
 interface SectionHeaderProps {
-  equipe?: EquipeData;
   title: string;
   isTeamSection?: boolean;
+  equipe?: EquipeData;
 }
 
-export const SectionHeader = ({
-  title,
-  isTeamSection,
-  equipe,
-}: SectionHeaderProps) => {
+export const SectionHeader = ({ title, isTeamSection, equipe }: SectionHeaderProps) => {
   return (
     <>
       <Box w={"100%"} mb={"24px"} mt={"24px"} px={"32px"}>

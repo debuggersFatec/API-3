@@ -1,4 +1,3 @@
-
 import { Flex, Box, Icon, Text, Input, Textarea, Button } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -18,9 +17,9 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./ChakraDatePicker";
 import type { Task, TaskPriority } from "../types/task";
 import { useAuth } from "../context/useAuth";
+import { useEquipe } from "@/context/EquipeContext";
 
 
-// Tipos
 interface Member {
   uuid: string;
   img: string;
@@ -34,8 +33,17 @@ interface ModalEditTaskProps {
   open: boolean;
   onClose?: () => void;
 }
+function useEquipeSafe() {
+  try {
+    return useEquipe();
+  } catch {
+    return undefined;
+  }
+}
 export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: ModalEditTaskProps) => {
   const { token } = useAuth();
+  const equipe = useEquipeSafe();
+  const fetchEquipe = equipe?.fetchEquipe;
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -142,6 +150,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
     })
       .then((response: import('axios').AxiosResponse) => {
         console.log("Task editada com sucesso!", response.data);
+        if (fetchEquipe) fetchEquipe();
         if (onClose) onClose();
       })
       .catch((error: unknown) => {
@@ -185,6 +194,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
           Authorization: `Bearer ${token}`,
         },
       });
+      if (fetchEquipe) fetchEquipe();
       if (onClose) onClose();
     } catch (err) {
       console.error("Erro ao excluir task:", err);

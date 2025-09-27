@@ -1,4 +1,3 @@
-import { useState } from "react";
 import {
   Portal,
   Dialog,
@@ -9,26 +8,16 @@ import {
 } from "@chakra-ui/react";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "@/context/useAuth";
+import { useState } from "react";
 
 export const ModalNewTeam = () => {
   const [teamName, setTeamName] = useState("");
-  const { user, token } = useAuth();
+  const { user, token, setUser } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("User in ModalNewTeam:", {
-      name: teamName,
-      membros: [
-        {
-          uuid: user?.uuid,
-          name: user?.name,
-          email: user?.email,
-          img: user?.img || null,
-        },
-      ],
-    });
     try {
-      await axios.post(
+      const response = await axios.post(
         "http://localhost:8080/api/equipes",
         {
           name: teamName,
@@ -47,7 +36,17 @@ export const ModalNewTeam = () => {
           },
         }
       );
-      alert("Equipe criada com sucesso!");
+
+      if (setUser && user) {
+        const equipe = response.data;
+        setUser({
+          ...user,
+          equipes: [
+            ...(user.equipes || []),
+            { uuid: equipe.uuid, name: equipe.name },
+          ],
+        });
+      }
     } catch (error) {
       const err = error as AxiosError;
       console.error("Erro ao criar equipe:", err);
