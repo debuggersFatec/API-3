@@ -55,12 +55,8 @@ export const Sidebar = () => {
             <Separator maxW={"200px"} />
             <Tabs.Trigger value="completas">Completas</Tabs.Trigger>
             <Tabs.Trigger value="lixo">Lixo</Tabs.Trigger>
-            <Button
-              onClick={() => logout()}
-              colorScheme="blue"
-              variant="ghost"
-            >
-              Log out <RiLogoutCircleRLine />
+            <Button onClick={() => logout()} variant="plain" color={"red.500"} alignContent={"flex-start"}>
+              Logout <RiLogoutCircleRLine color="red" size={22} />
             </Button>
           </Tabs.List>
           <Tabs.Content value="minhasTasks">
