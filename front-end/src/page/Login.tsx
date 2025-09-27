@@ -16,7 +16,7 @@ import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 import axios from "axios";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/context/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export const Login = () => {
@@ -39,7 +39,6 @@ export const Login = () => {
     axios
       .post("http://localhost:8080/api/auth/login", { email, password })
       .then((response) => {
-        console.log("Login bem-sucedido:", typeof response.data.token);
         setToken(response.data.token);
         setUser(response.data.user);
         navigate("/");
