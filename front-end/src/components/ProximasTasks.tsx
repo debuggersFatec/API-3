@@ -1,12 +1,39 @@
 import { Box, Text } from "@chakra-ui/react";
 import { ProximasTasksItem } from "./ProximasTasksItem";
-import { tasks } from "@/data/tasks";
+import type { TaskTeam } from "@/types/task";
 
-export const ProximasTasks = () => {
+interface ProximasTasksProps {
+  tasks: TaskTeam[] | undefined;
+}
+
+export const ProximasTasks = ({ tasks }: ProximasTasksProps) => {
+  if (!tasks || tasks.length === 0) {
+    return (
+      <Box
+        w={"100%"}
+        h={"100%"}
+        border={"1px solid"}
+        borderColor={"gray.200"}
+        borderRadius={"8px"}
+        p={"16px"}
+      >
+        <Text fontWeight="bold" mb={4}>
+          Sem tarefas para mostrar
+        </Text>
+      </Box>
+    );
+  }
   
   const proximas10Tasks = [...tasks]
-  
-    .sort((a, b) => +new Date(a.due_date) - +new Date(b.due_date))
+    .filter(
+      (task) => task.status === "not-started" || task.status === "in-progress"
+    )
+    .sort((a, b) => {
+      if (!a.due_date && !b.due_date) return 0;
+      if (!a.due_date) return 1;
+      if (!b.due_date) return -1;
+      return +new Date(a.due_date) - +new Date(b.due_date);
+    })
     .slice(0, 10);
 
   return (
