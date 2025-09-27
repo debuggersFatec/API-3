@@ -4,7 +4,7 @@ export interface Responsavel {
   uuid: string;
 }
 
-export type TaskStatus = "not-started" | "in-progress" | "completed";
+export type TaskStatus = "not-started" | "in-progress" | "completed" | "excluida";
 export type TaskPriority = "baixa" | "media" | "alta" | "critica";
 
 export interface Task {

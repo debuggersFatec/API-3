@@ -3,7 +3,7 @@ export type tasksUser = {
   title: string;
   description?: string;
   due_date: string;
-  status: "not-started" | "in-progress" | "completed";
+  status: "not-started" | "in-progress" | "completed" | "excluida";
   prioridade: "baixa" | "média" | "alta";
   equipe_uuid: string;
 }
