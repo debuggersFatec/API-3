@@ -1,15 +1,24 @@
 "use client";
 
+import type { TaskTeam } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export const ProdutividadeChart = () => {
+interface ProdutividadeChartProps {
+  tasks: TaskTeam[];
+}
+
+export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {
+  const naoAtribuido = tasks.filter((t) => !t.responsible).length;
+  const atribuido = tasks.filter((t) => t.responsible && t.status !== "completed").length;
+  const concluido = tasks.filter((t) => t.status === "completed").length;
+
   const chart = useChart({
     data: [
-      { tasksNumber: 16, status: "Não atribuído" },
-      { tasksNumber: 55, status: "Atribuído" },
-      { tasksNumber: 190, status: "Concluído" },
+      { tasksNumber: naoAtribuido, label: "Não atribuído" },
+      { tasksNumber: atribuido, label: "Atribuído" },
+      { tasksNumber: concluido, label: "Concluído" },
     ],
     series: [{ name: "tasksNumber", color: "blue", stackId: "a" }],
   });
@@ -22,6 +31,7 @@ export const ProdutividadeChart = () => {
         flexDir={"column"}
         border={"1px solid"}
         borderColor={"gray.200"}
+         borderRadius={"8px"}
         h={"100%"}
         pt={"24px"}
         px={"24px"}
@@ -39,7 +49,7 @@ export const ProdutividadeChart = () => {
             <XAxis type="number" display="none" />
             <YAxis
               type="category"
-              dataKey="status"
+              dataKey="label"
               orientation="left"
               width={110}
               axisLine={false}
