@@ -1,19 +1,32 @@
 "use client";
 
+import type { TaskTeam } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export const RankingProdutividade = () => {
-  const originalData = [
-    { tasksNumber: 16, name: "Matheus" },
-    { tasksNumber: 55, name: "Pedro" },
-    { tasksNumber: 190, name: "Thomaz" },
-  ];
+interface RankingProdutividadeProps {
+  tasks: TaskTeam[];
+}
 
-  const sortedData = [...originalData].sort(
-    (a, b) => b.tasksNumber - a.tasksNumber
-  );
+export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
+  // Agrupa tasks concluídas por responsável
+  const ranking: Record<string, { name: string; tasksNumber: number }> = {};
+  tasks.forEach((t) => {
+    const status = (t.status || "").toLowerCase();
+    const isConcluida = status === "completed" || status === "concluida";
+    const nome = t.responsavel?.name?.trim();
+    if (isConcluida && nome) {
+      if (!ranking[nome]) {
+        ranking[nome] = { name: nome, tasksNumber: 0 };
+      }
+      ranking[nome].tasksNumber++;
+    }
+  });
+  // Top 3 ordenado
+  const sortedData = Object.values(ranking)
+    .sort((a, b) => b.tasksNumber - a.tasksNumber)
+    .slice(0, 3);
 
   const chart = useChart({
     data: sortedData,
@@ -21,7 +34,7 @@ export const RankingProdutividade = () => {
   });
 
   return (
-    <Box h={"300px"} w={"100%"} >
+    <Box h={"300px"} w={"100%"}>
       <Box
         w={"100%"}
         display={"flex"}
@@ -31,6 +44,7 @@ export const RankingProdutividade = () => {
         h={"100%"}
         pt={"24px"}
         px={"24px"}
+        borderRadius={"8px"}
       >
         <Text h={"5%"} fontSize={"lg"} fontWeight={"bold"}>
           Ranking de Produtividade
