@@ -23,7 +23,7 @@ type Member = {
 interface CheckItemProps {
   title: string;
   uuid: string;
-  status: "not-started" | "in-progress" | "completed";
+  status: "not-started" | "in-progress" | "completed" | "excluida";
   due_date?: string;
   task?: Task;
   equipe_uuid?: string;
