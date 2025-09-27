@@ -1,8 +1,8 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import { useAuth } from "@/context/useAuth";
 
 export const Dashboard = () => {
   const navigate = useNavigate();
@@ -15,6 +15,7 @@ export const Dashboard = () => {
   }, [user, token, navigate]);
 
   return (
+    console.log("Dashboard render with user:", user),
     <>
       <Header />
       <Sidebar />
