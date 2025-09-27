@@ -60,7 +60,6 @@ public class taskController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
             }
             
-            // Garantir que não há espaços extras no UUID da equipe
             String cleanEquipUuid = newTask.getEquip_uuid().trim();
             if (!cleanEquipUuid.equals(newTask.getEquip_uuid())) {
                 newTask.setEquip_uuid(cleanEquipUuid);
@@ -100,31 +99,29 @@ public class taskController {
         return ResponseEntity.ok(counts);
     }
 
+
     // UPDATE -> Atualiza uma tarefa existente
     @PutMapping("/{uuid}")
     public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String userEmail = userDetails.getUsername();
 
+        // Validação: Verificar se a tarefa existe
         Optional<Task> taskOptional = taskRepository.findById(uuid);
         if (taskOptional.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         
+        // Validação: Verificar se o usuário pertence à equipe da tarefa
         Task task = taskOptional.get();
         if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        task.setTitle(updatedTask.getTitle());
-        task.setDescription(updatedTask.getDescription());
-        task.setDue_date(updatedTask.getDue_date());
-        task.setStatus(updatedTask.getStatus());
-        task.setPriority(updatedTask.getPriority());
-        // ... Mais campos para atualização posteriormente
-
-        Task savedTask = taskRepository.save(task);
-        return ResponseEntity.ok(savedTask);
+        // Chama o serviço para realizar a atualização
+        return taskService.updateTask(uuid, updatedTask)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     // DELETE -> Deletar uma tarefa

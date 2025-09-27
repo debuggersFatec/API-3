@@ -23,7 +23,6 @@ public class User {
  
     private List<String> equipeIds = new ArrayList<>();
     private List<Object> tasks = new ArrayList<>();
-    private List<Object> lixeira = new ArrayList<>();
     private List<Object> notificacao = new ArrayList<>();
  
     public User(String name, String email , String password , String img){
@@ -88,14 +87,6 @@ public class User {
 
     public void setTasks(List<Object> tasks) {
         this.tasks = tasks;
-    }
-
-    public List<Object> getLixeira() {
-        return lixeira;
-    }
-
-    public void setLixeira(List<Object> lixeira) {
-        this.lixeira = lixeira;
     }
 
     public List<Object> getNotificacao() {

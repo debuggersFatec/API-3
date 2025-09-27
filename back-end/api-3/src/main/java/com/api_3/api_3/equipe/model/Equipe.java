@@ -1,5 +1,6 @@
 package com.api_3.api_3.equipe.model;
  
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -16,4 +17,5 @@ public class Equipe {
     private String name;
     private List<Membro> membros;
     private List<TaskInfo> tasks;
+    private List<TaskInfo> lixeira = new ArrayList<>();
 }
