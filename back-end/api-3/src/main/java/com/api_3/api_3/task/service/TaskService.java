@@ -14,6 +14,9 @@ import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.equipe.model.ResponsavelTask;
 import com.api_3.api_3.equipe.model.TaskInfo;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.InvalidResponsibleException;
+import com.api_3.api_3.exception.TaskValidationException;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
 import com.api_3.api_3.user.model.User;
@@ -31,61 +34,49 @@ public class TaskService {
     @Autowired
     private UserRepository userRepository;
 
-    // ... (método createTask inalterado) ...
     @Transactional
     public Task createTask(Task newTask) {
+        if (newTask.getTitle() == null || newTask.getTitle().trim().isEmpty()) {
+            throw new TaskValidationException("O título da tarefa é obrigatório.");
+        }
+        if (newTask.getEquip_uuid() == null || newTask.getEquip_uuid().trim().isEmpty()) {
+            throw new TaskValidationException("O ID da equipe é obrigatório para criar uma tarefa.");
+        }
+
+        validateResponsible(newTask);
+
         newTask.setUuid(UUID.randomUUID().toString());
         Task savedTask = taskRepository.save(newTask);
 
-        // Adiciona a tarefa à lista de tasks da equipe
-        if (savedTask.getEquip_uuid() != null && !savedTask.getEquip_uuid().isEmpty()) {
-            equipeRepository.findById(savedTask.getEquip_uuid()).ifPresent(equipe -> {
-                TaskInfo taskInfo = new TaskInfo();
-                taskInfo.setUuid(savedTask.getUuid());
-                taskInfo.setTitle(savedTask.getTitle());
-                if (savedTask.getDue_date() != null) {
-                    taskInfo.setDue_date(savedTask.getDue_date().toString());
-                }
-                taskInfo.setStatus(savedTask.getStatus());
-                taskInfo.setPrioridade(savedTask.getPriority());
-                taskInfo.setEquipe_uuid(savedTask.getEquip_uuid());
+        equipeRepository.findById(savedTask.getEquip_uuid()).ifPresent(equipe -> {
+            TaskInfo taskInfo = new TaskInfo();
+            taskInfo.setUuid(savedTask.getUuid());
+            taskInfo.setTitle(savedTask.getTitle());
+            if (savedTask.getDue_date() != null) {
+                taskInfo.setDue_date(savedTask.getDue_date().toString());
+            }
+            taskInfo.setStatus(savedTask.getStatus());
+            taskInfo.setPrioridade(savedTask.getPriority());
+            taskInfo.setEquipe_uuid(savedTask.getEquip_uuid());
 
-                if (savedTask.getResponsible() != null) {
-                    ResponsavelTask responsavelTask = new ResponsavelTask();
-                    responsavelTask.setUuid(savedTask.getResponsible().getUuid());
-                    responsavelTask.setName(savedTask.getResponsible().getName());
-                    responsavelTask.setImg(savedTask.getResponsible().getUrl_img());
-                    taskInfo.setResponsavel(responsavelTask);
-                }
+            if (savedTask.getResponsible() != null) {
+                ResponsavelTask responsavelTask = new ResponsavelTask();
+                responsavelTask.setUuid(savedTask.getResponsible().getUuid());
+                responsavelTask.setName(savedTask.getResponsible().getName());
+                responsavelTask.setImg(savedTask.getResponsible().getUrl_img());
+                taskInfo.setResponsavel(responsavelTask);
+            }
 
-                if (equipe.getTasks() == null) {
-                    equipe.setTasks(new ArrayList<>());
-                }
+            if (equipe.getTasks() == null) {
+                equipe.setTasks(new ArrayList<>());
+            }
 
-                equipe.getTasks().add(taskInfo);
-                equipeRepository.save(equipe);
-            });
-        }
+            equipe.getTasks().add(taskInfo);
+            equipeRepository.save(equipe);
+        });
 
-        // Adiciona a tarefa à lista de tasks do usuário responsável
         if (savedTask.getResponsible() != null && savedTask.getResponsible().getUuid() != null) {
-            userRepository.findById(savedTask.getResponsible().getUuid()).ifPresent(user -> {
-                if (user.getTasks() == null) {
-                    user.setTasks(new ArrayList<>());
-                }
-                TaskInfo taskInfoForUser = new TaskInfo();
-                taskInfoForUser.setUuid(savedTask.getUuid());
-                taskInfoForUser.setTitle(savedTask.getTitle());
-                if (savedTask.getDue_date() != null) {
-                    taskInfoForUser.setDue_date(savedTask.getDue_date().toString());
-                }
-                taskInfoForUser.setStatus(savedTask.getStatus());
-                taskInfoForUser.setPrioridade(savedTask.getPriority());
-                taskInfoForUser.setEquipe_uuid(savedTask.getEquip_uuid());
-
-                user.getTasks().add(taskInfoForUser);
-                userRepository.save(user);
-            });
+            addTaskToUser(savedTask, savedTask.getResponsible().getUuid());
         }
 
         return savedTask;
@@ -93,35 +84,31 @@ public class TaskService {
 
     @Transactional
     public Optional<Task> updateTask(String uuid, Task updatedTaskData) {
-        Optional<Task> taskOptional = taskRepository.findById(uuid);
-        if (taskOptional.isEmpty()) {
+        Task existingTask = taskRepository.findById(uuid)
+                .orElse(null); 
+
+        if (existingTask == null) {
             return Optional.empty();
         }
+        
+        String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().getUuid() : null;
+        String newResponsibleUuid = (updatedTaskData.getResponsible() != null) ? updatedTaskData.getResponsible().getUuid() : null;
 
-        Task existingTask = taskOptional.get();
+        if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
+            validateResponsible(updatedTaskData);
+        }
 
-        // Lógica para lidar com a mudança de responsável
-        String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().getUuid()
-                : null;
-        String newResponsibleUuid = (updatedTaskData.getResponsible() != null)
-                ? updatedTaskData.getResponsible().getUuid()
-                : null;
-
-        // Atualiza os campos da tarefa
         existingTask.setTitle(updatedTaskData.getTitle());
         existingTask.setDescription(updatedTaskData.getDescription());
         existingTask.setDue_date(updatedTaskData.getDue_date());
         existingTask.setStatus(updatedTaskData.getStatus());
         existingTask.setPriority(updatedTaskData.getPriority());
         existingTask.setResponsible(updatedTaskData.getResponsible());
-        // Adicionar outros campos que possam ser atualizados
-
+        
         Task savedTask = taskRepository.save(existingTask);
 
-        // Atualiza a tarefa na lista da equipe
         updateTaskInEquipe(savedTask);
 
-        // Se o responsável mudou, remove a tarefa do antigo e adiciona ao novo
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
             if (oldResponsibleUuid != null) {
                 removeTaskFromUser(uuid, oldResponsibleUuid);
@@ -130,11 +117,29 @@ public class TaskService {
                 addTaskToUser(savedTask, newResponsibleUuid);
             }
         } else if (newResponsibleUuid != null) {
-            // Se o responsável é o mesmo, apenas atualiza a tarefa
             updateTaskInUser(savedTask, newResponsibleUuid);
         }
 
         return Optional.of(savedTask);
+    }
+
+    private void validateResponsible(Task task) {
+        Equipe equipe = equipeRepository.findById(task.getEquip_uuid())
+                .orElseThrow(() -> new EquipeNotFoundException("Equipe com ID " + task.getEquip_uuid() + " não encontrada."));
+
+        if (task.getResponsible() != null && task.getResponsible().getUuid() != null) {
+            String responsibleUuid = task.getResponsible().getUuid();
+
+            userRepository.findById(responsibleUuid)
+                    .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));
+
+            boolean isMember = equipe.getMembros().stream()
+                    .anyMatch(membro -> membro.getUuid().equals(responsibleUuid));
+
+            if (!isMember) {
+                throw new InvalidResponsibleException("O usuário responsável com ID " + responsibleUuid + " não é membro da equipe " + equipe.getName() + ".");
+            }
+        }
     }
 
     private void updateTaskInEquipe(Task task) {
@@ -173,7 +178,6 @@ public class TaskService {
             if (user.getTasks() == null) {
                 user.setTasks(new ArrayList<>());
             }
-            // Evita adicionar duplicados
             if (user.getTasks().stream()
                     .noneMatch(t -> t instanceof TaskInfo && ((TaskInfo) t).getUuid().equals(task.getUuid()))) {
                 TaskInfo taskInfoForUser = new TaskInfo();
@@ -232,14 +236,12 @@ public class TaskService {
 
         Task task = taskOptional.get();
 
-        // Se a tarefa não pertence a uma equipe, apenas mude o status
         if (task.getEquip_uuid() == null || task.getEquip_uuid().isEmpty()) {
             task.setStatus("excluida");
             Task updatedTask = taskRepository.save(task);
             return Optional.of(updatedTask);
         }
 
-        // Lógica para mover a tarefa para a lixeira da equipe
         equipeRepository.findById(task.getEquip_uuid()).ifPresent(equipe -> {
             Optional<TaskInfo> taskInfoOptional = equipe.getTasks().stream()
                     .filter(ti -> ti.getUuid().equals(uuid))
@@ -248,10 +250,8 @@ public class TaskService {
             if (taskInfoOptional.isPresent()) {
                 TaskInfo taskInfo = taskInfoOptional.get();
 
-                // Remove da lista de tarefas ativas
                 equipe.getTasks().remove(taskInfo);
 
-                // Adiciona na lixeira da equipe
                 if (equipe.getLixeira() == null) {
                     equipe.setLixeira(new ArrayList<>());
                 }
@@ -273,5 +273,4 @@ public class TaskService {
 
         return Optional.of(updatedTask);
     }
-
 }

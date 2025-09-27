@@ -32,15 +32,15 @@ public class GlobalExceptionHandler {
         Map<String, String> response = Map.of("erro", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
     }
-    
-    //  Exceções de Pedido Inválido (Genérica) 
+
+    // Exceções de Pedido Inválido (Genérica)
     @ExceptionHandler(InvalidRequestException.class)
     public ResponseEntity<Map<String, String>> handleInvalidRequestException(InvalidRequestException ex) {
         Map<String, String> response = Map.of("erro", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    //  Exceções de Equipa 
+    // Exceções de Equipa
     @ExceptionHandler(EquipeNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEquipeNotFoundException(EquipeNotFoundException ex) {
         Map<String, String> response = Map.of("erro", ex.getMessage());
@@ -66,4 +66,26 @@ public class GlobalExceptionHandler {
         Map<String, String> response = Map.of("erro", "Ocorreu um erro interno no servidor.");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    //  Exceções de Tarefa --------------------------------------------------------------------------------
+    
+    @ExceptionHandler(TaskNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTaskNotFoundException(TaskNotFoundException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TaskValidationException.class)
+    public ResponseEntity<Map<String, String>> handleTaskValidationException(TaskValidationException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidResponsibleException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidResponsibleException(InvalidResponsibleException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    // Fim das Exceções de Tarefa --------------------------------------------------------------------------------
 }

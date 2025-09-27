@@ -2,8 +2,6 @@ package com.api_3.api_3.task.controller;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +16,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.api_3.api_3.equipe.repository.EquipeRepository;
 import com.api_3.api_3.equipe.service.EquipeService;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.TaskNotFoundException;
+import com.api_3.api_3.exception.TaskValidationException;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
 import com.api_3.api_3.task.service.TaskService;
@@ -36,46 +38,30 @@ public class taskController {
     @Autowired
     private EquipeService equipeService;
 
+    @Autowired
+    private EquipeRepository equipeRepository;
+
     // CREATE -> Criar uma nova task
     @PostMapping
     public ResponseEntity<Task> createTask(@RequestBody Task newTask, Authentication authentication) {
-        try {
-            if (authentication == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            
-            Object principal = authentication.getPrincipal();
-            if (principal == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            
-            if (!(principal instanceof UserDetails)) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-            
-            UserDetails userDetails = (UserDetails) principal;
-            String userEmail = userDetails.getUsername();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String userEmail = userDetails.getUsername();
 
-            if (newTask.getEquip_uuid() == null || newTask.getEquip_uuid().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-            }
-            
-            String cleanEquipUuid = newTask.getEquip_uuid().trim();
-            if (!cleanEquipUuid.equals(newTask.getEquip_uuid())) {
-                newTask.setEquip_uuid(cleanEquipUuid);
-            }
-            
-            boolean isMember = equipeService.isUserMemberOfEquipe(userEmail, newTask.getEquip_uuid());
-            
-            if (!isMember) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-
-            Task savedTask = taskService.createTask(newTask);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        String equipUuid = newTask.getEquip_uuid();
+        if (equipUuid == null || equipUuid.trim().isEmpty()) {
+            throw new TaskValidationException("O ID da equipe é obrigatório para criar uma tarefa.");
         }
+
+        equipeRepository.findById(equipUuid)
+                .orElseThrow(() -> new EquipeNotFoundException("Equipe com ID " + equipUuid + " não encontrada."));
+
+        boolean isMember = equipeService.isUserMemberOfEquipe(userEmail, equipUuid);
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Task savedTask = taskService.createTask(newTask);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
     // READ -> Obter todas as tarefas
@@ -88,8 +74,9 @@ public class taskController {
     // READ -> Obter uma tarefa por UUID
     @GetMapping("/{uuid}")
     public ResponseEntity<Task> getTaskById(@PathVariable String uuid) {
-        Optional<Task> task = taskRepository.findById(uuid);
-        return task.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        Task task = taskRepository.findById(uuid)
+                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada com o ID: " + uuid));
+        return ResponseEntity.ok(task);
     }
 
     // READ -> Obter a contagem de tarefas por status
@@ -106,22 +93,16 @@ public class taskController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String userEmail = userDetails.getUsername();
 
-        // Validação: Verificar se a tarefa existe
-        Optional<Task> taskOptional = taskRepository.findById(uuid);
-        if (taskOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        
-        // Validação: Verificar se o usuário pertence à equipe da tarefa
-        Task task = taskOptional.get();
+        Task task = taskRepository.findById(uuid)
+                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada para atualizar com o ID: " + uuid));
+
         if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // Chama o serviço para realizar a atualização
         return taskService.updateTask(uuid, updatedTask)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new TaskNotFoundException("Falha ao atualizar a tarefa com ID: " + uuid));
     }
 
     // DELETE -> Deletar uma tarefa
@@ -130,18 +111,15 @@ public class taskController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String userEmail = userDetails.getUsername();
 
-        Optional<Task> taskOptional = taskRepository.findById(uuid);
-        if (taskOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+        Task task = taskRepository.findById(uuid)
+                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada para apagar com o ID: " + uuid));
 
-        Task task = taskOptional.get();
         if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         return taskService.deleteTask(uuid)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .orElseThrow(() -> new TaskNotFoundException("Falha ao apagar a tarefa com ID: " + uuid));
     }
 }
