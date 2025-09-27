@@ -1,4 +1,3 @@
-// Removida a importação de createListCollection, pois não está sendo utilizada
 import {
   Button,
   Flex,
@@ -22,62 +21,41 @@ import { Field, FieldLabel } from "@chakra-ui/react/field";
 import { useRef, useState } from "react";
 import { MdOutlineMail } from "react-icons/md";
 import { useDisclosure } from "@chakra-ui/react/hooks";
-// import axios from "axios";
+import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
-import ChakraDatePicker from "./ChakraDatePicker"; // Certifique-se de que o caminho está correto
+import ChakraDatePicker from "./ChakraDatePicker";
+import type { Task, TaskPriority } from "@/types/task";
+import { useAuth } from "@/context/useAuth";
 
 interface Member {
   uuid: string;
-  img_url: string;
+  img: string;
   name: string;
 }
 
-const membersData: Member[] = [
-  {
-    uuid: "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    img_url: "https://randomuser.me/api/portraits/women/1.jpg",
-    name: "Ana Silva",
-  },
-  {
-    uuid: "b2c3d4e5-f6a7-8901-2345-67890abcdef1",
-    img_url: "https://randomuser.me/api/portraits/men/2.jpg",
-    name: "Bruno Costa",
-  },
-  {
-    uuid: "c3d4e5f6-a7b8-9012-3456-7890abcdef12",
-    img_url: "https://randomuser.me/api/portraits/women/3.jpg",
-    name: "Clara Santos",
-  },
-  {
-    uuid: "d4e5f6a7-b8c9-0123-4567-890abcdef123",
-    img_url: "https://randomuser.me/api/portraits/men/4.jpg",
-    name: "Daniel Oliveira",
-  },
-  {
-    uuid: "e5f6a7b8-c9d0-1234-5678-90abcdef1234",
-    img_url: "https://randomuser.me/api/portraits/women/5.jpg",
-    name: "Erika Lima",
-  },
-];
+interface ModalNewTaskProps {
+  equipe_uuid: string;
+  membros: Member[];
+  task?: Task;
+}
 
-export const ModalNewTask = () => {
+export const ModalNewTask = ({ task, equipe_uuid, membros }: ModalNewTaskProps) => {
   const { open, onOpen, onClose } = useDisclosure();
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    due_date: null as Date | null,
-    status: "",
-    priority: "",
-    equip_uuid: "",
-    arquivo: null as File | null,
-    file_required: "",
-    file_finish: "",
-    responsible: {
-      uuid: "",
-      name: "",
-      img_url: "",
-    },
+  const [formData, setFormData] = useState<Task>({
+    uuid: task?.uuid || "",
+    title: task?.title || "",
+    description: task?.description || "",
+    due_date: task?.due_date || null,
+    status: task?.status || "not-started",
+    priority: task?.priority || "media",
+    equip_uuid: task?.equip_uuid || equipe_uuid,
+    // arquivo: null as File | null,
+    // file_required: "",
+    // file_finish: "",
+    responsible: task?.responsible || undefined,
   });
+
+  const {token, } = useAuth();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
@@ -93,7 +71,7 @@ export const ModalNewTask = () => {
     setIsDropdownOpen(false);
   };
 
-  const handleSelectPriority = (priority: string) => {
+  const handleSelectPriority = (priority: TaskPriority) => {
     setFormData((prev) => ({
       ...prev,
       priority: priority,
@@ -111,31 +89,24 @@ export const ModalNewTask = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dataToSend = new FormData();
-    dataToSend.append("title", formData.title);
-    dataToSend.append("description", formData.description);
+    const payload = {
+      ...formData,
+      status: formData.responsible && formData.responsible.uuid ? 'in-progress' : 'not-started',
+    };
 
-    if (formData.due_date) {
-      dataToSend.append("due_date", formData.due_date.toISOString());
-    }
-
-    dataToSend.append("priority", formData.priority);
-    dataToSend.append("responsible_uuid", formData.responsible.uuid);
-
-    if (formData.arquivo) {
-      dataToSend.append("arquivo", formData.arquivo);
-    }
-
-    // axios
-    //   .post("http://localhost:8080/api/tasks", dataToSend)
-    //   .then((response) => {
-    //     console.log("Dados enviados com sucesso!", response.data);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Ocorreu um erro:", error);
-    //   });
-    // onClose();
-    console.log("task", formData);
+    axios.post("http://localhost:8080/api/tasks", payload, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+      .then((response) => {
+        console.log("Dados enviados com sucesso!", response.data);
+      })
+      .catch((error) => {
+        console.error("Ocorreu um erro:", error);
+      });
+    onClose();
   };
 
   const handleInputChange = (
@@ -158,7 +129,7 @@ export const ModalNewTask = () => {
     }));
   };
 
-  const prioritys = [
+  const prioritys: { label: string; value: TaskPriority }[] = [
     { label: "Baixa", value: "baixa" },
     { label: "Média", value: "media" },
     { label: "Alta", value: "alta" },
@@ -209,22 +180,17 @@ export const ModalNewTask = () => {
                     </Field.Root>
                   </Box>
 
-                  <Box
-                    w={"100%"}
-                    gap={"8px"}
-                    display={"flex"}
-                    flexDir={"column"}
-                  >
+                  <Box w={"100%"}>
                     <Field.Root>
                       <FieldLabel>Responsável</FieldLabel>
-                      <Box position="relative" w={"100%"}>
+                      <Box position="relative" w="100%">
                         <Button
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           variant="outline"
                           w="full"
                           justifyContent="space-between"
                         >
-                          {formData.responsible.name ? (
+                          {formData.responsible?.name ? (
                             <Flex
                               p={2}
                               align="center"
@@ -233,7 +199,7 @@ export const ModalNewTask = () => {
                             >
                               <AvatarUser
                                 name={formData.responsible.name}
-                                imageUrl={formData.responsible.img_url}
+                                imageUrl={formData.responsible.img ? formData.responsible.img : ''}
                                 size="2xs"
                               />
                               <Text ml={2}>{formData.responsible.name}</Text>
@@ -255,7 +221,7 @@ export const ModalNewTask = () => {
                             zIndex="10"
                             boxShadow="md"
                           >
-                            {membersData.map((member) => (
+                            {membros.map((member) => (
                               <Flex
                                 key={member.uuid}
                                 p={2}
@@ -266,7 +232,7 @@ export const ModalNewTask = () => {
                               >
                                 <AvatarUser
                                   name={member.name}
-                                  imageUrl={member.img_url}
+                                  imageUrl={member.img || ''}
                                   size="2xs"
                                 />
                                 <Text ml={2}>{member.name}</Text>
@@ -364,11 +330,11 @@ export const ModalNewTask = () => {
                         <Text mt={2} color="gray.500">
                           Anexar arquivo
                         </Text>
-                        {formData.arquivo && (
+                        {/* {formData.arquivo && (
                           <Text mt={2} fontWeight="bold">
                             Arquivo selecionado: {formData.arquivo.name}
                           </Text>
-                        )}
+                        )} */}
                       </Box>
                       <Input
                         type="file"
