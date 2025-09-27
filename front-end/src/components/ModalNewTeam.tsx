@@ -7,8 +7,8 @@ import {
   Field,
   Input,
 } from "@chakra-ui/react";
-import { useAuth } from "@/context/AuthContext";
 import axios, { AxiosError } from "axios";
+import { useAuth } from "@/context/useAuth";
 
 export const ModalNewTeam = () => {
   const [teamName, setTeamName] = useState("");
@@ -16,6 +16,17 @@ export const ModalNewTeam = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    console.log("User in ModalNewTeam:", {
+      name: teamName,
+      membros: [
+        {
+          uuid: user?.uuid,
+          name: user?.name,
+          email: user?.email,
+          img: user?.img || null,
+        },
+      ],
+    });
     try {
       await axios.post(
         "http://localhost:8080/api/equipes",
