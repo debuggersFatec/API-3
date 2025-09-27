@@ -15,7 +15,6 @@ export const Dashboard = () => {
   }, [user, token, navigate]);
 
   return (
-    console.log("Dashboard render with user:", user),
     <>
       <Header />
       <Sidebar />
