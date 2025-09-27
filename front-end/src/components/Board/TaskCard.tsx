@@ -2,7 +2,7 @@ import { Box, Text, Button, Dialog , Portal } from "@chakra-ui/react";
 import { useDraggable } from "@dnd-kit/core";
 import { AvatarUser } from "../AvatarUser";
 import type { Task } from "@/types/task";
-import { useState, useRef } from "react";
+import { useState } from "react";
 
 interface TaskCardProps {
   task: Task;
