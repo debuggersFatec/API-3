@@ -15,6 +15,18 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   equip_uuid: string;
+  responsible?: Responsavel;
+  responsavel?: Responsavel;
+}
+
+export interface TaskTeam {
+  uuid: string;
+  title: string;
+  due_date: Date | null;
+  status: TaskStatus;
+  priority: TaskPriority;
+  equip_uuid: string;
+  responsible?: Responsavel;
   responsavel?: Responsavel;
 }
 
