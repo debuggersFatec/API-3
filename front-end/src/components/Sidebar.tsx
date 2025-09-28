@@ -14,6 +14,8 @@ export const Sidebar = () => {
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
   const filteredTasks =
     user?.tasks?.filter((task) => task.status !== "excluida") || [];
+
+  console.log("Renderizando Sidebar com user:", user);
   return (
     <>
       <Flex>
@@ -78,7 +80,7 @@ export const Sidebar = () => {
             {user?.equipes &&
               user.equipes.map((equipe) => {
                 const equipeCount = filteredTasks.filter(
-                  (t) => t.equipe_uuid === equipe.uuid
+                  (t) => t.equip_uuid === equipe.uuid
                 ).length;
                 return (
                   <Tabs.Trigger

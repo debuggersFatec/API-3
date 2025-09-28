@@ -6,6 +6,7 @@ export type tasksUser = {
   status: "not-started" | "in-progress" | "completed" | "excluida";
   prioridade: "baixa" | "média" | "alta";
   equipe_uuid: string;
+  equip_uuid: string;
 }
 
 export type equipeUser = {
