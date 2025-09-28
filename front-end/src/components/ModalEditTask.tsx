@@ -25,6 +25,7 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "../types/task";
 import { useAuth } from "../context/useAuth";
+import { useEquipe } from "@/context/EquipeContext";
 
 interface Member {
   uuid: string;
@@ -48,6 +49,7 @@ export const ModalEditTask = ({
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
+  const { refreshEquipe } = useEquipe();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -158,6 +160,7 @@ export const ModalEditTask = ({
       })
       .then(async () => {
         await refreshUser();
+        await refreshEquipe();
         if (onClose) onClose();
       })
       .catch((error: unknown) => {
@@ -202,7 +205,10 @@ export const ModalEditTask = ({
             Authorization: `Bearer ${token}`,
           },
         })
-        .then(async () => await refreshUser());
+        .then(async () => {
+          await refreshUser();
+          await refreshEquipe();
+        });
       if (onClose) onClose();
     } catch (err) {
       console.error("Erro ao excluir task:", err);

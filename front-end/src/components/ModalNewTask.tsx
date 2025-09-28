@@ -26,6 +26,7 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
+import { useEquipe } from "@/context/EquipeContext";
 
 interface Member {
   uuid: string;
@@ -60,7 +61,7 @@ export function ModalNewTask({
   });
 
   const { token, refreshUser } = useAuth();
-
+  const { refreshEquipe } = useEquipe();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -109,6 +110,7 @@ export function ModalNewTask({
       })
       .then(async () => {
         await refreshUser();
+        await refreshEquipe();
       })
       .catch((error) => {
         console.error("Ocorreu um erro:", error);
