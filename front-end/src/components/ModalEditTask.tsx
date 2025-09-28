@@ -233,16 +233,7 @@ export const ModalEditTask = ({
                       variant={"flushed"}
                     />
                   </Field.Root>
-                  <Button
-                    variant="ghost"
-                    colorScheme="red"
-                    onClick={handleDelete}
-                    aria-label="Excluir tarefa"
-                    minW={"auto"}
-                    px={2}
-                  >
-                    <MdDelete size={22} color="#E53E3E" />
-                  </Button>
+
                   <DialogCloseTrigger asChild>
                     <Button
                       variant="ghost"
@@ -438,9 +429,23 @@ export const ModalEditTask = ({
                     />
                   </Field.Root>
 
-                  <Button w={"100%"} type="submit" colorScheme={"blue"}>
-                    Salvar alterações
-                  </Button>
+                  <Flex gap={2} maxW={"100%"}>
+                    <Button
+                      bg="red.500"
+                      color="white"
+                      _hover={{ bg: "red.600" }}
+                      onClick={handleDelete}
+                      aria-label="Excluir tarefa"
+                      flex={1}
+                      px={2}
+                    >
+                      Excluir
+                      <MdDelete size={22} color="#fff" />
+                    </Button>
+                    <Button flex={1} type="submit" colorScheme={"blue"}>
+                      Salvar alterações
+                    </Button>
+                  </Flex>
                 </Box>
               </Flex>
             </DialogBody>
