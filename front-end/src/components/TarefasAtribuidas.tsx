@@ -17,8 +17,6 @@ interface TarefasAtribuidasProps {
 }
 
 export const TarefasAtribuidas = ({ tasks }: TarefasAtribuidasProps) => {
-  console.log("TarefasAtribuidas received tasks:", tasks);
-
   const contagemPorUsuario = tasks.reduce<Accumulator>((acc, task) => {
     if (!task.responsavel) return acc;
     const { name } = task.responsavel;
