@@ -26,15 +26,6 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
-import { useEquipe } from "@/context/EquipeContext";
-
-function useEquipeSafe() {
-  try {
-    return useEquipe();
-  } catch {
-    return undefined;
-  }
-}
 
 interface Member {
   uuid: string;
@@ -48,7 +39,11 @@ interface ModalNewTaskProps {
   task?: Task;
 }
 
-export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) {
+export function ModalNewTask({
+  task,
+  equipe_uuid,
+  membros,
+}: ModalNewTaskProps) {
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<Task>({
     uuid: task?.uuid || "",
@@ -64,9 +59,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
     responsible: task?.responsible || undefined,
   });
 
-  const { token } = useAuth();
-  const equipe = useEquipeSafe();
-  const fetchEquipe = equipe?.fetchEquipe;
+  const { token, refreshUser } = useAuth();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
@@ -101,17 +94,21 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
 
     const payload = {
       ...formData,
-      status: formData.responsible && formData.responsible.uuid ? 'in-progress' : 'not-started',
+      status:
+        formData.responsible && formData.responsible.uuid
+          ? "in-progress"
+          : "not-started",
     };
 
-    axios.post("http://localhost:8080/api/tasks", payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then(() => {       
-        if (fetchEquipe) fetchEquipe();
+    axios
+      .post("http://localhost:8080/api/tasks", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then(async () => {
+        await refreshUser();
       })
       .catch((error) => {
         console.error("Ocorreu um erro:", error);
@@ -209,7 +206,11 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                             >
                               <AvatarUser
                                 name={formData.responsible.name}
-                                imageUrl={formData.responsible.img ? formData.responsible.img : ''}
+                                imageUrl={
+                                  formData.responsible.img
+                                    ? formData.responsible.img
+                                    : ""
+                                }
                                 size="2xs"
                               />
                               <Text ml={2}>{formData.responsible.name}</Text>
@@ -242,7 +243,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                               >
                                 <AvatarUser
                                   name={member.name}
-                                  imageUrl={member.img || ''}
+                                  imageUrl={member.img || ""}
                                   size="2xs"
                                 />
                                 <Text ml={2}>{member.name}</Text>
@@ -373,4 +374,3 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
     </>
   );
 }
-

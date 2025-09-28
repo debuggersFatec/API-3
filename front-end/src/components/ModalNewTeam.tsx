@@ -12,41 +12,32 @@ import { useState } from "react";
 
 export const ModalNewTeam = () => {
   const [teamName, setTeamName] = useState("");
-  const { user, token, setUser } = useAuth();
+  const { user, token, refreshUser } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:8080/api/equipes",
-        {
-          name: teamName,
-          membros: [
-            {
-              uuid: user?.uuid,
-              name: user?.name,
-              email: user?.email,
-              img: user?.img || null,
-            },
-          ],
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      await axios
+        .post(
+          "http://localhost:8080/api/equipes",
+          {
+            name: teamName,
+            membros: [
+              {
+                uuid: user?.uuid,
+                name: user?.name,
+                email: user?.email,
+                img: user?.img || null,
+              },
+            ],
           },
-        }
-      );
-
-      if (setUser && user) {
-        const equipe = response.data;
-        setUser({
-          ...user,
-          equipes: [
-            ...(user.equipes || []),
-            { uuid: equipe.uuid, name: equipe.name },
-          ],
-        });
-      }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        )
+        .then(async () => await refreshUser());
     } catch (error) {
       const err = error as AxiosError;
       console.error("Erro ao criar equipe:", err);

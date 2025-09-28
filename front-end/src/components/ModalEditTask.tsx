@@ -25,7 +25,6 @@ import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "../types/task";
 import { useAuth } from "../context/useAuth";
-import { useEquipe } from "@/context/EquipeContext";
 
 interface Member {
   uuid: string;
@@ -40,13 +39,7 @@ interface ModalEditTaskProps {
   open: boolean;
   onClose?: () => void;
 }
-function useEquipeSafe() {
-  try {
-    return useEquipe();
-  } catch {
-    return undefined;
-  }
-}
+
 export const ModalEditTask = ({
   task,
   equipe_uuid,
@@ -54,9 +47,7 @@ export const ModalEditTask = ({
   open,
   onClose,
 }: ModalEditTaskProps) => {
-  const { token } = useAuth();
-  const equipe = useEquipeSafe();
-  const fetchEquipe = equipe?.fetchEquipe;
+  const { token, refreshUser } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -165,9 +156,8 @@ export const ModalEditTask = ({
           "Content-Type": "application/json",
         },
       })
-      .then((response: import("axios").AxiosResponse) => {
-        console.log("Task editada com sucesso!", response.data);
-        if (fetchEquipe) fetchEquipe();
+      .then(async () => {
+        await refreshUser();
         if (onClose) onClose();
       })
       .catch((error: unknown) => {
@@ -206,12 +196,13 @@ export const ModalEditTask = ({
   const handleDelete = async () => {
     if (!formData) return;
     try {
-      await axios.delete(`http://localhost:8080/api/tasks/${formData.uuid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (fetchEquipe) fetchEquipe();
+      await axios
+        .delete(`http://localhost:8080/api/tasks/${formData.uuid}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then(async () => await refreshUser());
       if (onClose) onClose();
     } catch (err) {
       console.error("Erro ao excluir task:", err);
@@ -233,7 +224,7 @@ export const ModalEditTask = ({
             <DialogHeader>
               <DialogTitle w={"100%"}>
                 <Flex align="center" justify="space-between" gap={2}>
-                  <Field.Root  w="100%" required>
+                  <Field.Root w="100%" required>
                     <Input
                       name="title"
                       value={formData!.title}
@@ -346,7 +337,7 @@ export const ModalEditTask = ({
                   </Field.Root>
 
                   <Field.Root>
-                    <Box position="relative" w="100%"  mb={"8px"}>
+                    <Box position="relative" w="100%" mb={"8px"}>
                       <Button
                         onClick={() =>
                           setIsDropdownOpenPriority(!isDropdownOpenPriority)
@@ -402,7 +393,7 @@ export const ModalEditTask = ({
                   </Field.Root>
 
                   <Field.Root w={"100%"}>
-                    <Box w={"100%"} position="relative"  mb={"8px"}>
+                    <Box w={"100%"} position="relative" mb={"8px"}>
                       <ChakraDatePicker
                         selected={formData!.due_date}
                         onChange={handleDateChange}
@@ -417,7 +408,7 @@ export const ModalEditTask = ({
                       borderRadius="md"
                       p={6}
                       w={"100%"}
-                       mb={"8px"}
+                      mb={"8px"}
                       textAlign="center"
                       cursor="pointer"
                       onClick={() => fileInputRef.current?.click()}
