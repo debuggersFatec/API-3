@@ -9,6 +9,7 @@ export interface EquipeContextType {
   isLoading: boolean;
   setIsLoading: (b: boolean) => void;
   fetchEquipe: () => Promise<void>;
+  refreshEquipe: () => Promise<void>;
 }
 
 export const EquipeContext = createContext<EquipeContextType | undefined>(undefined);
