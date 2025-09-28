@@ -4,7 +4,6 @@ import { EquipeTabs } from "./EquipeTabs";
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import type { EquipeData } from "@/types/equipe";
-import { EquipeContext } from "@/context/EquipeContext";
 import { useAuth } from "@/context/useAuth";
 
 export type Equipe = {
@@ -51,7 +50,7 @@ export const EquipeDashboard = ({
   }, [isActive, fetchEquipe]);
 
   return (
-    <EquipeContext.Provider value={{ equipeData, setEquipeData, name, setName, isLoading, setIsLoading, fetchEquipe }}>
+    <>
       {isLoading ? (
         <div>Carregando...</div>
       ) : equipeData ? (
@@ -60,6 +59,6 @@ export const EquipeDashboard = ({
           <EquipeTabs />
         </Box>
       ) : null}
-    </EquipeContext.Provider>
+    </>
   );
 };

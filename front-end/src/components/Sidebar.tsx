@@ -5,19 +5,66 @@ import { VencidasTab } from "./VencidasTab";
 import { CompletasTab } from "./CompletasTab";
 import { ModalNewTeam } from "./ModalNewTeam";
 import { FaPlus } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/useAuth";
 import { RiLogoutCircleRLine } from "react-icons/ri";
+import { EquipeContext } from "@/context/EquipeContext";
+import type { EquipeData } from "@/types/equipe";
+import axios from "axios";
 
 export const Sidebar = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, token } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
   const filteredTasks =
     user?.tasks?.filter((task) => task.status !== "excluida") || [];
 
-  console.log("Renderizando Sidebar com user:", user);
+  const [name, setName] = useState("");
+  const [equipeData, setEquipeData] = useState<EquipeData | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchEquipe = useCallback(
+    async (uuid?: string, fallbackName?: string) => {
+      if (!uuid) return;
+      setIsLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/api/equipes/${uuid}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        setName(response.data.name);
+        setEquipeData(response.data);
+      } catch {
+        if (fallbackName) setName(fallbackName);
+      }
+      setIsLoading(false);
+    },
+    [token]
+  );
+
+  useEffect(() => {
+    if (activeTab && user?.equipes) {
+      const equipe = user.equipes.find((e) => e.uuid === activeTab);
+      if (equipe) fetchEquipe(equipe.uuid, equipe.name);
+    }
+  }, [activeTab, user?.equipes, fetchEquipe]);
+
   return (
-    <>
+    <EquipeContext.Provider
+      value={{
+        equipeData,
+        setEquipeData,
+        name,
+        setName,
+        isLoading,
+        setIsLoading,
+        fetchEquipe: () => fetchEquipe(equipeData?.uuid, name),
+        refreshEquipe: () => fetchEquipe(equipeData?.uuid, name),
+      }}
+    >
       <Flex>
         <Tabs.Root
           value={activeTab}
@@ -133,6 +180,6 @@ export const Sidebar = () => {
             ))}
         </Tabs.Root>
       </Flex>
-    </>
+    </EquipeContext.Provider>
   );
 };
