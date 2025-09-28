@@ -1,16 +1,13 @@
-import {
-  Portal,
-  Dialog,
-  Button,
-  CloseButton,
-  Field,
-  Input,
-} from "@chakra-ui/react";
+import { Dialog, Button, CloseButton, Field, Input } from "@chakra-ui/react";
 import axios, { AxiosError } from "axios";
 import { useAuth } from "@/context/useAuth";
 import { useState } from "react";
 
-export const ModalNewTeam = () => {
+interface ModalNewTeamProps {
+  onClose?: () => void;
+}
+
+export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
   const [teamName, setTeamName] = useState("");
   const { user, token, refreshUser } = useAuth();
 
@@ -37,7 +34,11 @@ export const ModalNewTeam = () => {
             },
           }
         )
-        .then(async () => await refreshUser());
+        .then(async () => {
+          await refreshUser();
+          if (onClose) onClose();
+          setTeamName("");
+        });
     } catch (error) {
       const err = error as AxiosError;
       console.error("Erro ao criar equipe:", err);
@@ -58,7 +59,7 @@ export const ModalNewTeam = () => {
   };
 
   return (
-    <Portal>
+    <>
       <Dialog.Backdrop />
       <Dialog.Positioner>
         <Dialog.Content>
@@ -80,7 +81,9 @@ export const ModalNewTeam = () => {
             </Dialog.Body>
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline">Cancel</Button>
+                <Button variant="outline" onClick={onClose}>
+                  Cancel
+                </Button>
               </Dialog.ActionTrigger>
               <Button type="submit">Criar</Button>
             </Dialog.Footer>
@@ -90,6 +93,6 @@ export const ModalNewTeam = () => {
           </Dialog.CloseTrigger>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Portal>
+    </>
   );
 };

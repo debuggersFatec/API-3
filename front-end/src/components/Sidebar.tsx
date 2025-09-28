@@ -14,6 +14,7 @@ import axios from "axios";
 
 export const Sidebar = () => {
   const { user, logout, token } = useAuth();
+  const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
   const filteredTasks =
     user?.tasks?.filter((task) => task.status !== "excluida") || [];
@@ -115,13 +116,19 @@ export const Sidebar = () => {
             </Tabs.Trigger>
             <Flex alignItems={"center"} justify={"space-between"}>
               <h1>Equipes</h1>
-              <Dialog.Root placement={"center"}>
+              <Dialog.Root
+                placement={"center"}
+                open={modalOpen}
+                onOpenChange={() => setModalOpen(!modalOpen)}
+              >
                 <Dialog.Trigger asChild>
                   <Box bg="blue.500" borderRadius="md" p={0.5} border="none">
                     <FaPlus color="white" />
                   </Box>
                 </Dialog.Trigger>
-                <ModalNewTeam />
+                {modalOpen && (
+                  <ModalNewTeam onClose={() => setModalOpen(false)} />
+                )}
               </Dialog.Root>
             </Flex>
             {user?.equipes &&
