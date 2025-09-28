@@ -17,13 +17,13 @@ import {
   DialogCloseTrigger,
   DialogTitle,
 } from "@chakra-ui/react/dialog";
-import { Field, FieldLabel } from "@chakra-ui/react/field";
+import { Field } from "@chakra-ui/react/field";
 import { useRef, useState } from "react";
 import { MdOutlineMail } from "react-icons/md";
 import { useDisclosure } from "@chakra-ui/react/hooks";
 import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
-import ChakraDatePicker from "./ChakraDatePicker";
+import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
 import { useEquipe } from "@/context/EquipeContext";
@@ -160,7 +160,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
             <form onSubmit={handleSubmit}>
               <DialogHeader>
                 <DialogTitle w={"100%"}>
-                  <Field.Root mb={"16px"}>
+                  <Field.Root required>
                     <Input
                       name="title"
                       value={formData.title}
@@ -181,7 +181,6 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                 <Flex justifyContent={"space-between"} gap={"12px"}>
                   <Box w={"100%"}>
                     <Field.Root h={"50%"}>
-                      <FieldLabel>Descrição</FieldLabel>
                       <Textarea
                         name="description"
                         placeholder="Descrição"
@@ -192,10 +191,9 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                     </Field.Root>
                   </Box>
 
-                  <Box w={"100%"}>
+                  <Box w={"100%"} gap={"8px"}>
                     <Field.Root>
-                      <FieldLabel>Responsável</FieldLabel>
-                      <Box position="relative" w="100%">
+                      <Box position="relative" w="100%" mb={"24px"}>
                         <Button
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           variant="outline"
@@ -256,8 +254,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                     </Field.Root>
 
                     <Field.Root>
-                      <FieldLabel>Prioridade</FieldLabel>
-                      <Box position="relative" w="100%">
+                      <Box position="relative" w="100%" mb={"8px"}>
                         <Button
                           onClick={() =>
                             setIsDropdownOpenPriority(!isDropdownOpenPriority)
@@ -313,7 +310,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                     </Field.Root>
 
                     <Field.Root w={"100%"}>
-                      <Box w={"100%"} position="relative">
+                      <Box w={"100%"} position="relative" mb={"8px"}>
                         <ChakraDatePicker
                           selected={formData.due_date}
                           onChange={handleDateChange}
@@ -328,6 +325,7 @@ export function ModalNewTask({ task, equipe_uuid, membros }: ModalNewTaskProps) 
                         borderRadius="md"
                         p={6}
                         w={"100%"}
+                        mb={"8px"}
                         textAlign="center"
                         cursor="pointer"
                         onClick={() => fileInputRef.current?.click()}

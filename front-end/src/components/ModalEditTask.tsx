@@ -1,4 +1,12 @@
-import { Flex, Box, Icon, Text, Input, Textarea, Button } from "@chakra-ui/react";
+import {
+  Flex,
+  Box,
+  Icon,
+  Text,
+  Input,
+  Textarea,
+  Button,
+} from "@chakra-ui/react";
 import {
   DialogRoot,
   DialogBackdrop,
@@ -9,16 +17,15 @@ import {
   DialogCloseTrigger,
   DialogTitle,
 } from "@chakra-ui/react/dialog";
-import { Field, FieldLabel } from "@chakra-ui/react/field";
+import { Field } from "@chakra-ui/react/field";
 import { useRef, useState, useEffect } from "react";
 import { MdOutlineMail, MdDelete } from "react-icons/md";
 import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
-import ChakraDatePicker from "./ChakraDatePicker";
+import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Task, TaskPriority } from "../types/task";
 import { useAuth } from "../context/useAuth";
 import { useEquipe } from "@/context/EquipeContext";
-
 
 interface Member {
   uuid: string;
@@ -40,7 +47,13 @@ function useEquipeSafe() {
     return undefined;
   }
 }
-export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: ModalEditTaskProps) => {
+export const ModalEditTask = ({
+  task,
+  equipe_uuid,
+  membros,
+  open,
+  onClose,
+}: ModalEditTaskProps) => {
   const { token } = useAuth();
   const equipe = useEquipeSafe();
   const fetchEquipe = equipe?.fetchEquipe;
@@ -139,16 +152,20 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
 
     const payload = {
       ...formData!,
-      status: formData!.responsible && formData!.responsible.uuid ? 'in-progress' : 'not-started',
+      status:
+        formData!.responsible && formData!.responsible.uuid
+          ? "in-progress"
+          : "not-started",
     };
 
-    axios.put(`http://localhost:8080/api/tasks/${formData!.uuid}`, payload, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    })
-      .then((response: import('axios').AxiosResponse) => {
+    axios
+      .put(`http://localhost:8080/api/tasks/${formData!.uuid}`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response: import("axios").AxiosResponse) => {
         console.log("Task editada com sucesso!", response.data);
         if (fetchEquipe) fetchEquipe();
         if (onClose) onClose();
@@ -216,7 +233,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
             <DialogHeader>
               <DialogTitle w={"100%"}>
                 <Flex align="center" justify="space-between" gap={2}>
-                  <Field.Root mb={"16px"} w="100%">
+                  <Field.Root  w="100%" required>
                     <Input
                       name="title"
                       value={formData!.title}
@@ -236,7 +253,11 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                     <MdDelete size={22} color="#E53E3E" />
                   </Button>
                   <DialogCloseTrigger asChild>
-                    <Button variant="ghost" onClick={onClose} aria-label="Fechar modal">
+                    <Button
+                      variant="ghost"
+                      onClick={onClose}
+                      aria-label="Fechar modal"
+                    >
                       X
                     </Button>
                   </DialogCloseTrigger>
@@ -248,7 +269,6 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
               <Flex justifyContent={"space-between"} gap={"12px"}>
                 <Box w={"100%"}>
                   <Field.Root h={"50%"}>
-                    <FieldLabel>Descrição</FieldLabel>
                     <Textarea
                       name="description"
                       placeholder="Descrição"
@@ -261,8 +281,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
 
                 <Box w={"100%"}>
                   <Field.Root>
-                    <FieldLabel>Responsável</FieldLabel>
-                    <Box position="relative" w="100%">
+                    <Box position="relative" w="100%" mb={"24px"}>
                       <Button
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         variant="outline"
@@ -278,7 +297,11 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                           >
                             <AvatarUser
                               name={formData!.responsible!.name}
-                              imageUrl={formData!.responsible!.img ? formData!.responsible!.img : ''}
+                              imageUrl={
+                                formData!.responsible!.img
+                                  ? formData!.responsible!.img
+                                  : ""
+                              }
                               size="2xs"
                             />
                             <Text ml={2}>{formData!.responsible!.name}</Text>
@@ -311,7 +334,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                             >
                               <AvatarUser
                                 name={member.name}
-                                imageUrl={member.img || ''}
+                                imageUrl={member.img || ""}
                                 size="2xs"
                               />
                               <Text ml={2}>{member.name}</Text>
@@ -323,8 +346,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                   </Field.Root>
 
                   <Field.Root>
-                    <FieldLabel>Prioridade</FieldLabel>
-                    <Box position="relative" w="100%">
+                    <Box position="relative" w="100%"  mb={"8px"}>
                       <Button
                         onClick={() =>
                           setIsDropdownOpenPriority(!isDropdownOpenPriority)
@@ -367,7 +389,9 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                               align="center"
                               cursor="pointer"
                               _hover={{ bg: "gray.100" }}
-                              onClick={() => handleSelectPriority(priority.value)}
+                              onClick={() =>
+                                handleSelectPriority(priority.value)
+                              }
                             >
                               <Text ml={2}>{priority.label}</Text>
                             </Flex>
@@ -378,7 +402,7 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                   </Field.Root>
 
                   <Field.Root w={"100%"}>
-                    <Box w={"100%"} position="relative">
+                    <Box w={"100%"} position="relative"  mb={"8px"}>
                       <ChakraDatePicker
                         selected={formData!.due_date}
                         onChange={handleDateChange}
@@ -393,17 +417,13 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
                       borderRadius="md"
                       p={6}
                       w={"100%"}
+                       mb={"8px"}
                       textAlign="center"
                       cursor="pointer"
                       onClick={() => fileInputRef.current?.click()}
                       _hover={{ borderColor: "blue.500" }}
                     >
-                      <Icon
-                        as={MdOutlineMail}
-                        w={12}
-                        h={12}
-                        color="gray.400"
-                      />
+                      <Icon as={MdOutlineMail} w={12} h={12} color="gray.400" />
                       <Text mt={2} color="gray.500">
                         Anexar arquivo
                       </Text>
@@ -438,5 +458,4 @@ export const ModalEditTask = ({ task, equipe_uuid, membros, open, onClose }: Mod
       </DialogPositioner>
     </DialogRoot>
   );
-}
-
+};

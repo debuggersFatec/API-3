@@ -1,6 +1,7 @@
 import DatePicker from "react-datepicker";
 import { Input, Box } from "@chakra-ui/react";
 import "react-datepicker/dist/react-datepicker.css";
+import "./chakra-datepicker.css";
 
 interface ChakraDatePickerProps {
   selected: Date | null;
@@ -12,9 +13,10 @@ const ChakraDatePicker = ({
   ...props
 }: ChakraDatePickerProps) => {
   return (
-    <Box w={"100%"} {...props}>
+    <Box w="100%" style={{ width: "100%" }}>
       <DatePicker
-        customInput={<Input w={"100%"} />}
+        wrapperClassName="chakra-datepicker-wrapper"
+        customInput={<Input w="100%" style={{ width: "100%" }} />}
         selected={selected}
         onChange={onChange}
         dateFormat="dd/MM/yyyy"
