@@ -11,4 +11,5 @@ export type EquipeData = {
   name: string;
   membros: Members[];
   tasks?: TaskTeam[];
+  lixeira?: TaskTeam[];
 };
