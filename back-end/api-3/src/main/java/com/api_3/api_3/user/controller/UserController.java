@@ -20,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.auth.AuthResponse;
 import com.api_3.api_3.equipe.model.Equipe;
 import com.api_3.api_3.equipe.repository.EquipeRepository;
-import com.api_3.api_3.exception.UserNotFoundException; 
 import com.api_3.api_3.exception.InvalidRequestException;
+import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.task.model.Task;
 import com.api_3.api_3.task.repository.TaskRepository;
 import com.api_3.api_3.user.model.User;
@@ -79,7 +79,8 @@ public class UserController {
                         task.getTitle(),
                         task.getStatus(),
                         task.getPriority(),
-                        task.getEquip_uuid()
+                        task.getEquip_uuid(),
+                        task.getDue_date()
                 ))
                 .collect(Collectors.toList());
         

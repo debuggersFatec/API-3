@@ -81,7 +81,9 @@ public class AuthController {
                         task.getTitle(),
                         task.getStatus(),
                         task.getPriority(),
-                        task.getEquip_uuid()
+                        task.getEquip_uuid(),
+                        task.getDue_date()
+                        
                 ))
                 .collect(Collectors.toList());
         
