@@ -37,27 +37,22 @@ interface Member {
 interface ModalNewTaskProps {
   equipe_uuid: string;
   membros: Member[];
-  task?: Task;
 }
 
-export function ModalNewTask({
-  task,
-  equipe_uuid,
-  membros,
-}: ModalNewTaskProps) {
+export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<Task>({
-    uuid: task?.uuid || "",
-    title: task?.title || "",
-    description: task?.description || "",
-    due_date: task?.due_date || null,
-    status: task?.status || "not-started",
-    priority: task?.priority || "media",
-    equip_uuid: task?.equip_uuid || equipe_uuid,
+    uuid: "",
+    title: "",
+    description: "",
+    due_date: null,
+    status: "not-started",
+    priority: "media",
+    equip_uuid: equipe_uuid,
     // arquivo: null as File | null,
     // file_required: "",
     // file_finish: "",
-    responsible: task?.responsible || undefined,
+    responsible: undefined,
   });
 
   const { token, refreshUser } = useAuth();
@@ -116,6 +111,16 @@ export function ModalNewTask({
         console.error("Ocorreu um erro:", error);
       })
       .finally(() => {
+        setFormData({
+          uuid: "",
+          title: "",
+          description: "",
+          due_date: null,
+          status: "not-started",
+          priority: "media",
+          equip_uuid: equipe_uuid,
+          responsible: undefined,
+        });
         onClose();
       });
   };
