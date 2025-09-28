@@ -1,6 +1,7 @@
 import type { TaskTeam } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
-import { Box } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
+
 import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
 
 interface ProgressoDisplayProps {
@@ -8,7 +9,6 @@ interface ProgressoDisplayProps {
 }
 
 export const ProgressoDisplay = ({ tasks }: ProgressoDisplayProps) => {
-  // Conta tasks concluídas e não concluídas
   let concluidas = 0;
   let naoConcluidas = 0;
   tasks.forEach((t) => {
@@ -25,6 +25,23 @@ export const ProgressoDisplay = ({ tasks }: ProgressoDisplayProps) => {
       { name: "Concluidas", value: concluidas, color: "blue.solid" },
     ],
   });
+
+  if (tasks.length === 0) {
+    return (
+      <Box
+        border={"1px solid"}
+        borderColor={"gray.200"}
+        w={"100%"}
+        borderRadius={"8px"}
+        p={4}
+      >
+        <Text fontWeight="bold" mb={8}>
+          Progresso
+        </Text>
+        <Text>Sem tarefas para mostrar</Text>
+      </Box>
+    );
+  }
 
   return (
     <Box

@@ -11,7 +11,9 @@ interface ProdutividadeChartProps {
 
 export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {
   const naoAtribuido = tasks.filter((t) => !t.responsible).length;
-  const atribuido = tasks.filter((t) => t.responsible && t.status !== "completed").length;
+  const atribuido = tasks.filter(
+    (t) => t.responsible && t.status !== "completed"
+  ).length;
   const concluido = tasks.filter((t) => t.status === "completed").length;
 
   const chart = useChart({
@@ -23,15 +25,38 @@ export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {
     series: [{ name: "tasksNumber", color: "blue", stackId: "a" }],
   });
 
+  if (tasks.length === 0) {
+    return (
+      <Box h={"300px"} w={"100%"}>
+        <Box
+          w={"100%"}
+          display={"flex"}
+          flexDir={"column"}
+          border={"1px solid"}
+          borderColor={"gray.200"}
+          borderRadius={"8px"}
+          h={"100%"}
+          pt={"24px"}
+          px={"24px"}
+        >
+          <Text h={"5%"} fontSize={"lg"} fontWeight={"bold"} mb={8}>
+            Gráfico de Produtividade
+          </Text>
+          <Text>Sem tarefas para mostrar</Text>
+        </Box>
+      </Box>
+    );
+  }
+
   return (
-    <Box h={"300px"} w={"100%"} >
+    <Box h={"300px"} w={"100%"}>
       <Box
         w={"100%"}
         display={"flex"}
         flexDir={"column"}
         border={"1px solid"}
         borderColor={"gray.200"}
-         borderRadius={"8px"}
+        borderRadius={"8px"}
         h={"100%"}
         pt={"24px"}
         px={"24px"}
@@ -39,7 +64,7 @@ export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {
         <Text h={"5%"} fontSize={"lg"} fontWeight={"bold"}>
           Gráfico de Produtividade
         </Text>
-        <Chart.Root chart={chart} h={"95%"} w={"100%"} >
+        <Chart.Root chart={chart} h={"95%"} w={"100%"}>
           <BarChart
             layout="vertical"
             data={chart.data}
@@ -62,7 +87,7 @@ export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {
               }}
             />
             {chart.series.map((item) => (
-               <Bar
+              <Bar
                 key={item.name}
                 stackId={item.stackId}
                 barSize={30}

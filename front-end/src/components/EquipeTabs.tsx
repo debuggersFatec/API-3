@@ -7,9 +7,6 @@ import { TabLixeiraEquipe } from "./TabLixeiraEquipe";
 
 export const EquipeTabs = () => {
   const { equipeData } = useEquipe();
-  if (!equipeData || !equipeData.tasks || equipeData.tasks.length === 0) {
-    return <div>Sem tarefas para mostrar</div>;
-  }
 
   return (
     <Tabs.Root
@@ -25,16 +22,16 @@ export const EquipeTabs = () => {
         <Tabs.Trigger value="lixo">Lixeira</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="dashboard">
-        <TabDashboard equipeData={equipeData} />
+        <TabDashboard tasks={equipeData?.tasks || []} />
       </Tabs.Content>
       <Tabs.Content value="tarefas">
-        <TabTarefasEquipes tasks={equipeData.tasks} />
+        <TabTarefasEquipes tasks={equipeData?.tasks || []} />
       </Tabs.Content>
       <Tabs.Content value="Quadro">
         <TabQuadro />
       </Tabs.Content>
       <Tabs.Content value="lixo">
-        <TabLixeiraEquipe lixeira={equipeData.lixeira}/>
+        <TabLixeiraEquipe lixeira={equipeData?.lixeira || []} />
       </Tabs.Content>
     </Tabs.Root>
   );

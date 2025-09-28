@@ -17,13 +17,14 @@ export const ProximasTasks = ({ tasks }: ProximasTasksProps) => {
         borderRadius={"8px"}
         p={"16px"}
       >
-        <Text fontWeight="bold" mb={4}>
-          Sem tarefas para mostrar
+        <Text fontWeight="bold" mb={8}>
+          Próximas Tasks
         </Text>
+        <Text>Sem tarefas para mostrar</Text>
       </Box>
     );
   }
-  
+
   const proximas10Tasks = [...tasks]
     .filter(
       (task) => task.status === "not-started" || task.status === "in-progress"

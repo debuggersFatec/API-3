@@ -10,7 +10,6 @@ interface RankingProdutividadeProps {
 }
 
 export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
-  // Agrupa tasks concluídas por responsável
   const ranking: Record<string, { name: string; tasksNumber: number }> = {};
   tasks.forEach((t) => {
     const status = (t.status || "").toLowerCase();
@@ -23,7 +22,7 @@ export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
       ranking[nome].tasksNumber++;
     }
   });
-  // Top 3 ordenado
+
   const sortedData = Object.values(ranking)
     .sort((a, b) => b.tasksNumber - a.tasksNumber)
     .slice(0, 3);
@@ -32,6 +31,27 @@ export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
     data: sortedData,
     series: [{ name: "tasksNumber", color: "blue", stackId: "a" }],
   });
+
+  if (tasks.length === 0) {
+    return ( <Box h={"300px"} w={"100%"}>
+      <Box
+        w={"100%"}
+        display={"flex"}
+        flexDir={"column"}
+        border={"1px solid"}
+        borderColor={"gray.200"}
+        h={"100%"}
+        pt={"24px"}
+        px={"24px"}
+        borderRadius={"8px"}
+      >
+        <Text h={"5%"} fontSize={"lg"} fontWeight={"bold"}mb={8}>
+          Ranking de Produtividade
+        </Text>
+        <Text>Sem tarefas para mostrar</Text>
+      </Box>
+    </Box>);
+  }
 
   return (
     <Box h={"300px"} w={"100%"}>

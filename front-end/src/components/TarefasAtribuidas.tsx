@@ -37,6 +37,22 @@ export const TarefasAtribuidas = ({ tasks }: TarefasAtribuidasProps) => {
     contagemPorUsuario
   ).sort((a, b) => b.countDeTarefas - a.countDeTarefas);
 
+  if (tasks.length === 0) {
+    return (
+      <Box
+        w={"100%"}
+        borderRadius={"8px"}
+        border={"1px solid #E2E8F0"}
+        p={"16px"}
+      >
+        <Text fontSize={"16px"} fontWeight={"bold"} mb={"16px"}>
+          Tarefas Atribuídas
+        </Text>
+        <Text>Sem tarefas para mostrar</Text>
+      </Box>
+    );
+  }
+
   return (
     <Box
       w={"100%"}
