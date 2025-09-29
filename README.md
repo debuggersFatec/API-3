@@ -60,7 +60,7 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | Entrega | Período | Status | Relatório | Vídeo |
 | --- | :--: | --- | :--: | :--: |
 | **Kick Off** | 25/08/2025 – 29/08/2025 | ✅ Concluído | | |
-| **Sprint 1** | 08/09/2025 – 28/09/2025 | 🔄 Em andamento | [📋 relatório]() | [🎥 Vídeo]() |
+| **Sprint 1** | 08/09/2025 – 28/09/2025 | 🔄 Em andamento | [📋 relatório](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
 | **Sprint Review / Planning** | 29/09/2025 – 03/10/2025 | ⏳ Não iniciado | | |
 | **Sprint 2** | 06/10/2025 – 26/10/2025 | ⏳ Não iniciado | [📋 relatório]() | [🎥 Vídeo]() |
 | **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | ⏳ Não iniciado | | |
@@ -100,13 +100,14 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 ```
 
 ## Como Executar o Projeto
+
 ### Pré-requisitos
 Certifique-se de ter instalado em sua máquina:
-<!--
-- **Node.js** (versão 18 ou superior)
-- **npm** (gerenciador de pacotes)
-- **Git**
--->
+
+- **Java (OpenJDK)**: versão 17 ou superior  
+- **Maven**: versão 3.6.3 ou superior  
+- **Node.js**: versão 18 ou superior  
+
 ### Passo a Passo
 1. **Clone o repositório**:
    ```bash
@@ -124,21 +125,12 @@ Certifique-se de ter instalado em sua máquina:
    # Instala todas as bibliotecas e dependências necessárias para o frontend funcionar
    npm install
    ```
-3. **Instale as dependências do Backend**:
-   ```bash
-   # Volta uma pasta e entra na pasta do backend (servidor/API)
-   cd ../back-end
-   
-   # Instala todas as bibliotecas e dependências necessárias para o backend funcionar
-   npm install
-   ```
-4. **Execute o Backend**:
+3. **Execute o Backend**:
    ```bash
    # Inicia o servidor backend - a API que fornece os dados para o frontend
-   npm start
+   mvn spring-boot:run
    ```
-   > Backend rodando em: `http://localhost:3001` (ou porta configurada)
-5. **Em outro terminal, execute o Frontend**:
+4. **Em outro terminal, execute o Frontend**:
    ```bash
    # Entra na pasta do frontend (em um terminal SEPARADO)
    cd ../front-end
@@ -146,33 +138,8 @@ Certifique-se de ter instalado em sua máquina:
    # Inicia o servidor de desenvolvimento do frontend
    npm start
    ```
-   > Frontend estará disponível em: `http://localhost:3000`
-<!--
-### 📝 Comentários Importantes
-- ⚠️ **Ordem de execução**: Recomenda-se iniciar primeiro o backend e depois o frontend
-- 🔄 **Terminais separados**: Backend e frontend devem rodar em terminais diferentes
-- 📊 **Variáveis de ambiente**: Verifique se há arquivos `.env` necessários em ambas as pastas
-- 🗄️ **Banco de dados**: Certifique-se de que qualquer banco de dados necessário esteja configurado e rodando
-### 🌐 Acesso à Aplicação
-- **Frontend**: http://localhost:3000 (interface do usuário)
-- **Backend**: http://localhost:3001 (API - fornece dados para o frontend)
-### ❌ Solução de Problemas Comuns
-- **Erro de porta**: Verifique se as portas 3000 e 3001 estão livres
-- **Dependências**: Execute `npm install` novamente se houver erros de módulos
-- **Variáveis de ambiente**: Configure corretamente as variáveis necessárias
--->
 ## Documentação
-📂 [Acessar Documentação Completa](https://github.com/debuggersFatec/API-3/docs)
-<br>
-📄 [Checklist de DoR e DoD](https://github.com/)
-<br>
-📄 [Manual de Usuário](https://github.com/)
-<br>
-📄 [Sprint 1 - DoR e DoD](https://github.com/)
-<br>
-📄 [Sprint 2 - DoR e DoD](https://github.com/)
-<br>
-📄 [Sprint 3 - DoR e DoD](https://github.com/)
+📂 [Acessar Documentação](https://github.com/debuggersFatec/API-3/docs)
 
 ## Equipe
 | Foto | Função | Nome | LinkedIn & GitHub |
@@ -183,4 +150,4 @@ Certifique-se de ter instalado em sua máquina:
 | <img src="https://avatars.githubusercontent.com/KwMajor" width=50px> | Dev Team | Matheus Felipe Correa Ramos | [![Linkedin Badge](https://img.shields.io/badge/-LinkedIn-0A66C2?logo=linkedin&logoColor=white)](http://www.linkedin.com/in/matheus-felipe-0832b52ba) [![GitHub Badge](https://img.shields.io/badge/-GitHub-181717?logo=github&logoColor=white)](https://github.com/KwMajor) |
 | <img src="https://avatars.githubusercontent.com/matheuskarnas" width=50px> | Dev Team | Matheus Karnas Castillo | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/matheuskarnas/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/matheuskarnas) |
 | <img src="https://avatars.githubusercontent.com/PedHr" width=50px> | Dev Team | Pedro Henrique Rosa | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/pedro-rosa-b66b70224/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/PedHr) |
-| <img src="https://avatars.githubusercontent.com/" width=50px> |  Dev Team  | Victor Chagas de Jesus | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)]() [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/victorchagas-93) |
+| <img src="https://avatars.githubusercontent.com/victorchagas-93" width=50px> |  Dev Team  | Victor Chagas de Jesus | [![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)]() [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/victorchagas-93) |
