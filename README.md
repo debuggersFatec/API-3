@@ -33,7 +33,6 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | 17 | Baixa  | Como usuário, quero comentar nas tarefas de outros colaboradores | 8  | 2 |
 | 18 | Média  | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
 
-
 ---
 
 ## Definition of Ready (DoR)

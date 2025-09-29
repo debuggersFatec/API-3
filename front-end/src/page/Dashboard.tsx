@@ -1,3 +1,23 @@
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useAuth } from "@/context/useAuth";
+
 export const Dashboard = () => {
-    return <div>Dashboard</div>;
+  const navigate = useNavigate();
+  const { user, token } = useAuth();
+
+  useEffect(() => {
+    if (user === null || token === null) {
+      navigate("/login");
+    }
+  }, [user, token, navigate]);
+
+  return (
+    <>
+      <Header />
+      <Sidebar />
+    </>
+  );
 };

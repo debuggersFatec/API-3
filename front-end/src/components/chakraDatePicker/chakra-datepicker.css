@@ -1,0 +1,10 @@
+.chakra-datepicker-wrapper {
+  width: 100% !important;
+  display: block;
+}
+
+.chakra-datepicker-wrapper input {
+  width: 100% !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
