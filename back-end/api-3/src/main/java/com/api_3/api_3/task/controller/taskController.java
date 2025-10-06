@@ -87,7 +87,7 @@ public class taskController {
     }
 
 
-    // UPDATE -> Atualiza uma tarefa existente
+    // UPDATE -> Atualiza uma tarefa existente por ID do usuario
     @PutMapping("/{uuid}")
     public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
