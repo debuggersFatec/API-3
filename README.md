@@ -23,18 +23,18 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | 7  | Alta   | Como usuário, quero fazer login para acessar meu painel de tarefas | 3  | 1 |
 | 8  | Alta   | Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades | 8  | 1 |
 | 9  | Média  | Como usuário, quero ter um botão para convidar alguém para a minha equipe, para facilitar a colaboração | 8  | 2 |
-| 10 | Baixa  | Como usuário, desejo sair de um projeto | 3  | 2 |
+| 10 | Média  | Como usuário, quero receber notificações quando minhas tarefas forem criadas, editadas, excluídas e quando faltar 1 dia para o vencimento, para acompanhar mudanças em tempo real e não perder prazos | 13 | 2 |
 | 11 | Média  | Como usuário, quero definir se é obrigatório ou não entregar uma tarefa com anexo, para que eu tenha controle sobre quando documentos são realmente necessários | 8  | 2 |
-| 12 | Baixa  | Como usuário, quero filtrar minhas tarefas por categoria para visualizar melhor minhas tarefas | 5  | 2 |
-| 13 | Baixa  | Como usuário, quero atualizar minha imagem e nome de perfil para manter minhas informações pessoais sempre corretas e personalizadas | 5  | 2 |
-| 14 | Baixa  | Como usuário, quero comentar nas tarefas de outros colaboradores | 8  | 2 |
-| 15 | Baixa  | Como usuário, quero anexar um arquivo quando entregar a tarefa | 5  | 2 |
-| 16 | Baixa  | Como usuário, quero conseguir sair de uma equipe | 5  | 2 |
-| 17 | Média  | Como usuário, quero que apareça um alerta sempre que ocorrer uma ação relevante no banco de dados, para que eu seja informado em tempo real | 8  | 2 |
-| 18 | Baixa  | Como usuário, desejo fechar um projeto | 5  | 2 |
-| 19 | Baixa  | Como usuário, quero ativar o modo escuro na aplicação para reduzir o cansaço visual e melhorar a experiência em ambientes de pouca luz | 5  | 2 |
-| 20 | Média  | Como usuário, quero receber notificações quando minhas tarefas forem criadas, editadas, excluídas e quando faltar 1 dia para o vencimento, para acompanhar mudanças em tempo real e não perder prazos | 13 | 2 |
-| 18 | Média  | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
+| 12 | Média  | Como usuário, quero que apareça um alerta sempre que ocorrer uma ação relevante no banco de dados, para que eu seja informado em tempo real | 8  | 2 |
+| 13 | Baixa  | Como usuário, desejo sair de um projeto | 3  | 2 |
+| 14 | Baixa  | Como usuário, quero filtrar minhas tarefas por categoria para visualizar melhor minhas tarefas | 5  | 2 |
+| 15 | Baixa  | Como usuário, quero atualizar minha imagem e nome de perfil para manter minhas informações pessoais sempre corretas e personalizadas | 5  | 2 |
+| 16 | Baixa  | Como usuário, quero comentar nas tarefas de outros colaboradores | 8  | 2 |
+| 17 | Baixa  | Como usuário, quero anexar um arquivo quando entregar a tarefa | 5  | 2 |
+| 18 | Baixa  | Como usuário, quero conseguir sair de uma equipe | 5  | 2 |
+| 19 | Baixa  | Como usuário, desejo fechar um projeto | 5  | 2 |
+| 20 | Baixa  | Como usuário, quero ativar o modo escuro na aplicação para reduzir o cansaço visual e melhorar a experiência em ambientes de pouca luz | 5  | 2 |
+| 21 | Média  | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 | 
 
 ---
 
