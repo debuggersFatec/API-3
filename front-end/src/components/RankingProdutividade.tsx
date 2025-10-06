@@ -1,12 +1,12 @@
 "use client";
 
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 interface RankingProdutividadeProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
@@ -14,7 +14,7 @@ export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
   tasks.forEach((t) => {
     const status = (t.status || "").toLowerCase();
     const isConcluida = status === "completed" || status === "concluida";
-    const nome = t.responsavel?.name?.trim();
+    const nome = t.responsible?.name?.trim();
     if (isConcluida && nome) {
       if (!ranking[nome]) {
         ranking[nome] = { name: nome, tasksNumber: 0 };

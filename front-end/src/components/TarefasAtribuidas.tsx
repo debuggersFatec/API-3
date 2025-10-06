@@ -1,6 +1,6 @@
 import { Box, Text } from "@chakra-ui/react";
 import { TarefasAtribuidasItem } from "./TarefasAtribuidasItem";
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 
 interface UserTaskCount {
   uuiddousuario: string;
@@ -13,14 +13,14 @@ type Accumulator = {
 };
 
 interface TarefasAtribuidasProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const TarefasAtribuidas = ({ tasks }: TarefasAtribuidasProps) => {
   const contagemPorUsuario = tasks.reduce<Accumulator>((acc, task) => {
-    if (!task.responsavel) return acc;
-    const { name } = task.responsavel;
-    const uuid = task.responsavel.name;
+    if (!task.responsible) return acc;
+    const { name } = task.responsible;
+    const uuid = task.responsible.name;
 
     if (!acc[uuid]) {
       acc[uuid] = {

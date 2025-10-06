@@ -1,12 +1,12 @@
 "use client";
 
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 interface ProdutividadeChartProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const ProdutividadeChart = ({ tasks }: ProdutividadeChartProps) => {

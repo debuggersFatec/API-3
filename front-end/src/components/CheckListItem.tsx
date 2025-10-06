@@ -11,8 +11,9 @@ import axios from "axios";
 
 import { ModalEditTask } from "./ModalEditTask";
 
-import type { Task } from "@/types/task";
+import type { Task, TaskProject } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
+import type { tasksUser } from "@/context/authUtils";
 
 type Member = {
   uuid: string;
@@ -21,33 +22,21 @@ type Member = {
 };
 
 interface CheckItemProps {
-  title: string;
-  uuid: string;
-  status: "not-started" | "in-progress" | "completed" | "excluida";
-  due_date?: string;
-  task?: Task;
-  equipe_uuid?: string;
+  task: TaskProject | tasksUser;
   membros?: Member[];
 }
 
-export const CheckListItem = ({
-  title,
-  status,
-  uuid,
-  equipe_uuid,
-  membros,
-}: CheckItemProps) => {
+export const CheckListItem = ({ task, membros }: CheckItemProps) => {
   const { token } = useAuth();
   const [checked, setChecked] = useState(status === "completed");
   const [modalOpen, setModalOpen] = useState(false);
-  const [taskData, setTaskData] = useState<Task | null>(null);
+  const [taskData, setTaskData] = useState<Task>();
 
   const handleOpenModal = async () => {
-    setTaskData(null); // sempre limpa antes de abrir
     setModalOpen(true); // abre imediatamente (mostra loading)
     try {
       const response = await axios.get(
-        `http://localhost:8080/api/tasks/${uuid}`,
+        `http://localhost:8080/api/tasks/${task.uuid}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -77,19 +66,19 @@ export const CheckListItem = ({
           fontWeight={checked ? "normal" : "semibold"}
           textDecoration={checked ? "line-through" : "none"}
         >
-          {title}
+          {task.title}
         </Text>
       </Flex>
-      <ModalEditTask
-        open={modalOpen}
-        task={taskData}
-        equipe_uuid={equipe_uuid || ""}
-        membros={membros || []}
-        onClose={() => {
-          setModalOpen(false);
-          setTaskData(null);
-        }}
-      />
+      {taskData && (
+        <ModalEditTask
+          open={modalOpen}
+          task={taskData}
+          membros={membros || []}
+          onClose={() => {
+            setModalOpen(false);
+          }}
+        />
+      )}
     </>
   );
 };

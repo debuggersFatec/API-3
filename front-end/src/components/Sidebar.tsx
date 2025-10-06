@@ -9,8 +9,8 @@ import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "@/context/useAuth";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { EquipeContext } from "@/context/EquipeContext";
-import type { EquipeData } from "@/types/equipe";
 import axios from "axios";
+import type { Project } from "@/types/project";
 
 export const Sidebar = () => {
   const { user, logout, token } = useAuth();
@@ -20,7 +20,7 @@ export const Sidebar = () => {
     user?.tasks?.filter((task) => task.status !== "excluida") || [];
 
   const [name, setName] = useState("");
-  const [equipeData, setEquipeData] = useState<EquipeData | undefined>();
+  const [equipeData, setEquipeData] = useState<Project | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchEquipe = useCallback(

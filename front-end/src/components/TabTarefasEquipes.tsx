@@ -1,8 +1,8 @@
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 import { CheckList } from "./CheckList";
 
 interface TabTarefasEquipesProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const TabTarefasEquipes = ({ tasks }: TabTarefasEquipesProps) => {

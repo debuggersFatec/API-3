@@ -1,11 +1,11 @@
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 
 import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
 
 interface ProgressoDisplayProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const ProgressoDisplay = ({ tasks }: ProgressoDisplayProps) => {

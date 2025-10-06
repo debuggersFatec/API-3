@@ -4,10 +4,10 @@ import { ProgressoDisplay } from "./ProgressoDisplay";
 import { RankingProdutividade } from "./RankingProdutividade";
 import { ProximasTasks } from "./ProximasTasks";
 import { TarefasAtribuidas } from "./TarefasAtribuidas";
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 
 interface TabDashboardProps {
-  tasks: TaskTeam[];
+  tasks: TaskProject[];
 }
 
 export const TabDashboard = ({ tasks }: TabDashboardProps) => {
@@ -31,7 +31,7 @@ export const TabDashboard = ({ tasks }: TabDashboardProps) => {
         gridColumn={{ base: "1", md: "2 / 3" }}
         gridRow={{ base: "3", md: "1 / 3" }}
       >
-        <ProximasTasks tasks={tasks} />
+        <ProximasTasks tasks={tasks ?? []} />
       </GridItem>
 
       <GridItem

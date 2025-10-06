@@ -1,16 +1,16 @@
+import type { UserRef } from "@/types/user";
 import { Avatar } from "@chakra-ui/react";
 
 interface AvatarUserProps {
-  name: string;
-  imageUrl: string;
+  user: UserRef;
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "full" | "2xs" | "xs";
 }
 
-export const AvatarUser = ({ name, imageUrl, size }: AvatarUserProps) => {
+export const AvatarUser = ({ user, size }: AvatarUserProps) => {
   return (
     <Avatar.Root size={size || "md"} colorPalette="blue">
-      <Avatar.Fallback name={name} />
-      <Avatar.Image src={imageUrl} />
+      <Avatar.Fallback name={user.name} />
+      <Avatar.Image src={user.img} />
     </Avatar.Root>
   );
 };

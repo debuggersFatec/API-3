@@ -1,43 +1,51 @@
-export interface Responsavel {
-  name: string;
-  img: string;
-  uuid: string;
-}
+import type { UserRef } from "./user";
 
-export type TaskStatus = "not-started" | "in-progress" | "completed" | "excluida";
-export type TaskPriority = "baixa" | "media" | "alta" | "critica";
+export type Status = "not-started" | "in-progress" | "completed" | "deleted";
+export type Priority = "low" | "medium" | "high";
+
+
+
+export interface TaskComment {
+  uuid: string;
+  comment: string;
+  created_at: string;
+  user: UserRef;
+}
 
 export interface Task {
   uuid: string;
   title: string;
   description?: string;
-  due_date: Date | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  equip_uuid: string;
-  responsible?: Responsavel;
-  responsavel?: Responsavel;
+  due_date?: Date;
+  status: Status;
+  priority: Priority;
+  file_url?: string;
+  isRequerid_file: boolean;
+  requered_file?: string;
+  team_uuid: string;
+  project_uuid: string;
+  responsible?: UserRef;
+  comments?: TaskComment[];
 }
 
-export interface TaskTeam {
+export interface TaskUser {
   uuid: string;
   title: string;
-  due_date: Date | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  equip_uuid: string;
-  responsible?: Responsavel;
-  responsavel?: Responsavel;
+  due_date?: string;
+  status: Status;
+  priority: Priority;
+  team_uuid: string;
+  project_uuid: string;
+  responsible?: UserRef;
 }
 
-export interface Column {
-  id: string;
+export interface TaskProject {
+  uuid: string;
   title: string;
-  taskIds: string[];
-}
-
-export interface BoardData {
-  tasks: Record<string, Task>;
-  columns: Record<string, Column>;
-  columnOrder: string[];
+  due_date?: string;
+  status: Status;
+  priority: Priority;
+  team_uuid: string;
+  project_uuid: string;
+  responsible?: UserRef;
 }

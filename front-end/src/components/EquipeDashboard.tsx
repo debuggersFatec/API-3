@@ -3,7 +3,7 @@ import { SectionHeader } from "./SectionHeader";
 import { EquipeTabs } from "./EquipeTabs";
 import { useEffect, useState, useCallback } from "react";
 import axios from "axios";
-import type { EquipeData } from "@/types/equipe";
+import type { Project } from "@/types/project";
 import { useAuth } from "@/context/useAuth";
 
 export type Equipe = {
@@ -20,7 +20,7 @@ export const EquipeDashboard = ({
 }) => {
 
   const [name, setName] = useState(equipe.name);
-  const [equipeData, setEquipeData] = useState<EquipeData | undefined>();
+  const [projectData, setProjectData] = useState<Project | undefined>();
   const [isLoading, setIsLoading] = useState(false);
   const { token } = useAuth();
 
@@ -36,7 +36,7 @@ export const EquipeDashboard = ({
         }
       );
       setName(response.data.name);
-      setEquipeData(response.data);
+      setProjectData(response.data);
     } catch {
       setName(equipe.name);
     }
@@ -53,9 +53,9 @@ export const EquipeDashboard = ({
     <>
       {isLoading ? (
         <div>Carregando...</div>
-      ) : equipeData ? (
+      ) : projectData ? (
         <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
-          <SectionHeader title={name} isTeamSection={true} equipe={equipeData} />
+          <SectionHeader title={name} isTeamSection={true} project={projectData} />
           <EquipeTabs />
         </Box>
       ) : null}

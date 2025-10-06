@@ -1,9 +1,9 @@
 import { Box, Text } from "@chakra-ui/react";
 import { ProximasTasksItem } from "./ProximasTasksItem";
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 
 interface ProximasTasksProps {
-  tasks: TaskTeam[] | undefined;
+  tasks: TaskProject[];
 }
 
 export const ProximasTasks = ({ tasks }: ProximasTasksProps) => {

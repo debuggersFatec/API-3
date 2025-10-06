@@ -31,7 +31,7 @@ export const EquipeTabs = () => {
         <TabQuadro />
       </Tabs.Content>
       <Tabs.Content value="lixo">
-        <TabLixeiraEquipe lixeira={equipeData?.lixeira || []} />
+        <TabLixeiraEquipe lixeira={equipeData?.trashcan || []} />
       </Tabs.Content>
     </Tabs.Root>
   );

@@ -24,35 +24,37 @@ import { useDisclosure } from "@chakra-ui/react/hooks";
 import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
-import type { Task, TaskPriority } from "@/types/task";
+import type { Priority, Task } from "@/types/task";
 import { useAuth } from "@/context/useAuth";
 import { useEquipe } from "@/context/EquipeContext";
-
-interface Member {
-  uuid: string;
-  img: string;
-  name: string;
-}
+import type { UserRef } from "@/types/user";
 
 interface ModalNewTaskProps {
-  equipe_uuid: string;
-  membros: Member[];
+  team_uuid: string;
+  members: UserRef[];
+  project_uuid: string;
 }
 
-export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
+export function ModalNewTask({
+  team_uuid,
+  members,
+  project_uuid,
+}: ModalNewTaskProps) {
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<Task>({
     uuid: "",
     title: "",
     description: "",
-    due_date: null,
+    due_date: undefined,
     status: "not-started",
-    priority: "media",
-    equip_uuid: equipe_uuid,
+    priority: "medium",
+    project_uuid: project_uuid,
+    team_uuid: team_uuid,
     // arquivo: null as File | null,
     // file_required: "",
     // file_finish: "",
     responsible: undefined,
+    isRequerid_file: false,
   });
 
   const { token, refreshUser } = useAuth();
@@ -63,7 +65,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSelectMember = (member: Member) => {
+  const handleSelectMember = (member: UserRef) => {
     setFormData((prev) => ({
       ...prev,
       responsible: member,
@@ -71,7 +73,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
     setIsDropdownOpen(false);
   };
 
-  const handleSelectPriority = (priority: TaskPriority) => {
+  const handleSelectPriority = (priority: Priority) => {
     setFormData((prev) => ({
       ...prev,
       priority: priority,
@@ -80,10 +82,14 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
   };
 
   const handleDateChange = (date: Date | null) => {
-    setFormData((prev) => ({
-      ...prev,
-      due_date: date,
-    }));
+    setFormData((prev) =>
+      prev
+        ? {
+            ...prev,
+            due_date: date || undefined,
+          }
+        : prev
+    );
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,11 +121,13 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
           uuid: "",
           title: "",
           description: "",
-          due_date: null,
+          due_date: undefined,
           status: "not-started",
-          priority: "media",
-          equip_uuid: equipe_uuid,
+          priority: "medium",
+          team_uuid: team_uuid,
+          project_uuid: project_uuid,
           responsible: undefined,
+          isRequerid_file: false,
         });
         onClose();
       });
@@ -145,10 +153,10 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
     }));
   };
 
-  const prioritys: { label: string; value: TaskPriority }[] = [
-    { label: "Baixa", value: "baixa" },
-    { label: "Média", value: "media" },
-    { label: "Alta", value: "alta" },
+  const prioritys: { label: string; value: Priority }[] = [
+    { label: "Baixa", value: "low" },
+    { label: "Média", value: "medium" },
+    { label: "Alta", value: "high" },
   ];
 
   return (
@@ -212,12 +220,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
                               _hover={{ bg: "gray.100" }}
                             >
                               <AvatarUser
-                                name={formData.responsible.name}
-                                imageUrl={
-                                  formData.responsible.img
-                                    ? formData.responsible.img
-                                    : ""
-                                }
+                                user={formData.responsible}
                                 size="2xs"
                               />
                               <Text ml={2}>{formData.responsible.name}</Text>
@@ -239,7 +242,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
                             zIndex="10"
                             boxShadow="md"
                           >
-                            {membros.map((member) => (
+                            {members.map((member) => (
                               <Flex
                                 key={member.uuid}
                                 p={2}
@@ -249,8 +252,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
                                 onClick={() => handleSelectMember(member)}
                               >
                                 <AvatarUser
-                                  name={member.name}
-                                  imageUrl={member.img || ""}
+                                  user={member}
                                   size="2xs"
                                 />
                                 <Text ml={2}>{member.name}</Text>
@@ -320,7 +322,7 @@ export function ModalNewTask({ equipe_uuid, membros }: ModalNewTaskProps) {
                     <Field.Root w={"100%"}>
                       <Box w={"100%"} position="relative" mb={"8px"}>
                         <ChakraDatePicker
-                          selected={formData.due_date}
+                          selected={formData!.due_date || null}
                           onChange={handleDateChange}
                         />
                       </Box>

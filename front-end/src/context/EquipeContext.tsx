@@ -1,9 +1,9 @@
 import { createContext, useContext } from "react";
-import type { EquipeData } from "@/types/equipe";
+import type { Project } from "@/types/project";
 
 export interface EquipeContextType {
-  equipeData: EquipeData | undefined;
-  setEquipeData: (data: EquipeData) => void;
+  equipeData: Project | undefined;
+  setEquipeData: (data: Project) => void;
   name: string;
   setName: (name: string) => void;
   isLoading: boolean;

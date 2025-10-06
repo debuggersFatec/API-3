@@ -1,7 +1,7 @@
-import type { TaskTeam } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 
 interface TabLixeiraEquipeProps {
-  lixeira: TaskTeam[] | undefined;
+  lixeira: TaskProject[] | undefined;
 }
 export const TabLixeiraEquipe = ({ lixeira }: TabLixeiraEquipeProps) => {
   if (!lixeira || lixeira.length === 0) {
