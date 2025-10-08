@@ -63,11 +63,11 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | Entrega | Período | Status | Relatório | Vídeo |
 | --- | :--: | --- | :--: | :--: |
 | **Kick Off** | 25/08/2025 – 29/08/2025 | ✅ Concluído | | |
-| **Sprint 1** | 08/09/2025 – 28/09/2025 | ✅ Concluído | [📋 relatório](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
+| **Sprint 1** | 08/09/2025 – 28/09/2025 | ✅ Concluído | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
 | **Sprint Review / Planning** | 29/09/2025 – 03/10/2025 | ✅ Concluído | | |
-| **Sprint 2** | 06/10/2025 – 26/10/2025 | 🔄 Em andamento | [📋 relatório]() | [🎥 Vídeo]() |
+| **Sprint 2** | 06/10/2025 – 26/10/2025 | 🔄 Em andamento | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.27br5mqml95v#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo]() |
 | **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | ⏳ Não iniciado | | |
-| **Sprint 3** | 03/11/2025 – 23/11/2025 | ⏳ Não iniciado |  [📋 relatório]() | [🎥 Vídeo]() |
+| **Sprint 3** | 03/11/2025 – 23/11/2025 | ⏳ Não iniciado |  [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.iyux6hln9nfr#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo]() |
 | **Sprint Review** | 24/11/2025 – 28/11/2025 | ⏳ Não iniciado | | |
 | **Feira de Soluções** | 04/12/2025 | ⏳ Não iniciado | | |
 
