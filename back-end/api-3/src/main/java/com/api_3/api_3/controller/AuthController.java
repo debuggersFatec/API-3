@@ -31,6 +31,7 @@ import com.api_3.api_3.repository.EquipeRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -55,7 +56,7 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public AuthResponse authenticateAndGetToken(@RequestBody AuthRequest authRequest) {
+    public AuthResponse authenticateAndGetToken(@Valid @RequestBody AuthRequest authRequest) {
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -102,7 +103,7 @@ public class AuthController {
     }
     
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> registerUser(@RequestBody User newUser) {
+    public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody User newUser) {
         if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
             throw new EmailAlreadyExistsException("Erro: E-mail já está em uso!");
         }

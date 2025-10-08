@@ -1,115 +1,52 @@
 package com.api_3.api_3.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.api_3.api_3.dto.response.AuthResponse;
+import com.api_3.api_3.dto.response.UserResponse;
+import com.api_3.api_3.mapper.UserMapper;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.service.GetUserService;
+import com.api_3.api_3.service.UpdateUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.api_3.api_3.dto.response.AuthResponse;
-import com.api_3.api_3.exception.InvalidRequestException;
-import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.model.entity.Equipe;
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.EquipeRepository;
-import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.repository.UserRepository;
+import java.util.List;
+
+import com.api_3.api_3.dto.request.AddEquipeToUserRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository;
-    
+    private GetUserService getUserService;
     @Autowired
-    private EquipeRepository equipeRepository;
+    private UpdateUserService updateUserService;
 
     @Autowired
-    private TaskRepository taskRepository;
-    
-    // Endpoint de diagnóstico para verificar associações de usuários e equipes
+    private UserMapper userMapper;
+
     @GetMapping("/debug/user-teams")
-    public ResponseEntity<?> debugUserTeams() {
-        List<User> users = userRepository.findAll();
-        List<Map<String, Object>> result = new ArrayList<>();
-        
-        for (User user : users) {
-            Map<String, Object> userInfo = new HashMap<>();
-            userInfo.put("uuid", user.getUuid());
-            userInfo.put("name", user.getName());
-            userInfo.put("email", user.getEmail());
-            userInfo.put("equipeIds", user.getEquipeIds());
-            result.add(userInfo);
-        }
-        
-        return ResponseEntity.ok(result);
+    public ResponseEntity<List<UserResponse>> debugUserTeams() {
+        List<User> users = getUserService.findAllUsersForDebug();
+        return ResponseEntity.ok(userMapper.toUserResponseList(users));
     }
 
-    
     @GetMapping("/me")
     public ResponseEntity<AuthResponse.UserInfo> getCurrentUser(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
-
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("Utilizador autenticado não encontrado com o email: " + userEmail));
-
-        List<Equipe> equipesCompletas = equipeRepository.findAllById(user.getEquipeIds());
-        List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
-                .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
-                .collect(Collectors.toList());
-        
-        List<Task> tasksDoUsuario = taskRepository.findByResponsibleUuid(user.getUuid());
-        List<AuthResponse.TaskInfo> tasks = tasksDoUsuario.stream()
-                .map(task -> new AuthResponse.TaskInfo(
-                        task.getUuid(),
-                        task.getTitle(),
-                        task.getStatus(),
-                        task.getPriority(),
-                        task.getEquip_uuid(),
-                        task.getDue_date()
-                ))
-                .collect(Collectors.toList());
-        
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
-                user.getUuid(),
-                user.getName(),
-                user.getEmail(),
-                user.getImg(),
-                equipes,
-                tasks
-        );
-        
+        AuthResponse.UserInfo userInfo = getUserService.findCurrentUserProfile(userDetails.getUsername());
         return ResponseEntity.ok(userInfo);
     }
 
     @PutMapping("/{userId}/equipes")
-    public ResponseEntity<User> addEquipeToUser(@PathVariable String userId, @RequestBody Map<String, String> payload) {
-        String equipeId = payload.get("equipeId");
-        if (equipeId == null || equipeId.trim().isEmpty()) {
-            throw new InvalidRequestException("O campo 'equipeId' é obrigatório no corpo do pedido.");
-        }
-
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o ID: " + userId));
-            
-        if (!user.getEquipeIds().contains(equipeId)) {
-            user.getEquipeIds().add(equipeId);
-            userRepository.save(user);
-        }
-        return ResponseEntity.ok(user);
-    }
+public ResponseEntity<UserResponse> addEquipeToUser(
+        @PathVariable String userId,
+        @Valid @RequestBody AddEquipeToUserRequest request) {
+    User updatedUser = updateUserService.addEquipeToUser(userId, request.getEquipeId());
+    return ResponseEntity.ok(userMapper.toUserResponse(updatedUser));
+}
 }
