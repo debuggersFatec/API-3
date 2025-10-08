@@ -19,8 +19,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/equipes")
 public class EquipeController {
-
-    // Injetando cada serviço específico
     @Autowired private CreateEquipeService createEquipeService;
     @Autowired private GetEquipesService getEquipesService;
     @Autowired private UpdateEquipeService updateEquipeService;
@@ -31,23 +29,27 @@ public class EquipeController {
     @Autowired
     private EquipeMapper equipeMapper;
 
+    private UserDetails getUserDetails(Authentication authentication) {
+        return (UserDetails) authentication.getPrincipal();
+    }
+
     @PostMapping
     public ResponseEntity<EquipeResponse> createEquipe(@Valid @RequestBody CreateEquipeRequest request, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         Equipe novaEquipe = createEquipeService.execute(request, userDetails.getUsername());
         return ResponseEntity.status(HttpStatus.CREATED).body(equipeMapper.toEquipeResponse(novaEquipe));
     }
 
     @GetMapping
     public ResponseEntity<List<EquipeResponse>> getEquipesDoUsuario(Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         List<Equipe> equipes = getEquipesService.findAllForUser(userDetails.getUsername());
         return ResponseEntity.ok(equipeMapper.toEquipeResponseList(equipes));
     }
 
     @GetMapping("/{uuid}")
     public ResponseEntity<EquipeResponse> getEquipeById(@PathVariable String uuid, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         try {
             Equipe equipe = getEquipesService.findByIdAndVerifyMembership(uuid, userDetails.getUsername());
             return ResponseEntity.ok(equipeMapper.toEquipeResponse(equipe));
@@ -57,32 +59,52 @@ public class EquipeController {
     }
 
     @PutMapping("/{uuid}")
-    public ResponseEntity<EquipeResponse> updateEquipe(@PathVariable String uuid, @RequestBody Equipe equipeAtualizada) {
-        // ATENÇÃO: Adicionar verificação de permissão aqui no futuro!
-        Equipe equipe = updateEquipeService.execute(uuid, equipeAtualizada);
-        return ResponseEntity.ok(equipeMapper.toEquipeResponse(equipe));
+    public ResponseEntity<EquipeResponse> updateEquipe(@PathVariable String uuid, @RequestBody Equipe equipeAtualizada, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            getEquipesService.findByIdAndVerifyMembership(uuid, userDetails.getUsername());
+            Equipe equipe = updateEquipeService.execute(uuid, equipeAtualizada);
+            return ResponseEntity.ok(equipeMapper.toEquipeResponse(equipe));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> deleteEquipe(@PathVariable String uuid) {
-        // ATENÇÃO: Adicionar verificação de permissão aqui no futuro!
-        deleteEquipeService.execute(uuid);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteEquipe(@PathVariable String uuid, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            getEquipesService.findByIdAndVerifyMembership(uuid, userDetails.getUsername());
+            deleteEquipeService.execute(uuid);
+            return ResponseEntity.noContent().build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     // MÉTODOS DE GESTÃO DE MEMBROS
 
     @PostMapping("/{equipeId}/membros/{membroId}")
-    public ResponseEntity<String> addMembroNaEquipe(@PathVariable String equipeId, @PathVariable String membroId) {
-        // ATENÇÃO: Adicionar verificação de permissão aqui no futuro!
-        addMembroEquipeService.execute(equipeId, membroId);
-        return ResponseEntity.ok("Membro adicionado com sucesso");
+    public ResponseEntity<String> addMembroNaEquipe(@PathVariable String equipeId, @PathVariable String membroId, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            getEquipesService.findByIdAndVerifyMembership(equipeId, userDetails.getUsername());
+            addMembroEquipeService.execute(equipeId, membroId);
+            return ResponseEntity.ok("Membro adicionado com sucesso");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     @DeleteMapping("/{equipeId}/membros/{membroId}")
-    public ResponseEntity<String> removeMembroDaEquipe(@PathVariable String equipeId, @PathVariable String membroId) {
-        // ATENÇÃO: Adicionar verificação de permissão aqui no futuro!
-        removeMembroEquipeService.execute(equipeId, membroId);
-        return ResponseEntity.ok("Membro removido com sucesso");
+    public ResponseEntity<String> removeMembroDaEquipe(@PathVariable String equipeId, @PathVariable String membroId, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            getEquipesService.findByIdAndVerifyMembership(equipeId, userDetails.getUsername());
+            removeMembroEquipeService.execute(equipeId, membroId);
+            return ResponseEntity.ok("Membro removido com sucesso");
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 }

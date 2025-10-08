@@ -25,19 +25,22 @@ import java.util.Map;
 @RequestMapping("/api/tasks")
 public class TaskController {
 
-    // Injetando os serviços específicos para cada ação
     @Autowired private CreateTaskService createTaskService;
     @Autowired private GetTaskService getTaskService;
     @Autowired private UpdateTaskService updateTaskService;
     @Autowired private DeleteTaskService deleteTaskService;
 
-    // Injetando serviços auxiliares e mappers
+    
     @Autowired private GetEquipesService getEquipesService;
     @Autowired private TaskMapper taskMapper;
 
+    private UserDetails getUserDetails(Authentication authentication) {
+        return (UserDetails) authentication.getPrincipal();
+    }
+
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         try {
             getEquipesService.findByIdAndVerifyMembership(request.getEquip_uuid(), userDetails.getUsername());
         } catch (SecurityException e) {
@@ -48,17 +51,16 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(taskMapper.toTaskResponse(savedTask));
     }
 
-    @GetMapping
-    public ResponseEntity<List<TaskResponse>> getAllTasks() {
-        List<Task> tasks = getTaskService.findAll();
-        // AQUI ESTÁ A CORREÇÃO: Mapeamos a lista de entidades para uma lista de DTOs
-        return ResponseEntity.ok(taskMapper.toTaskResponseList(tasks));
-    }
-
     @GetMapping("/{uuid}")
-    public ResponseEntity<TaskResponse> getTaskById(@PathVariable String uuid) {
-        Task task = getTaskService.findById(uuid);
-        return ResponseEntity.ok(taskMapper.toTaskResponse(task));
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable String uuid, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            Task task = getTaskService.findById(uuid);
+            getEquipesService.findByIdAndVerifyMembership(task.getEquip_uuid(), userDetails.getUsername());
+            return ResponseEntity.ok(taskMapper.toTaskResponse(task));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     @GetMapping("/count-by-status")
@@ -69,7 +71,7 @@ public class TaskController {
 
     @PutMapping("/{uuid}")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable String uuid, @Valid @RequestBody UpdateTaskRequest request, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         Task existingTask = getTaskService.findById(uuid);
 
         try {
@@ -84,7 +86,7 @@ public class TaskController {
 
     @DeleteMapping("/{uuid}")
     public ResponseEntity<TaskResponse> deleteTask(@PathVariable String uuid, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        UserDetails userDetails = getUserDetails(authentication);
         Task task = getTaskService.findById(uuid);
 
         try {
