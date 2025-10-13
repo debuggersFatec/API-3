@@ -27,6 +27,9 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.ProjectNotFoundException;
+import com.api_3.api_3.exception.UserNotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -44,16 +47,18 @@ public class ProjectsController {
     }
 
     private void assertMemberOfTeam(String teamUuid, String email) {
-        Teams team = teamsRepository.findById(teamUuid).orElseThrow(() -> new RuntimeException("Team not found"));
+        Teams team = teamsRepository.findById(teamUuid)
+                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
         Optional<User> u = userRepository.findByEmail(email);
-        if (u.isEmpty()) throw new SecurityException("User not found");
+        if (u.isEmpty()) throw new UserNotFoundException("Utilizador não encontrado.");
         String uid = u.get().getUuid();
         boolean isMember = team.getMembers().stream().anyMatch(m -> uid.equals(m.getUuid()));
-        if (!isMember) throw new SecurityException("Not a member of this team");
+        if (!isMember) throw new SecurityException("Acesso negado à equipe.");
     }
 
     private void assertMemberOfProject(String projectUuid, String email) {
-        Projects p = projectsRepository.findById(projectUuid).orElseThrow(() -> new RuntimeException("Project not found"));
+        Projects p = projectsRepository.findById(projectUuid)
+                .orElseThrow(() -> new ProjectNotFoundException("Projeto não encontrado com o ID: " + projectUuid));
         assertMemberOfTeam(p.getTeamUuid(), email);
     }
 
@@ -66,6 +71,28 @@ public class ProjectsController {
         dto.setMembers(p.getMembers().stream()
                 .map(m -> new ProjectResponse.MemberSummary(m.getUuid(), m.getName(), m.getImg()))
                 .collect(Collectors.toList()));
+        // Map tasks
+        java.util.function.Function<com.api_3.api_3.model.entity.Task.TaskProject, ProjectResponse.TaskSummary> mapTask = tp -> {
+            ProjectResponse.TaskSummary ts = new ProjectResponse.TaskSummary();
+            ts.setUuid(tp.getUuid());
+            ts.setTitle(tp.getTitle());
+            ts.setDue_date(tp.getDueDate());
+            ts.setStatus(tp.getStatus() != null ? tp.getStatus().name() : null);
+            ts.setPriority(tp.getPriority() != null ? tp.getPriority().name() : null);
+            ts.setEquip_uuid(tp.getTeamUuid());
+            ts.setProject_uuid(tp.getProjectUuid());
+            if (tp.getResponsible() != null) {
+                dto.getClass(); // keep dto in-scope
+                ProjectResponse.ResponsibleSummary rs = new ProjectResponse.ResponsibleSummary(
+                        tp.getResponsible().getUuid(),
+                        tp.getResponsible().getName(),
+                        tp.getResponsible().getImg());
+                ts.setResponsible(rs);
+            }
+            return ts;
+        };
+        dto.setTasks(p.getTasks() == null ? java.util.List.of() : p.getTasks().stream().map(mapTask).collect(Collectors.toList()));
+        dto.setTrashcan(p.getTrashcan() == null ? java.util.List.of() : p.getTrashcan().stream().map(mapTask).collect(Collectors.toList()));
         return dto;
     }
 
@@ -82,9 +109,18 @@ public class ProjectsController {
     @GetMapping("/{projectUuid}")
     public ResponseEntity<ProjectResponse> getProject(@PathVariable String projectUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
-        assertMemberOfProject(projectUuid, email);
-        Projects p = projectsRepository.findById(projectUuid).orElseThrow();
-        return ResponseEntity.ok(toProjectResponse(p));
+        try {
+            assertMemberOfProject(projectUuid, email);
+            Projects p = projectsRepository.findById(projectUuid)
+                    .orElseThrow(() -> new ProjectNotFoundException("Projeto não encontrado com o ID: " + projectUuid));
+            return ResponseEntity.ok(toProjectResponse(p));
+        } catch (ProjectNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     @PostMapping("/team/{teamUuid}")
