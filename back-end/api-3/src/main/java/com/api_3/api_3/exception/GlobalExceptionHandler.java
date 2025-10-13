@@ -1,6 +1,7 @@
 package com.api_3.api_3.exception;
 
 import java.util.Map; // Importar a classe Map
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,13 @@ public class GlobalExceptionHandler {
     // Exceções de Equipa
     @ExceptionHandler(EquipeNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleEquipeNotFoundException(EquipeNotFoundException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // Exceções de Projeto
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleProjectNotFoundException(ProjectNotFoundException ex) {
         Map<String, String> response = Map.of("erro", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }

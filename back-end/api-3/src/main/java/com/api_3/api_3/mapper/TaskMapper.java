@@ -1,11 +1,12 @@
 package com.api_3.api_3.mapper;
 
-import com.api_3.api_3.dto.response.TaskResponse;
-import com.api_3.api_3.model.entity.Task;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.api_3.api_3.dto.response.TaskResponse;
+import com.api_3.api_3.model.entity.Task;
 
 @Component
 public class TaskMapper {
@@ -23,6 +24,7 @@ public class TaskMapper {
         dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
         dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
         dto.setEquip_uuid(task.getEquip_uuid());
+        dto.setProject_uuid(task.getProjectUuid());
         if (task.getResponsible() != null) {
             // Map User.UserRef (record) to Responsible DTO-compatible class if needed
             com.api_3.api_3.model.entity.Responsible resp = new com.api_3.api_3.model.entity.Responsible();

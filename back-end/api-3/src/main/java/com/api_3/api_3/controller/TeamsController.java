@@ -22,14 +22,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.dto.request.CreateTeamRequest;
 import com.api_3.api_3.dto.request.UpdateTeamRequest;
 import com.api_3.api_3.dto.response.TeamResponse;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.exception.EquipeNotFoundException;
-import com.api_3.api_3.exception.UserNotFoundException;
+import com.api_3.api_3.service.TaskMaintenanceService;
 
 import jakarta.validation.Valid;
 
@@ -40,6 +41,7 @@ public class TeamsController {
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectsRepository projectsRepository;
+    @Autowired private TaskMaintenanceService taskMaintenanceService;
 
     private String currentUserEmail(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -174,6 +176,9 @@ public class TeamsController {
             u.setTeams(u.getTeams().stream().filter(tr -> !teamUuid.equals(tr.getUuid())).collect(Collectors.toList()));
             userRepository.save(u);
         });
+
+        // Unassign tasks where this user was responsible within this team
+        taskMaintenanceService.unassignForTeam(teamUuid, userUuid);
         return ResponseEntity.ok(toTeamResponse(team));
     }
 

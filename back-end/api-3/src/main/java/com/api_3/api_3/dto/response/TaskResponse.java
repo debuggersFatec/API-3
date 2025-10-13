@@ -1,8 +1,10 @@
 package com.api_3.api_3.dto.response;
 
-import com.api_3.api_3.model.entity.Responsible;
-import lombok.Data;
 import java.util.Date;
+
+import com.api_3.api_3.model.entity.Responsible;
+
+import lombok.Data;
 
 @Data
 public class TaskResponse {
@@ -13,5 +15,6 @@ public class TaskResponse {
     private String status;
     private String priority;
     private String equip_uuid;
+    private String project_uuid;
     private Responsible responsible;
 }

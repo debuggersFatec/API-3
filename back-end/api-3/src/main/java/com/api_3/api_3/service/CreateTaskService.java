@@ -1,42 +1,51 @@
 package com.api_3.api_3.service;
 
-import com.api_3.api_3.dto.request.CreateTaskRequest;
-import com.api_3.api_3.exception.EquipeNotFoundException;
-import com.api_3.api_3.exception.InvalidResponsibleException;
-import com.api_3.api_3.model.embedded.ResponsavelTask;
-import com.api_3.api_3.model.embedded.TaskInfo;
-import com.api_3.api_3.model.entity.Teams;
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.TeamsRepository;
-import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import com.api_3.api_3.dto.request.CreateTaskRequest;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.InvalidResponsibleException;
+import com.api_3.api_3.exception.ProjectNotFoundException;
+import com.api_3.api_3.model.entity.Projects;
+import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.model.entity.Teams;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.ProjectsRepository;
+import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.UserRepository;
 
 @Service
 public class CreateTaskService {
     @Autowired private TaskRepository taskRepository;
+    @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
 
     @Transactional
     public Task execute(CreateTaskRequest request) {
-    Teams team = teamsRepository.findById(request.getEquip_uuid())
-        .orElseThrow(() -> new EquipeNotFoundException("Equipe (team) com ID " + request.getEquip_uuid() + " não encontrada."));
+        // Carregar o projeto alvo e derivar a equipe a partir dele
+        Projects project = projectsRepository.findById(request.getProject_uuid())
+            .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + request.getProject_uuid() + " não encontrado."));
+
+        Teams team = teamsRepository.findById(project.getTeamUuid())
+            .orElseThrow(() -> new EquipeNotFoundException("Equipe (team) com ID " + project.getTeamUuid() + " não encontrada."));
 
         Task newTask = new Task();
         newTask.setUuid(UUID.randomUUID().toString());
         newTask.setTitle(request.getTitle());
         newTask.setDescription(request.getDescription());
-    newTask.setDue_date(request.getDue_date());
-    newTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : Task.Status.NOT_STARTED);
-    newTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : Task.Priority.LOW);
-        newTask.setEquip_uuid(request.getEquip_uuid());
+        newTask.setDue_date(request.getDue_date());
+        newTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : Task.Status.NOT_STARTED);
+        newTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : Task.Priority.LOW);
+        // Atribuir vínculos corretos
+        newTask.setEquip_uuid(project.getTeamUuid());
+        newTask.setProjectUuid(request.getProject_uuid());
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             newTask.setResponsible(new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img()));
@@ -46,6 +55,11 @@ public class CreateTaskService {
 
         validateResponsible(newTask, team);
         Task savedTask = taskRepository.save(newTask);
+
+        // Adicionar referência da tarefa ao projeto
+        if (project.getTasks() == null) project.setTasks(new java.util.ArrayList<>());
+        project.getTasks().add(savedTask.toProjectRef());
+        projectsRepository.save(project);
 
         // No longer embed TaskInfo in Equipe; Teams/Projects will maintain references via lists if needed in future
         if (savedTask.getResponsible() != null && savedTask.getResponsible().uuid() != null) {

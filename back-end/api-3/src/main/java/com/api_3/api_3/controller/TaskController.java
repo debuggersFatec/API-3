@@ -6,6 +6,7 @@ import com.api_3.api_3.dto.response.TaskResponse;
 import com.api_3.api_3.mapper.TaskMapper;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
@@ -35,6 +36,7 @@ public class TaskController {
 
     
     @Autowired private TeamsRepository teamsRepository;
+    @Autowired private ProjectsRepository projectsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private TaskMapper taskMapper;
 
@@ -55,7 +57,11 @@ public class TaskController {
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request, Authentication authentication) {
         UserDetails userDetails = getUserDetails(authentication);
         try {
-            assertMember(request.getEquip_uuid(), userDetails.getUsername());
+            // Derive team from project for membership validation
+            String teamUuid = projectsRepository.findById(request.getProject_uuid())
+                    .orElseThrow(() -> new com.api_3.api_3.exception.ProjectNotFoundException("Projeto não encontrado com o ID: " + request.getProject_uuid()))
+                    .getTeamUuid();
+            assertMember(teamUuid, userDetails.getUsername());
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

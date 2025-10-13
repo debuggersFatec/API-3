@@ -19,4 +19,10 @@ public interface TaskRepository extends MongoRepository<Task, String>{
     
     @Query("{ 'responsible.uuid' : ?0 }")
     List<Task> findByResponsibleUuid(String uuid);
+
+    @Query(value = "{ 'teamUuid': ?0, 'responsible.uuid' : ?1 }")
+    List<Task> findByTeamUuidAndResponsibleUuid(String teamUuid, String responsibleUuid);
+
+    @Query(value = "{ 'projectUuid': ?0, 'responsible.uuid' : ?1 }")
+    List<Task> findByProjectUuidAndResponsibleUuid(String projectUuid, String responsibleUuid);
 }
