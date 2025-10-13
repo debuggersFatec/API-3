@@ -31,6 +31,7 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.service.TaskMaintenanceService;
+import com.api_3.api_3.service.LeaveTeamService;
 
 import jakarta.validation.Valid;
 
@@ -42,6 +43,7 @@ public class TeamsController {
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TaskMaintenanceService taskMaintenanceService;
+    @Autowired private LeaveTeamService leaveTeamService;
 
     private String currentUserEmail(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -188,5 +190,17 @@ public class TeamsController {
         assertMember(teamUuid, email);
         List<Projects> projects = projectsRepository.findByTeamUuid(teamUuid);
         return ResponseEntity.ok(projects);
+    }
+
+    @DeleteMapping("/{teamUuid}/leave")
+    public ResponseEntity<Void> leaveTeam(@PathVariable String teamUuid, Authentication authentication) {
+        String email = currentUserEmail(authentication);
+        User currentUser = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UserNotFoundException("Usuário autenticado não encontrado."));
+        
+        // UTILIZAR O SERVICE
+        leaveTeamService.execute(teamUuid, currentUser.getUuid());
+
+        return ResponseEntity.noContent().build(); // Resposta 204 No Content
     }
 }
