@@ -43,7 +43,7 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/equipes")
-public ResponseEntity<UserResponse> addEquipeToUser(
+    public ResponseEntity<UserResponse> addEquipeToUser(
         @PathVariable String userId,
         @Valid @RequestBody AddEquipeToUserRequest request) {
     User updatedUser = updateUserService.addEquipeToUser(userId, request.getEquipeId());

@@ -22,7 +22,7 @@ public class UserMapper {
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setImg(user.getImg());
-        dto.setEquipeIds(user.getEquipeIds());
+    dto.setEquipeIds(user.getEquipeIds());
         return dto;
     }
 
@@ -37,16 +37,16 @@ public class UserMapper {
                 .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
                 .collect(Collectors.toList());
         
-        List<AuthResponse.TaskInfo> taskInfos = tasks.stream()
-                .map(task -> new AuthResponse.TaskInfo(
-                        task.getUuid(),
-                        task.getTitle(),
-                        task.getStatus(),
-                        task.getPriority(),
-                        task.getEquip_uuid(),
-                        task.getDue_date()
-                ))
-                .collect(Collectors.toList());
+    List<AuthResponse.TaskInfo> taskInfos = tasks.stream()
+        .map(task -> new AuthResponse.TaskInfo(
+            task.getUuid(),
+            task.getTitle(),
+            task.getStatus() != null ? task.getStatus().name() : null,
+            task.getPriority() != null ? task.getPriority().name() : null,
+            task.getEquip_uuid(),
+            task.getDue_date()
+        ))
+        .collect(Collectors.toList());
 
         return new AuthResponse.UserInfo(
                 user.getUuid(),

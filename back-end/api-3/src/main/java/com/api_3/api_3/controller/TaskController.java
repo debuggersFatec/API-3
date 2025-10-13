@@ -5,7 +5,10 @@ import com.api_3.api_3.dto.request.UpdateTaskRequest;
 import com.api_3.api_3.dto.response.TaskResponse;
 import com.api_3.api_3.mapper.TaskMapper;
 import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.service.GetEquipesService;
+import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.model.entity.Teams;
+import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.service.CreateTaskService;
 import com.api_3.api_3.service.DeleteTaskService;
 import com.api_3.api_3.service.GetTaskService;
@@ -31,18 +34,28 @@ public class TaskController {
     @Autowired private DeleteTaskService deleteTaskService;
 
     
-    @Autowired private GetEquipesService getEquipesService;
+    @Autowired private TeamsRepository teamsRepository;
+    @Autowired private UserRepository userRepository;
     @Autowired private TaskMapper taskMapper;
 
     private UserDetails getUserDetails(Authentication authentication) {
         return (UserDetails) authentication.getPrincipal();
     }
 
+    private void assertMember(String teamUuid, String email) {
+        Teams team = teamsRepository.findById(teamUuid)
+                .orElseThrow(() -> new com.api_3.api_3.exception.EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+        String currentUserUuid = userRepository.findByEmail(email).map(User::getUuid)
+                .orElseThrow(() -> new com.api_3.api_3.exception.UserNotFoundException("Utilizador não encontrado."));
+        boolean isMember = team.getMembers().stream().anyMatch(m -> currentUserUuid.equals(m.getUuid()));
+        if (!isMember) throw new SecurityException("Acesso negado à equipe.");
+    }
+
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request, Authentication authentication) {
         UserDetails userDetails = getUserDetails(authentication);
         try {
-            getEquipesService.findByIdAndVerifyMembership(request.getEquip_uuid(), userDetails.getUsername());
+            assertMember(request.getEquip_uuid(), userDetails.getUsername());
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -56,7 +69,7 @@ public class TaskController {
         UserDetails userDetails = getUserDetails(authentication);
         try {
             Task task = getTaskService.findById(uuid);
-            getEquipesService.findByIdAndVerifyMembership(task.getEquip_uuid(), userDetails.getUsername());
+            assertMember(task.getEquip_uuid(), userDetails.getUsername());
             return ResponseEntity.ok(taskMapper.toTaskResponse(task));
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -75,7 +88,7 @@ public class TaskController {
         Task existingTask = getTaskService.findById(uuid);
 
         try {
-            getEquipesService.findByIdAndVerifyMembership(existingTask.getEquip_uuid(), userDetails.getUsername());
+            assertMember(existingTask.getEquip_uuid(), userDetails.getUsername());
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -90,7 +103,7 @@ public class TaskController {
         Task task = getTaskService.findById(uuid);
 
         try {
-            getEquipesService.findByIdAndVerifyMembership(task.getEquip_uuid(), userDetails.getUsername());
+            assertMember(task.getEquip_uuid(), userDetails.getUsername());
         } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

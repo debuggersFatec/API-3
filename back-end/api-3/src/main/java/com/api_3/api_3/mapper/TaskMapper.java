@@ -20,10 +20,19 @@ public class TaskMapper {
         dto.setTitle(task.getTitle());
         dto.setDescription(task.getDescription());
         dto.setDue_date(task.getDue_date());
-        dto.setStatus(task.getStatus());
-        dto.setPriority(task.getPriority());
+        dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
+        dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
         dto.setEquip_uuid(task.getEquip_uuid());
-        dto.setResponsible(task.getResponsible());
+        if (task.getResponsible() != null) {
+            // Map User.UserRef (record) to Responsible DTO-compatible class if needed
+            com.api_3.api_3.model.entity.Responsible resp = new com.api_3.api_3.model.entity.Responsible();
+            resp.setUuid(task.getResponsible().uuid());
+            resp.setName(task.getResponsible().name());
+            resp.setUrl_img(task.getResponsible().img());
+            dto.setResponsible(resp);
+        } else {
+            dto.setResponsible(null);
+        }
 
         return dto;
     }

@@ -24,10 +24,10 @@ import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.model.entity.Equipe;
+import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.EquipeRepository;
+import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
@@ -47,7 +47,7 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private EquipeRepository equipeRepository;
+    private TeamsRepository teamsRepository;
 
     @Autowired
     private TaskRepository taskRepository;
@@ -72,23 +72,12 @@ public class AuthController {
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         
-        List<Equipe> equipesCompletas = equipeRepository.findAllById(user.getEquipeIds());
+    // Using compatibility shim on User to get equipe IDs from new teams structure
+    List<Teams> equipesCompletas = teamsRepository.findAllById(user.getEquipeIds());
         List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
-                .map(equipe -> new AuthResponse.EquipeInfo(equipe.getUuid(), equipe.getName()))
+                .map(team -> new AuthResponse.EquipeInfo(team.getUuid(), team.getName()))
                 .collect(Collectors.toList());
         
-        List<Task> tasksDoUsuario = taskRepository.findByResponsibleUuid(user.getUuid());
-        List<AuthResponse.TaskInfo> tasks = tasksDoUsuario.stream()
-                .map(task -> new AuthResponse.TaskInfo(
-                        task.getUuid(),
-                        task.getTitle(),
-                        task.getStatus(),
-                        task.getPriority(),
-                        task.getEquip_uuid(),
-                        task.getDue_date()
-                        
-                ))
-                .collect(Collectors.toList());
         
         AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
                 user.getUuid(),
@@ -96,7 +85,7 @@ public class AuthController {
                 user.getEmail(),
                 user.getImg(),
                 equipes,
-                tasks
+                Collections.emptyList()
         );
         
         return new AuthResponse(token, userInfo);
