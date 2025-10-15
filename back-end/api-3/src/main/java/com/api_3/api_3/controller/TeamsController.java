@@ -30,8 +30,8 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.service.TaskMaintenanceService;
 import com.api_3.api_3.service.LeaveTeamService;
+import com.api_3.api_3.service.TaskMaintenanceService;
 
 import jakarta.validation.Valid;
 
@@ -172,7 +172,20 @@ public class TeamsController {
         assertMember(teamUuid, email);
         Teams team = teamsRepository.findById(teamUuid).orElseThrow();
         team.setMembers(team.getMembers().stream().filter(m -> !userUuid.equals(m.getUuid())).collect(Collectors.toList()));
-        teamsRepository.save(team);
+        // If no members remain, delete the team and return 204
+        if (team.getMembers() == null || team.getMembers().isEmpty()) {
+            teamsRepository.deleteById(teamUuid);
+            // Clean up the user's team reference as well
+            userRepository.findById(userUuid).ifPresent(u -> {
+                u.setTeams(u.getTeams().stream().filter(tr -> !teamUuid.equals(tr.getUuid())).collect(Collectors.toList()));
+                userRepository.save(u);
+            });
+            // Unassign tasks for the team scope
+            taskMaintenanceService.unassignForTeam(teamUuid, userUuid);
+            return ResponseEntity.noContent().build();
+        } else {
+            teamsRepository.save(team);
+        }
 
         userRepository.findById(userUuid).ifPresent(u -> {
             u.setTeams(u.getTeams().stream().filter(tr -> !teamUuid.equals(tr.getUuid())).collect(Collectors.toList()));

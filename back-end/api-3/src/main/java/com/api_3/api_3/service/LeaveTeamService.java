@@ -1,5 +1,11 @@
 package com.api_3.api_3.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.api_3.api_3.exception.EquipeNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
@@ -8,11 +14,6 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class LeaveTeamService {
@@ -60,5 +61,12 @@ public class LeaveTeamService {
 
         // Chamar o serviço de manutenção para desatribuir as tarefas (REUTILIZAÇÃO)
         taskMaintenanceService.unassignForTeam(teamUuid, userUuid);
+
+        // Se a equipa ficar sem membros, removê-la do banco
+        if (team.getMembers() == null || team.getMembers().isEmpty()) {
+            teamsRepository.deleteById(teamUuid);
+            // Opcional: remover/arquivar projetos e tarefas associados ao time
+            // Mantido simples conforme requisito: apenas excluir o Team quando sem participantes
+        }
     }
 }

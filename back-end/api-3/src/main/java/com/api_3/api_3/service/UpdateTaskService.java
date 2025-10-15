@@ -1,23 +1,22 @@
 package com.api_3.api_3.service;
 
-import com.api_3.api_3.dto.request.UpdateTaskRequest;
-import com.api_3.api_3.exception.EquipeNotFoundException;
-import com.api_3.api_3.exception.InvalidResponsibleException;
-import com.api_3.api_3.exception.TaskNotFoundException;
-import com.api_3.api_3.model.embedded.ResponsavelTask;
-import com.api_3.api_3.model.embedded.TaskInfo;
-import com.api_3.api_3.model.entity.Teams;
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.TeamsRepository;
-import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import com.api_3.api_3.dto.request.UpdateTaskRequest;
+import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.InvalidResponsibleException;
+import com.api_3.api_3.exception.TaskNotFoundException;
+import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.model.entity.Teams;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.UserRepository;
 
 @Service
 public class UpdateTaskService {

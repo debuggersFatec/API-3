@@ -1,5 +1,10 @@
 package com.api_3.api_3.service;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.mapper.UserMapper;
@@ -9,10 +14,6 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.EquipeRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class GetUserService {

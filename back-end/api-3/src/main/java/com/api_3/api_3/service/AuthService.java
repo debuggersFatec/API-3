@@ -69,9 +69,15 @@ public class AuthService {
         List<Equipe> equipes = equipeRepository.findAllById(user.getEquipeIds());
         List<Task> tasks = taskRepository.findByResponsibleUuid(user.getUuid());
 
-        AuthResponse.UserInfo userInfo = userMapper.toUserInfo(user, equipes, tasks);
+    AuthResponse.UserInfo userInfo = userMapper.toUserInfo(user, equipes, tasks);
+    AuthResponse.Routes routes = new AuthResponse.Routes(
+        "/api/teams",
+        "/api/projects",
+        "/api/teams/{teamUuid}/members",
+        "/api/tasks"
+    );
         
-        return new AuthResponse(token, userInfo);
+    return new AuthResponse(token, routes, userInfo);
     }
 
     public AuthResponse register(User newUser) {
@@ -96,8 +102,14 @@ public class AuthService {
 
         String token = jwtUtil.generateToken(userDetails);
         
-        AuthResponse.UserInfo userInfo = userMapper.toUserInfo(savedUser, Collections.emptyList(), Collections.emptyList());
+    AuthResponse.UserInfo userInfo = userMapper.toUserInfo(savedUser, Collections.emptyList(), Collections.emptyList());
+    AuthResponse.Routes routes = new AuthResponse.Routes(
+        "/api/teams",
+        "/api/projects",
+        "/api/teams/{teamUuid}/members",
+        "/api/tasks"
+    );
         
-        return new AuthResponse(token, userInfo);
+    return new AuthResponse(token, routes, userInfo);
     }
 }

@@ -25,12 +25,13 @@ import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Teams;
-import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.ProjectsRepository;
+import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -51,6 +52,8 @@ public class AuthController {
 
     @Autowired
     private TaskRepository taskRepository;
+    @Autowired
+    private ProjectsRepository projectsRepository;
     
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -72,23 +75,36 @@ public class AuthController {
         User user = userRepository.findByEmail(authRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
         
-    // Using compatibility shim on User to get equipe IDs from new teams structure
-    List<Teams> equipesCompletas = teamsRepository.findAllById(user.getEquipeIds());
-        List<AuthResponse.EquipeInfo> equipes = equipesCompletas.stream()
-                .map(team -> new AuthResponse.EquipeInfo(team.getUuid(), team.getName()))
-                .collect(Collectors.toList());
+    // Teams listing for this user
+    List<Teams> userTeams = teamsRepository.findAllById(user.getEquipeIds()); // compatibility shim
+    List<AuthResponse.TeamInfo> teams = userTeams.stream()
+        .map(team -> new AuthResponse.TeamInfo(team.getUuid(), team.getName()))
+        .collect(Collectors.toList());
         
         
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+    // Build projects list for the user's teams
+    List<AuthResponse.ProjectInfo> projects = userTeams.stream()
+        .flatMap(t -> projectsRepository.findByTeamUuid(t.getUuid()).stream())
+        .map(p -> new AuthResponse.ProjectInfo(p.getUuid(), p.getName(), p.isActive(), p.getTeamUuid()))
+        .collect(Collectors.toList());
+
+    AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
                 user.getUuid(),
                 user.getName(),
                 user.getEmail(),
                 user.getImg(),
-                equipes,
-                Collections.emptyList()
+        teams,
+        projects,
+        Collections.emptyList()
         );
+    AuthResponse.Routes routes = new AuthResponse.Routes(
+        "/api/teams",
+        "/api/projects",
+        "/api/teams/{teamUuid}/members",
+        "/api/tasks"
+    );
         
-        return new AuthResponse(token, userInfo);
+    return new AuthResponse(token, routes, userInfo);
     }
     
     @PostMapping("/register")
@@ -114,15 +130,22 @@ public class AuthController {
                         .build()
         );
         
-        AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
+    AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(
                 savedUser.getUuid(),
                 savedUser.getName(),
                 savedUser.getEmail(),
                 savedUser.getImg(),
                 Collections.emptyList(),
+                Collections.emptyList(),
                 Collections.emptyList()
         );
+    AuthResponse.Routes routes = new AuthResponse.Routes(
+        "/api/teams",
+        "/api/projects",
+        "/api/teams/{teamUuid}/members",
+        "/api/tasks"
+    );
         
-        return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, userInfo));
+    return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponse(token, routes, userInfo));
     }
 }
