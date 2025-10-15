@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.dto.response.UserResponse;
-import com.api_3.api_3.model.entity.Equipe;
 import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 
@@ -38,36 +38,54 @@ public class UserMapper {
                 .collect(Collectors.toList());
     }
 
-    public AuthResponse.UserInfo toUserInfo(User user, List<Equipe> equipes, List<Task> tasks) {
-        List<AuthResponse.TeamInfo> teamInfos = equipes.stream()
-                .map(equipe -> new AuthResponse.TeamInfo(equipe.getUuid(), equipe.getName()))
+    // Map user info with Teams (new model)
+    public AuthResponse.UserInfo toUserInfo(User user, List<Teams> teams, List<Task> tasks) {
+        List<AuthResponse.TeamInfo> teamInfos = teams.stream()
+                .map(t -> new AuthResponse.TeamInfo(t.getUuid(), t.getName()))
                 .collect(Collectors.toList());
 
-        List<AuthResponse.TaskInfo> taskInfos = tasks.stream()
-            .map(task -> new AuthResponse.TaskInfo(
-                task.getUuid(),
-                task.getTitle(),
-                task.getStatus() != null ? task.getStatus().name() : null,
-                task.getPriority() != null ? task.getPriority().name() : null,
-                task.getEquip_uuid(),
-                task.getProjectUuid(),
-                task.getDue_date()
-            ))
+        List<AuthResponse.TaskInfo> taskInfos;
+        if (tasks != null && !tasks.isEmpty()) {
+            taskInfos = tasks.stream()
+                .map(task -> new AuthResponse.TaskInfo(
+                    task.getUuid(),
+                    task.getTitle(),
+                    task.getStatus() != null ? task.getStatus().name() : null,
+                    task.getPriority() != null ? task.getPriority().name() : null,
+                    task.getEquip_uuid(),
+                    task.getProjectUuid(),
+                    task.getDue_date()
+                ))
+                .collect(Collectors.toList());
+        } else if (user.getTasks() != null && !user.getTasks().isEmpty()) {
+            // Fallback: map embedded TaskUser refs directly if repository didn't return tasks
+            taskInfos = user.getTasks().stream()
+                .map(tu -> new AuthResponse.TaskInfo(
+                    tu.getUuid(),
+                    tu.getTitle(),
+                    tu.getStatus() != null ? tu.getStatus().name() : null,
+                    tu.getPriority() != null ? tu.getPriority().name() : null,
+                    tu.getTeamUuid(),
+                    tu.getProjectUuid(),
+                    tu.getDueDate()
+                ))
+                .collect(Collectors.toList());
+        } else {
+            taskInfos = java.util.List.of();
+        }
+
+        List<AuthResponse.ProjectInfo> projectInfos = teams.stream()
+            .flatMap(t -> projectsRepository.findByTeamUuid(t.getUuid()).stream())
+            .map(p -> new AuthResponse.ProjectInfo(p.getUuid(), p.getName(), p.isActive(), p.getTeamUuid()))
             .collect(Collectors.toList());
 
-    // Collect projects for the user's teams
-    List<AuthResponse.ProjectInfo> projectInfos = equipes.stream()
-        .flatMap(eq -> projectsRepository.findByTeamUuid(eq.getUuid()).stream())
-        .map(p -> new AuthResponse.ProjectInfo(p.getUuid(), p.getName(), p.isActive(), p.getTeamUuid()))
-        .collect(Collectors.toList());
-
-    return new AuthResponse.UserInfo(
+        return new AuthResponse.UserInfo(
                 user.getUuid(),
                 user.getName(),
                 user.getEmail(),
                 user.getImg(),
-        teamInfos,
-        projectInfos,
+                teamInfos,
+                projectInfos,
                 taskInfos
         );
     }
