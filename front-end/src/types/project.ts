@@ -4,7 +4,7 @@ import type { UserRef } from "./user";
 export interface Project {
   uuid: string;
   name: string;
-  isActive: boolean;
+  active: boolean;
   members: UserRef[];
   team_uuid: string;
   tasks?: TaskProject[];
@@ -14,5 +14,5 @@ export interface Project {
 export interface ProjectRef {
   uuid: string;
   name: string;
-  isActive: boolean;
+  active: boolean;
 }
