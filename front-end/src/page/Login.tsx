@@ -16,7 +16,7 @@ import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 import axios from "axios";
-import { useAuth } from "@/context/useAuth";
+import { useAuth } from "@/context/auth/useAuth";
 import { useNavigate } from "react-router-dom";
 
 export const Login = () => {

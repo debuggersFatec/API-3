@@ -21,25 +21,18 @@ import { Field } from "@chakra-ui/react/field";
 import { useRef, useState } from "react";
 import { MdOutlineMail } from "react-icons/md";
 import { useDisclosure } from "@chakra-ui/react/hooks";
-import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Priority, Task } from "@/types/task";
-import { useAuth } from "@/context/useAuth";
-import { useEquipe } from "@/context/EquipeContext";
+import { useAuth } from "@/context/auth/useAuth";
 import type { UserRef } from "@/types/user";
+import { taskService } from "@/services";
+import { useProject } from "@/context/project/useProject";
+import { useTeam } from "@/context/team/useTeam";
 
-interface ModalNewTaskProps {
-  team_uuid: string;
-  members: UserRef[];
-  project_uuid: string;
-}
-
-export function ModalNewTask({
-  team_uuid,
-  members,
-  project_uuid,
-}: ModalNewTaskProps) {
+export function ModalNewTask() {
+  const { teamData } = useTeam();
+  const { project } = useProject();
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState<Task>({
     uuid: "",
@@ -48,8 +41,8 @@ export function ModalNewTask({
     due_date: undefined,
     status: "not-started",
     priority: "medium",
-    project_uuid: project_uuid,
-    team_uuid: team_uuid,
+    project_uuid: project?.uuid || "",
+    team_uuid: teamData?.uuid || "",
     // arquivo: null as File | null,
     // file_required: "",
     // file_finish: "",
@@ -58,7 +51,8 @@ export function ModalNewTask({
   });
 
   const { token, refreshUser } = useAuth();
-  const { refreshEquipe } = useEquipe();
+  const { refreshProject } = useProject();
+  const { refreshTeam } = useTeam();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -91,46 +85,30 @@ export function ModalNewTask({
         : prev
     );
   };
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData,
-      status:
-        formData.responsible && formData.responsible.uuid
-          ? "in-progress"
-          : "not-started",
-    };
-
-    axios
-      .post("http://localhost:8080/api/tasks", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(async () => {
-        await refreshUser();
-        await refreshEquipe();
-      })
-      .catch((error) => {
-        console.error("Ocorreu um erro:", error);
-      })
-      .finally(() => {
-        setFormData({
-          uuid: "",
-          title: "",
-          description: "",
-          due_date: undefined,
-          status: "not-started",
-          priority: "medium",
-          team_uuid: team_uuid,
-          project_uuid: project_uuid,
-          responsible: undefined,
-          isRequerid_file: false,
-        });
-        onClose();
-      });
+    console.log(formData);
+    try {
+      await taskService.createTask(formData, token);
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
+    } catch (error) {
+      console.error("Erro ao criar tarefa:", error);
+    }
+    setFormData({
+      uuid: "",
+      title: "",
+      description: "",
+      due_date: undefined,
+      status: "not-started",
+      priority: "medium",
+      project_uuid: project?.uuid || "",
+      team_uuid: teamData?.uuid || "",
+      responsible: undefined,
+      isRequerid_file: false,
+    });
+    onClose();
   };
 
   const handleInputChange = (
@@ -242,7 +220,7 @@ export function ModalNewTask({
                             zIndex="10"
                             boxShadow="md"
                           >
-                            {members.map((member) => (
+                            {project?.members.map((member) => (
                               <Flex
                                 key={member.uuid}
                                 p={2}
@@ -251,10 +229,7 @@ export function ModalNewTask({
                                 _hover={{ bg: "gray.100" }}
                                 onClick={() => handleSelectMember(member)}
                               >
-                                <AvatarUser
-                                  user={member}
-                                  size="2xs"
-                                />
+                                <AvatarUser user={member} size="2xs" />
                                 <Text ml={2}>{member.name}</Text>
                               </Flex>
                             ))}

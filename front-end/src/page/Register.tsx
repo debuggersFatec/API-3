@@ -6,7 +6,7 @@ import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/useAuth";
+import { useAuth } from "@/context/auth/useAuth";
 
 const PasswordStrengthMeter = ({ value }: { value: number }) => {
   const color = value < 3 ? "red.500" : value < 5 ? "yellow.500" : "green.500";

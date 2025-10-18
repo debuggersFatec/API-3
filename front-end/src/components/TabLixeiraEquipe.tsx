@@ -1,9 +1,9 @@
-import type { TaskProject } from "@/types/task";
+import { useProject } from "@/context/project/useProject";
 
-interface TabLixeiraEquipeProps {
-  lixeira: TaskProject[] | undefined;
-}
-export const TabLixeiraEquipe = ({ lixeira }: TabLixeiraEquipeProps) => {
+export const TabLixeiraEquipe = () => {
+  const { project } = useProject();
+  const lixeira = project?.trashcan || [];
+
   if (!lixeira || lixeira.length === 0) {
     return <div>Sem tarefas na lixeira</div>;
   }

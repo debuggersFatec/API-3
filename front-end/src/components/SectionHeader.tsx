@@ -9,7 +9,11 @@ interface SectionHeaderProps {
   project?: Project;
 }
 
-export const SectionHeader = ({ title, isTeamSection, project }: SectionHeaderProps) => {
+export const SectionHeader = ({
+  title,
+  isTeamSection,
+  project,
+}: SectionHeaderProps) => {
   return (
     <>
       <Box w={"100%"} mb={"24px"} mt={"24px"} px={"32px"}>
@@ -24,11 +28,7 @@ export const SectionHeader = ({ title, isTeamSection, project }: SectionHeaderPr
           {isTeamSection && project && (
             <Dialog.Root placement={"center"}>
               <Dialog.Trigger asChild></Dialog.Trigger>
-              <ModalNewTask
-                team_uuid={project.team_uuid}
-                members={project.members}
-                project_uuid={project.uuid}
-              />
+              <ModalNewTask />
             </Dialog.Root>
           )}
           <Filtergroup />
