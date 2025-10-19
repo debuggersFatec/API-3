@@ -55,7 +55,6 @@ public class AuthController {
 
     @PostMapping("/login")
     public AuthResponse authenticateAndGetToken(@Valid @RequestBody AuthRequest authRequest) {
-        // Delegate to service to ensure tasks/teams/projects are populated consistently
         return authService.login(authRequest);
     }
     
@@ -69,7 +68,7 @@ public class AuthController {
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         
         if (newUser.getEquipeIds() == null) {
-            newUser.setEquipeIds(Collections.emptyList());
+            newUser.setEquipeIds(Collections.<String>emptyList());
         }
         
         User savedUser = userRepository.save(newUser);

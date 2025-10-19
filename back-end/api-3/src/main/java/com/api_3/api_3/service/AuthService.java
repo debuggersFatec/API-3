@@ -133,7 +133,7 @@ public class AuthService {
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
         
         if (newUser.getEquipeIds() == null) {
-            newUser.setEquipeIds(Collections.emptyList());
+            newUser.setEquipeIds(Collections.<String>emptyList());
         }
         
         User savedUser = userRepository.save(newUser);

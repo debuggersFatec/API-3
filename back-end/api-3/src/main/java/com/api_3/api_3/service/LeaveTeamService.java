@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
@@ -33,7 +33,7 @@ public class LeaveTeamService {
     @Transactional
     public void execute(String teamUuid, String userUuid) {
         Teams team = teamsRepository.findById(teamUuid)
-                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+                .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
 
         User user = userRepository.findById(userUuid)
                 .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o ID: " + userUuid));

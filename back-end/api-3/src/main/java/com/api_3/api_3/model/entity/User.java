@@ -62,14 +62,13 @@ public class User {
                 .collect(Collectors.toList());
     }
 
-    // Accept a list of IDs and convert to TeamRef with null name
-    public void setEquipeIds(List<Object> ids) {
+    // Accept a list of team IDs and convert to TeamRef with null name
+    public void setEquipeIds(List<String> ids) {
         if (ids == null) {
             this.teams = new ArrayList<>();
             return;
         }
         this.teams = ids.stream()
-                .map(obj -> obj == null ? null : String.valueOf(obj))
                 .filter(id -> id != null && !id.isBlank())
                 .map(id -> new Teams.TeamRef(id, null))
                 .collect(Collectors.toCollection(ArrayList::new));

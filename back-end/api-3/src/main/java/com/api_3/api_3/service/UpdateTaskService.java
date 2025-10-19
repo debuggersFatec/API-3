@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.api_3.api_3.dto.request.UpdateTaskRequest;
-import com.api_3.api_3.exception.EquipeNotFoundException;
 import com.api_3.api_3.exception.InvalidResponsibleException;
 import com.api_3.api_3.exception.TaskNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
@@ -59,7 +59,7 @@ public class UpdateTaskService {
 
     private void validateResponsible(Task task) {
     Teams team = teamsRepository.findById(task.getEquip_uuid())
-                .orElseThrow(() -> new EquipeNotFoundException("Equipe (team) com ID " + task.getEquip_uuid() + " não encontrada."));
+                .orElseThrow(() -> new TeamNotFoundException("Team com ID " + task.getEquip_uuid() + " não encontrado."));
 
     if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
         String responsibleUuid = task.getResponsible().uuid();

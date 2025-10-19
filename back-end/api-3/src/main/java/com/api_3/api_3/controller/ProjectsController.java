@@ -27,7 +27,7 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.ProjectNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 
@@ -48,12 +48,12 @@ public class ProjectsController {
 
     private void assertMemberOfTeam(String teamUuid, String email) {
         Teams team = teamsRepository.findById(teamUuid)
-                .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+                .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
         Optional<User> u = userRepository.findByEmail(email);
         if (u.isEmpty()) throw new UserNotFoundException("Utilizador não encontrado.");
         String uid = u.get().getUuid();
         boolean isMember = team.getMembers().stream().anyMatch(m -> uid.equals(m.getUuid()));
-        if (!isMember) throw new SecurityException("Acesso negado à equipe.");
+    if (!isMember) throw new SecurityException("Acesso negado à team.");
     }
 
     private void assertMemberOfProject(String projectUuid, String email) {

@@ -46,7 +46,7 @@ public class TaskController {
 
     private void assertMember(String teamUuid, String email) {
         Teams team = teamsRepository.findById(teamUuid)
-                .orElseThrow(() -> new com.api_3.api_3.exception.EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+                .orElseThrow(() -> new com.api_3.api_3.exception.TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
         String currentUserUuid = userRepository.findByEmail(email).map(User::getUuid)
                 .orElseThrow(() -> new com.api_3.api_3.exception.UserNotFoundException("Utilizador não encontrado."));
         boolean isMember = team.getMembers().stream().anyMatch(m -> currentUserUuid.equals(m.getUuid()));

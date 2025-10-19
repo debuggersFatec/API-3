@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.api_3.api_3.dto.request.CreateTaskRequest;
-import com.api_3.api_3.exception.EquipeNotFoundException;
 import com.api_3.api_3.exception.InvalidResponsibleException;
 import com.api_3.api_3.exception.ProjectNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Teams;
@@ -34,7 +34,7 @@ public class CreateTaskService {
             .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + request.getProject_uuid() + " não encontrado."));
 
         Teams team = teamsRepository.findById(project.getTeamUuid())
-            .orElseThrow(() -> new EquipeNotFoundException("Equipe (team) com ID " + project.getTeamUuid() + " não encontrada."));
+            .orElseThrow(() -> new TeamNotFoundException("Team com ID " + project.getTeamUuid() + " não encontrado."));
 
         Task newTask = new Task();
         newTask.setUuid(UUID.randomUUID().toString());

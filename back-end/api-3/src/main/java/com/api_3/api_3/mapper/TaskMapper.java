@@ -23,7 +23,8 @@ public class TaskMapper {
         dto.setDue_date(task.getDue_date());
         dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
         dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
-        dto.setEquip_uuid(task.getEquip_uuid());
+    dto.setTeam_uuid(task.getEquip_uuid()); // new
+    dto.setEquip_uuid(task.getEquip_uuid()); // legacy
         dto.setProject_uuid(task.getProjectUuid());
         if (task.getResponsible() != null) {
             // Map User.UserRef (record) to Responsible DTO-compatible class if needed

@@ -14,6 +14,14 @@ public class TaskResponse {
     private Date due_date;
     private String status;
     private String priority;
+    /**
+     * Preferred field for team identifier (new naming).
+     */
+    private String team_uuid;
+    /**
+     * Legacy alias kept for backward compatibility. Will be removed after frontend migration.
+     */
+    @Deprecated
     private String equip_uuid;
     private String project_uuid;
     private Responsible responsible;

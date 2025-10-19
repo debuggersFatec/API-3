@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.dto.request.CreateTeamRequest;
 import com.api_3.api_3.dto.request.UpdateTeamRequest;
 import com.api_3.api_3.dto.response.TeamResponse;
-import com.api_3.api_3.exception.EquipeNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
@@ -52,7 +52,7 @@ public class TeamsController {
 
     private void assertMember(String teamUuid, String email) {
     Teams team = teamsRepository.findById(teamUuid)
-        .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+    .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
     String currentUserUuid = userRepository.findByEmail(email).map(User::getUuid)
         .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado."));
         boolean isMember = team.getMembers().stream().anyMatch(m -> currentUserUuid.equals(m.getUuid()));
@@ -93,9 +93,9 @@ public class TeamsController {
         try {
             assertMember(teamUuid, email);
             Teams team = teamsRepository.findById(teamUuid)
-                    .orElseThrow(() -> new EquipeNotFoundException("Equipa não encontrada com o ID: " + teamUuid));
+                    .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
             return ResponseEntity.ok(toTeamResponse(team));
-        } catch (EquipeNotFoundException e) {
+    } catch (TeamNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

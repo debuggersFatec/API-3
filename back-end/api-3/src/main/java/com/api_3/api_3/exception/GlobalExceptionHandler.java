@@ -42,8 +42,8 @@ public class GlobalExceptionHandler {
     }
 
     // Exceções de Equipa
-    @ExceptionHandler(EquipeNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleEquipeNotFoundException(EquipeNotFoundException ex) {
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTeamNotFoundException(TeamNotFoundException ex) {
         Map<String, String> response = Map.of("erro", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -61,11 +61,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT); // HTTP 409 Conflict é ideal para este caso
     }
 
-    @ExceptionHandler(EquipeBadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleEquipeBadRequestException(EquipeBadRequestException ex) {
-        Map<String, String> response = Map.of("erro", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
+    // Legacy EquipeBadRequestException removed
 
     // --- Apanhador Genérico ---
     @ExceptionHandler(Exception.class)
