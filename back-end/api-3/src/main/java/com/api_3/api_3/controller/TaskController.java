@@ -1,126 +1,120 @@
 package com.api_3.api_3.controller;
 
-import java.util.List;
-import java.util.Map;
-
+import com.api_3.api_3.dto.request.CreateTaskRequest;
+import com.api_3.api_3.dto.request.UpdateTaskRequest;
+import com.api_3.api_3.dto.response.TaskResponse;
+import com.api_3.api_3.mapper.TaskMapper;
+import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.ProjectsRepository;
+import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.model.entity.Teams;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.service.CreateTaskService;
+import com.api_3.api_3.service.DeleteTaskService;
+import com.api_3.api_3.service.GetTaskService;
+import com.api_3.api_3.service.UpdateTaskService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.api_3.api_3.exception.EquipeNotFoundException;
-import com.api_3.api_3.exception.TaskNotFoundException;
-import com.api_3.api_3.exception.TaskValidationException;
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.repository.EquipeRepository;
-import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.service.EquipeService;
-import com.api_3.api_3.service.TaskService;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
 
-    @Autowired
-    private TaskRepository taskRepository;
+    @Autowired private CreateTaskService createTaskService;
+    @Autowired private GetTaskService getTaskService;
+    @Autowired private UpdateTaskService updateTaskService;
+    @Autowired private DeleteTaskService deleteTaskService;
 
-    @Autowired
-    private TaskService taskService;
+    
+    @Autowired private TeamsRepository teamsRepository;
+    @Autowired private ProjectsRepository projectsRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private TaskMapper taskMapper;
 
-    @Autowired
-    private EquipeService equipeService;
+    private UserDetails getUserDetails(Authentication authentication) {
+        return (UserDetails) authentication.getPrincipal();
+    }
 
-    @Autowired
-    private EquipeRepository equipeRepository;
+    private void assertMember(String teamUuid, String email) {
+        Teams team = teamsRepository.findById(teamUuid)
+                .orElseThrow(() -> new com.api_3.api_3.exception.TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
+        String currentUserUuid = userRepository.findByEmail(email).map(User::getUuid)
+                .orElseThrow(() -> new com.api_3.api_3.exception.UserNotFoundException("Utilizador não encontrado."));
+        boolean isMember = team.getMembers().stream().anyMatch(m -> currentUserUuid.equals(m.getUuid()));
+        if (!isMember) throw new SecurityException("Acesso negado à equipe.");
+    }
 
-    // CREATE -> Criar uma nova task
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task newTask, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
-
-        String equipUuid = newTask.getEquip_uuid();
-        if (equipUuid == null || equipUuid.trim().isEmpty()) {
-            throw new TaskValidationException("O ID da equipe é obrigatório para criar uma tarefa.");
-        }
-
-        equipeRepository.findById(equipUuid)
-                .orElseThrow(() -> new EquipeNotFoundException("Equipe com ID " + equipUuid + " não encontrada."));
-
-        boolean isMember = equipeService.isUserMemberOfEquipe(userEmail, equipUuid);
-        if (!isMember) {
+    public ResponseEntity<TaskResponse> createTask(@Valid @RequestBody CreateTaskRequest request, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            // Derive team from project for membership validation
+            String teamUuid = projectsRepository.findById(request.getProject_uuid())
+                    .orElseThrow(() -> new com.api_3.api_3.exception.ProjectNotFoundException("Projeto não encontrado com o ID: " + request.getProject_uuid()))
+                    .getTeamUuid();
+            assertMember(teamUuid, userDetails.getUsername());
+        } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Task savedTask = taskService.createTask(newTask);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
+        Task savedTask = createTaskService.execute(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(taskMapper.toTaskResponse(savedTask));
     }
 
-    // READ -> Obter todas as tarefas
-    @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks() {
-        List<Task> tasks = taskRepository.findAll();
-        return ResponseEntity.ok(tasks);
-    }
-
-    // READ -> Obter uma tarefa por UUID
     @GetMapping("/{uuid}")
-    public ResponseEntity<Task> getTaskById(@PathVariable String uuid) {
-        Task task = taskRepository.findById(uuid)
-                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada com o ID: " + uuid));
-        return ResponseEntity.ok(task);
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable String uuid, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        try {
+            Task task = getTaskService.findById(uuid);
+            assertMember(task.getEquip_uuid(), userDetails.getUsername());
+            return ResponseEntity.ok(taskMapper.toTaskResponse(task));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
-    // READ -> Obter a contagem de tarefas por status
     @GetMapping("/count-by-status")
     public ResponseEntity<List<Map<String, Object>>> getTaskCountByStatus() {
-        List<Map<String, Object>> counts = taskRepository.countByStatus();
+        List<Map<String, Object>> counts = getTaskService.countByStatus();
         return ResponseEntity.ok(counts);
     }
 
-
-    // UPDATE -> Atualiza uma tarefa existente por ID do usuario
     @PutMapping("/{uuid}")
-    public ResponseEntity<Task> updateTask(@PathVariable String uuid, @RequestBody Task updatedTask, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable String uuid, @Valid @RequestBody UpdateTaskRequest request, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        Task existingTask = getTaskService.findById(uuid);
 
-        Task task = taskRepository.findById(uuid)
-                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada para atualizar com o ID: " + uuid));
-
-        if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
+        try {
+            assertMember(existingTask.getEquip_uuid(), userDetails.getUsername());
+        } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return taskService.updateTask(uuid, updatedTask)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new TaskNotFoundException("Falha ao atualizar a tarefa com ID: " + uuid));
+        Task updatedTask = updateTaskService.execute(uuid, request);
+        return ResponseEntity.ok(taskMapper.toTaskResponse(updatedTask));
     }
 
-    // DELETE -> Deletar uma tarefa
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Task> deleteTask(@PathVariable String uuid, Authentication authentication) {
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String userEmail = userDetails.getUsername();
+    public ResponseEntity<TaskResponse> deleteTask(@PathVariable String uuid, Authentication authentication) {
+        UserDetails userDetails = getUserDetails(authentication);
+        Task task = getTaskService.findById(uuid);
 
-        Task task = taskRepository.findById(uuid)
-                .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada para apagar com o ID: " + uuid));
-
-        if (!equipeService.isUserMemberOfEquipe(userEmail, task.getEquip_uuid())) {
+        try {
+            assertMember(task.getEquip_uuid(), userDetails.getUsername());
+        } catch (SecurityException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return taskService.deleteTask(uuid)
-                .map(ResponseEntity::ok)
-                .orElseThrow(() -> new TaskNotFoundException("Falha ao apagar a tarefa com ID: " + uuid));
+        Task deletedTask = deleteTaskService.execute(uuid);
+        return ResponseEntity.ok(taskMapper.toTaskResponse(deletedTask));
     }
 }

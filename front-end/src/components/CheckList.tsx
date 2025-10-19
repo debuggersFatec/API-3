@@ -1,10 +1,10 @@
 import { VStack } from "@chakra-ui/react";
 import { CheckListItem } from "./CheckListItem";
-import type { TaskProject } from "@/types/task";
-import type { tasksUser } from "@/context/authUtils";
+import type { TaskProject, TaskUser } from "@/types/task";
+
 
 interface CheckListProps {
-  tasks: TaskProject[] | tasksUser[] | undefined;
+  tasks: TaskProject[] | TaskUser[] | undefined;
 }
 
 export const CheckList = ({ tasks }: CheckListProps) => {

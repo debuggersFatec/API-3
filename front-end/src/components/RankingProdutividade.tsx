@@ -1,15 +1,16 @@
 "use client";
 
+import { useProject } from "@/context/project/useProject";
 import type { TaskProject } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-interface RankingProdutividadeProps {
-  tasks: TaskProject[];
-}
 
-export const RankingProdutividade = ({ tasks }: RankingProdutividadeProps) => {
+
+export const RankingProdutividade = () => {
+  const {project} = useProject();
+  const tasks: TaskProject[] = project?.tasks || [];
   const ranking: Record<string, { name: string; tasksNumber: number }> = {};
   tasks.forEach((t) => {
     const status = (t.status || "").toLowerCase();

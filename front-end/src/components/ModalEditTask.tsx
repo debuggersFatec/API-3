@@ -20,13 +20,15 @@ import {
 import { Field } from "@chakra-ui/react/field";
 import { useRef, useState, useEffect } from "react";
 import { MdOutlineMail, MdDelete } from "react-icons/md";
-import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Priority, Task } from "../types/task";
-import { useAuth } from "../context/useAuth";
-import { useEquipe } from "@/context/EquipeContext";
+import { useAuth } from "../context/auth/useAuth";
+
 import type { UserRef } from "@/types/user";
+import { taskService } from "@/services";
+import { useTeam } from "@/context/team/useTeam";
+import { useProject } from "@/context/project/useProject";
 
 interface ModalEditTaskProps {
   membros: UserRef[];
@@ -42,7 +44,9 @@ export const ModalEditTask = ({
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
-  const { refreshEquipe } = useEquipe();
+  const { refreshTeam } = useTeam();
+  const { refreshProject } = useProject();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -107,32 +111,17 @@ export const ModalEditTask = ({
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData!,
-      status:
-        formData!.responsible && formData!.responsible.uuid
-          ? "in-progress"
-          : "not-started",
-    };
-
-    axios
-      .put(`http://localhost:8080/api/tasks/${formData!.uuid}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(async () => {
-        await refreshUser();
-        await refreshEquipe();
-        if (onClose) onClose();
-      })
-      .catch((error: unknown) => {
-        console.error("Ocorreu um erro ao editar:", error);
-      });
+    try {
+      await taskService.updateTask(formData!.uuid, formData!, token);
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
+      if (onClose) onClose();
+    } catch (error) {
+      console.error("Ocorreu um erro ao editar:", error);
+    }
   };
 
   const handleInputChange = (
@@ -165,20 +154,15 @@ export const ModalEditTask = ({
 
   const handleDelete = async () => {
     if (!formData) return;
+
     try {
-      await axios
-        .delete(`http://localhost:8080/api/tasks/${formData.uuid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(async () => {
-          await refreshUser();
-          await refreshEquipe();
-        });
+      await taskService.deleteTask(formData.uuid, token);
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
       if (onClose) onClose();
-    } catch (err) {
-      console.error("Erro ao excluir task:", err);
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
     }
   };
 
@@ -282,10 +266,7 @@ export const ModalEditTask = ({
                               _hover={{ bg: "gray.100" }}
                               onClick={() => handleSelectMember(member)}
                             >
-                              <AvatarUser
-                                user={member}
-                                size="2xs"
-                              />
+                              <AvatarUser user={member} size="2xs" />
                               <Text ml={2}>{member.name}</Text>
                             </Flex>
                           ))}

@@ -1,10 +1,11 @@
 import { Box } from "@chakra-ui/react";
 import { SectionHeader } from "./SectionHeader";
 import { CheckList } from "./CheckList";
-import type { tasksUser } from "@/context/authUtils";
+import type { TaskUser } from "@/types/task";
+
 
 interface CompletasTabProps {
-  tasks?: tasksUser[];
+  tasks?: TaskUser[];
 }
 
 export const CompletasTab = ({ tasks }: CompletasTabProps) => {

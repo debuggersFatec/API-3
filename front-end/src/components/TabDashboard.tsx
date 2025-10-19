@@ -4,13 +4,8 @@ import { ProgressoDisplay } from "./ProgressoDisplay";
 import { RankingProdutividade } from "./RankingProdutividade";
 import { ProximasTasks } from "./ProximasTasks";
 import { TarefasAtribuidas } from "./TarefasAtribuidas";
-import type { TaskProject } from "@/types/task";
 
-interface TabDashboardProps {
-  tasks: TaskProject[];
-}
-
-export const TabDashboard = ({ tasks }: TabDashboardProps) => {
+export const TabDashboard = () => {
   return (
     <Grid
       w="100%"
@@ -20,32 +15,32 @@ export const TabDashboard = ({ tasks }: TabDashboardProps) => {
       gap={6}
     >
       <GridItem gridColumn="1 / 2" gridRow="1 / 2">
-        <ProdutividadeChart tasks={tasks ?? []} />
+        <ProdutividadeChart />
       </GridItem>
 
       <GridItem gridColumn="1 / 2" gridRow="2 / 3">
-        <RankingProdutividade tasks={tasks ?? []} />
+        <RankingProdutividade />
       </GridItem>
 
       <GridItem
         gridColumn={{ base: "1", md: "2 / 3" }}
         gridRow={{ base: "3", md: "1 / 3" }}
       >
-        <ProximasTasks tasks={tasks ?? []} />
+        <ProximasTasks />
       </GridItem>
 
       <GridItem
         gridColumn={{ base: "1", md: "3 / 4" }}
         gridRow={{ base: "4", md: "1 / 2" }}
       >
-        <ProgressoDisplay tasks={tasks ?? []} />
+        <ProgressoDisplay />
       </GridItem>
 
       <GridItem
         gridColumn={{ base: "1", md: "3 / 4" }}
         gridRow={{ base: "5", md: "2 / 3" }}
       >
-        <TarefasAtribuidas tasks={tasks ?? []} />
+        <TarefasAtribuidas />
       </GridItem>
     </Grid>
   );

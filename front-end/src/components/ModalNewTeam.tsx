@@ -1,7 +1,9 @@
 import { Dialog, Button, CloseButton, Field, Input } from "@chakra-ui/react";
-import axios, { AxiosError } from "axios";
-import { useAuth } from "@/context/useAuth";
+import { AxiosError } from "axios";
+import { useAuth } from "@/context/auth/useAuth";
 import { useState } from "react";
+import { teamServices } from "@/services/teamServices";
+import type { UserRef } from "@/types/user";
 
 interface ModalNewTeamProps {
   onClose?: () => void;
@@ -13,32 +15,16 @@ export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (!user) {
+      alert("Usuário não autenticado. Faça login novamente.");
+      return;
+    }
+    const member: UserRef = { uuid: user.uuid, name: user.name, img: user.img };
     try {
-      await axios
-        .post(
-          "http://localhost:8080/api/equipes",
-          {
-            name: teamName,
-            membros: [
-              {
-                uuid: user?.uuid,
-                name: user?.name,
-                email: user?.email,
-                img: user?.img || null,
-              },
-            ],
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        )
-        .then(async () => {
-          await refreshUser();
-          if (onClose) onClose();
-          setTeamName("");
-        });
+      await teamServices.createTeam(teamName, member, token);
+      await refreshUser();
+      if (onClose) onClose();
+      setTeamName("");
     } catch (error) {
       const err = error as AxiosError;
       console.error("Erro ao criar equipe:", err);
