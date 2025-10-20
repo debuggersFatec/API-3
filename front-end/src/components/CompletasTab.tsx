@@ -16,7 +16,7 @@ export const CompletasTab = ({ tasks }: CompletasTabProps) => {
   return (
     <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
       <SectionHeader title="Completas" />
-      <CheckList tasks={completas} />
+      <CheckList tasks={completas} hideStatusFilter />
     </Box>
   );
 };

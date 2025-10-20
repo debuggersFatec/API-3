@@ -13,8 +13,8 @@ import { useProject } from "@/context/project/useProject";
 
 export const Sidebar = () => {
   const { user, logout } = useAuth();
-  const { fetchTeam, teamData } = useTeam();
-  const { project, setProject } = useProject();
+  const { fetchTeam } = useTeam();
+  const { setProject } = useProject();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
@@ -28,9 +28,6 @@ export const Sidebar = () => {
       if (team) fetchTeam(team.uuid);
     }
   }, [activeTab, user?.teams, fetchTeam]);
-
-    console.log("Team Data in EquipeDashboard:", teamData);
-  console.log("Team Project in EquipeDashboard:", project);
 
   return (
     <Flex>
@@ -51,13 +48,21 @@ export const Sidebar = () => {
           pl={"24px"}
         >
           <h1>Tarefas</h1>
-          <Tabs.Trigger value="minhasTasks" justifyContent={"space-between"}>
+          <Tabs.Trigger
+            value="minhasTasks"
+            justifyContent={"space-between"}
+            onClick={() => setProject(undefined)}
+          >
             Minhas Tasks
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {filteredTasks.length}
             </span>
           </Tabs.Trigger>
-          <Tabs.Trigger value="vencidas" justifyContent={"space-between"}>
+          <Tabs.Trigger
+            value="vencidas"
+            justifyContent={"space-between"}
+            onClick={() => setProject(undefined)}
+          >
             Vencidas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {
@@ -120,7 +125,11 @@ export const Sidebar = () => {
               );
             })}
           <Separator maxW={"200px"} />
-          <Tabs.Trigger value="completas" justifyContent={"space-between"}>
+          <Tabs.Trigger
+            value="completas"
+            justifyContent={"space-between"}
+            onClick={() => setProject(undefined)}
+          >
             Completas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {filteredTasks.filter((t) => t.status === "completed").length}
