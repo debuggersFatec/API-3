@@ -12,10 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import com.api_3.api_3.dto.request.UpdateUserRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.dto.response.UserResponse;
@@ -25,6 +21,9 @@ import com.api_3.api_3.security.JwtUtil;
 import com.api_3.api_3.service.GetUserService;
 import com.api_3.api_3.service.UpdateUserService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
