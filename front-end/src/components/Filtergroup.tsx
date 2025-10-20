@@ -41,7 +41,7 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
     filters.status ?? "all"
   );
   const [localPriority, setLocalPriority] = React.useState<Priority | "all">(
-    (filters.priority as Priority) ?? "all"
+    filters.priority ?? "all"
   );
   const [localFrom, setLocalFrom] = React.useState<string | undefined>(
     filters.dueDateFrom
