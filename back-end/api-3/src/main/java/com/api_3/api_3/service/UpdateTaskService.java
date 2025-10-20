@@ -51,7 +51,6 @@ public class UpdateTaskService {
         Task savedTask = taskRepository.save(existingTask);
 
         // A lógica agora é chamada através de métodos privados nesta mesma classe
-        updateTaskInEquipe(savedTask);
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
 
         return savedTask;
@@ -85,10 +84,6 @@ public class UpdateTaskService {
         } else if (newResponsibleUuid != null) {
             updateTaskInUser(task, newResponsibleUuid);
         }
-    }
-
-    private void updateTaskInEquipe(Task task) {
-        // For new architecture, we are not maintaining TaskInfo inside Teams; consider updating a Project/Team view in future
     }
 
     private void addTaskToUser(Task task, String userUuid) {

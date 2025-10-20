@@ -21,15 +21,15 @@ import org.springframework.web.bind.annotation.RestController;
 import com.api_3.api_3.dto.request.CreateProjectRequest;
 import com.api_3.api_3.dto.request.UpdateProjectRequest;
 import com.api_3.api_3.dto.response.ProjectResponse;
+import com.api_3.api_3.exception.ProjectNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
+import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.exception.TeamNotFoundException;
-import com.api_3.api_3.exception.ProjectNotFoundException;
-import com.api_3.api_3.exception.UserNotFoundException;
 
 import jakarta.validation.Valid;
 
@@ -171,6 +171,19 @@ public class ProjectsController {
         Projects p = projectsRepository.findById(projectUuid).orElseThrow();
         p.setActive(false);
         p = projectsRepository.save(p);
+
+        // sync active flag in team's project refs
+        Teams team = teamsRepository.findById(p.getTeamUuid()).orElse(null);
+        if (team != null && team.getProjects() != null) {
+            final boolean active = p.isActive();
+            final String pid = p.getUuid();
+            final String pname = p.getName();
+            team.setProjects(team.getProjects().stream().map(pr ->
+                pr.getUuid().equals(pid) ? new Projects.ProjectRef(pid, pname, active) : pr
+            ).collect(java.util.stream.Collectors.toList()));
+            teamsRepository.save(team);
+        }
+
         return ResponseEntity.ok(toProjectResponse(p));
     }
 
@@ -181,6 +194,19 @@ public class ProjectsController {
         Projects p = projectsRepository.findById(projectUuid).orElseThrow();
         p.setActive(true);
         p = projectsRepository.save(p);
+
+        // sync active flag in team's project refs
+        Teams team = teamsRepository.findById(p.getTeamUuid()).orElse(null);
+        if (team != null && team.getProjects() != null) {
+            final boolean active = p.isActive();
+            final String pid = p.getUuid();
+            final String pname = p.getName();
+            team.setProjects(team.getProjects().stream().map(pr ->
+                pr.getUuid().equals(pid) ? new Projects.ProjectRef(pid, pname, active) : pr
+            ).collect(java.util.stream.Collectors.toList()));
+            teamsRepository.save(team);
+        }
+
         return ResponseEntity.ok(toProjectResponse(p));
     }
 }
