@@ -6,6 +6,7 @@ import {
   Input,
   Textarea,
   Button,
+  Switch,
 } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -51,6 +52,7 @@ export const ModalEditTask = ({
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRequeridFile, setIsRequeridFile] = useState(task.isRequerid_file);
 
   const [formData, setFormData] = useState(task);
 
@@ -138,6 +140,14 @@ export const ModalEditTask = ({
           }
         : prev
     );
+  };
+
+  const handleRequiredFileChange = (checked: boolean) => {
+    setIsRequeridFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequerid_file: checked,
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -274,6 +284,17 @@ export const ModalEditTask = ({
                       )}
                     </Box>
                   </Field.Root>
+
+                  <Switch.Root
+                    checked={isRequeridFile}
+                    onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                    <Switch.Label>É necessário um arquivo de entrega?</Switch.Label>
+                  </Switch.Root>
 
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"8px"}>

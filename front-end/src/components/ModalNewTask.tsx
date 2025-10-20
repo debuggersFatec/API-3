@@ -6,6 +6,7 @@ import {
   Text,
   Input,
   Textarea,
+  Switch,
 } from "@chakra-ui/react";
 import {
   Dialog,
@@ -34,6 +35,7 @@ export function ModalNewTask() {
   const { teamData } = useTeam();
   const { project } = useProject();
   const { open, onOpen, onClose } = useDisclosure();
+  const [isRequeridFile, setIsRequeridFile] = useState(false);
   const [formData, setFormData] = useState<Task>({
     uuid: "",
     title: "",
@@ -87,7 +89,6 @@ export function ModalNewTask() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
     try {
       await taskService.createTask(formData, token);
       await refreshUser();
@@ -120,6 +121,15 @@ export function ModalNewTask() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleRequiredFileChange = (checked: boolean) => {
+    console.log("Checked:", checked);
+    setIsRequeridFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequerid_file: checked,
     }));
   };
 
@@ -183,7 +193,7 @@ export function ModalNewTask() {
 
                   <Box w={"100%"} gap={"8px"}>
                     <Field.Root>
-                      <Box position="relative" w="100%" mb={"24px"}>
+                      <Box position="relative" w="100%" mb={"10px"}>
                         <Button
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           variant="outline"
@@ -237,6 +247,21 @@ export function ModalNewTask() {
                         )}
                       </Box>
                     </Field.Root>
+                    <Switch.Root
+                      checked={isRequeridFile}
+                      onCheckedChange={(e) =>
+                        handleRequiredFileChange(e.checked)
+                      }
+                      mb={"10px"}
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <Switch.Label>
+                        É necessário um arquivo de entrega?
+                      </Switch.Label>
+                    </Switch.Root>
 
                     <Field.Root>
                       <Box position="relative" w="100%" mb={"8px"}>
