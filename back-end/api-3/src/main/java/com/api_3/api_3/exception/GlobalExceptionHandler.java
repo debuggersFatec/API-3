@@ -91,5 +91,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // Fim das Exceções de Tarefa --------------------------------------------------------------------------------
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleCommentNotFoundException(CommentNotFoundException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
 }
