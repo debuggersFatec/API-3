@@ -1,5 +1,4 @@
 import { Box, Text, Separator, Dialog } from "@chakra-ui/react";
-import { Filtergroup } from "./Filtergroup";
 import { ModalNewTask } from "./ModalNewTask";
 import type { Project } from "@/types/project";
 
@@ -31,7 +30,6 @@ export const SectionHeader = ({
               <ModalNewTask />
             </Dialog.Root>
           )}
-          <Filtergroup />
         </Box>
         <Separator mt={"24px"} />
       </Box>
