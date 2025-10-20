@@ -125,7 +125,11 @@ public class AuthService {
     }
 
     public AuthResponse register(User newUser) {
-        if (userRepository.findByEmail(newUser.getEmail()).isPresent()) {
+        if (newUser.getEmail() != null) newUser.setEmail(newUser.getEmail().trim());
+        if (newUser.getEmail() == null || newUser.getEmail().isBlank()) {
+            throw new EmailAlreadyExistsException("Erro: E-mail inválido!");
+        }
+        if (userRepository.existsByEmailIgnoreCase(newUser.getEmail())) {
             throw new EmailAlreadyExistsException("Erro: E-mail já está em uso!");
         }
         
