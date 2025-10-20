@@ -1,25 +1,39 @@
 package com.api_3.api_3.service;
 
-import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.api_3.api_3.dto.request.UpdateUserRequest;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.UserRepository;
+
 @Service
 public class UpdateUserService {
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
+
+    public UpdateUserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Transactional
-    public User addEquipeToUser(String userId, String equipeId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o ID: " + userId));
-        if (!user.getEquipeIds().contains(equipeId)) {
-            user.getEquipeIds().add(equipeId);
-            userRepository.save(user);
+    public User updateCurrentUser(UpdateUserRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new RuntimeException("Usuário não autenticado.");
         }
-        return user;
+        String email = auth.getName();
+        User user = userRepository.findByEmailIgnoreCase(email)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        if (request.getName() != null && !request.getName().isBlank()) {
+            user.setName(request.getName().trim());
+        }
+        if (request.getImg() != null && !request.getImg().isBlank()) {
+            user.setImg(request.getImg().trim());
+        }
+        return userRepository.save(user);
     }
 }

@@ -7,13 +7,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api_3.api_3.dto.request.AddEquipeToUserRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
+import com.api_3.api_3.dto.request.UpdateUserRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.dto.response.UserResponse;
 import com.api_3.api_3.mapper.UserMapper;
@@ -26,6 +29,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/users")
+@Tag(name = "Users", description = "Operações de usuário")
 public class UserController {
 
     @Autowired
@@ -46,6 +50,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @Operation(summary = "Obter usuário autenticado", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<AuthResponse> getCurrentUser(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         AuthResponse.UserInfo userInfo = getUserService.findCurrentUserProfile(userDetails.getUsername());
@@ -60,11 +65,11 @@ public class UserController {
         return ResponseEntity.ok(new AuthResponse(token, routes, userInfo));
     }
 
-    @PutMapping("/{userId}/equipes")
-    public ResponseEntity<UserResponse> addEquipeToUser(
-        @PathVariable String userId,
-        @Valid @RequestBody AddEquipeToUserRequest request) {
-    User updatedUser = updateUserService.addEquipeToUser(userId, request.getEquipeId());
-    return ResponseEntity.ok(userMapper.toUserResponse(updatedUser));
-}
+    // Atualiza o usuário autenticado (nome e imagem)
+    @PutMapping("/me")
+    @Operation(summary = "Atualizar nome e imagem do usuário autenticado", security = {@SecurityRequirement(name = "bearerAuth")})
+    public ResponseEntity<UserResponse> updateCurrentUser(@Valid @RequestBody UpdateUserRequest request) {
+        User updated = updateUserService.updateCurrentUser(request);
+        return ResponseEntity.ok(userMapper.toUserResponse(updated));
+    }
 }
