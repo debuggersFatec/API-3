@@ -23,5 +23,4 @@ public class UpdateTaskRequest {
 
     private String requiredFile;
 
-    private boolean isRequiredFile;
 }
