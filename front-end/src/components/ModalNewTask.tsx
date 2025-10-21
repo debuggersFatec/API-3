@@ -35,7 +35,7 @@ export function ModalNewTask() {
   const { teamData } = useTeam();
   const { project } = useProject();
   const { open, onOpen, onClose } = useDisclosure();
-  const [isRequeridFile, setIsRequeridFile] = useState(false);
+  const [isRequiredFile, setIsRequiredFile] = useState(false);
   const [formData, setFormData] = useState<Task>({
     uuid: "",
     title: "",
@@ -49,7 +49,7 @@ export function ModalNewTask() {
     // file_required: "",
     // file_finish: "",
     responsible: undefined,
-    isRequerid_file: false,
+    isRequiredFile: false,
   });
 
   const { token, refreshUser } = useAuth();
@@ -107,7 +107,7 @@ export function ModalNewTask() {
       project_uuid: project?.uuid || "",
       team_uuid: teamData?.uuid || "",
       responsible: undefined,
-      isRequerid_file: false,
+      isRequiredFile: false,
     });
     onClose();
   };
@@ -126,10 +126,10 @@ export function ModalNewTask() {
 
   const handleRequiredFileChange = (checked: boolean) => {
     console.log("Checked:", checked);
-    setIsRequeridFile(checked);
+    setIsRequiredFile(checked);
     setFormData((prev) => ({
       ...prev,
-      isRequerid_file: checked,
+      isRequiredFile: checked,
     }));
   };
 
@@ -248,7 +248,7 @@ export function ModalNewTask() {
                       </Box>
                     </Field.Root>
                     <Switch.Root
-                      checked={isRequeridFile}
+                      checked={isRequiredFile}
                       onCheckedChange={(e) =>
                         handleRequiredFileChange(e.checked)
                       }

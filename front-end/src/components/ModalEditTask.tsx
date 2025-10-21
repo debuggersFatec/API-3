@@ -52,7 +52,7 @@ export const ModalEditTask = ({
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isRequeridFile, setIsRequeridFile] = useState(task.isRequerid_file);
+  const [isRequiredFile, setIsRequiredFile] = useState(task.isRequiredFile);
 
   const [formData, setFormData] = useState(task);
 
@@ -143,10 +143,10 @@ export const ModalEditTask = ({
   };
 
   const handleRequiredFileChange = (checked: boolean) => {
-    setIsRequeridFile(checked);
+    setIsRequiredFile(checked);
     setFormData((prev) => ({
       ...prev,
-      isRequerid_file: checked,
+      isRequiredFile: checked,
     }));
   };
 
@@ -286,14 +286,16 @@ export const ModalEditTask = ({
                   </Field.Root>
 
                   <Switch.Root
-                    checked={isRequeridFile}
+                    checked={isRequiredFile}
                     onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
                   >
                     <Switch.HiddenInput />
                     <Switch.Control>
                       <Switch.Thumb />
                     </Switch.Control>
-                    <Switch.Label>É necessário um arquivo de entrega?</Switch.Label>
+                    <Switch.Label>
+                      É necessário um arquivo de entrega?
+                    </Switch.Label>
                   </Switch.Root>
 
                   <Field.Root>
