@@ -26,7 +26,7 @@ export const Header = () => {
         <Icon as={FaLink} boxSize={5} cursor="pointer" />
         <Icon as={FaBell} boxSize={5} cursor="pointer" />
         <ColorModeButton w="24px" h="24px" fontSize="12px" minW={0} />
-        <AvatarUser name="Matheus Karnas" imageUrl="" />
+        <AvatarUser user={{ uuid: "1", name: "Matheus Karnas", img: "" }} />
       </Box>
     </Box>
   );

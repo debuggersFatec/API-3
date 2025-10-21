@@ -1,11 +1,11 @@
-import { Box, Text, Button, Dialog , Portal } from "@chakra-ui/react";
+import { Box, Text, Button, Dialog, Portal } from "@chakra-ui/react";
 import { useDraggable } from "@dnd-kit/core";
 import { AvatarUser } from "../AvatarUser";
-import type { Task } from "@/types/task";
+import type { TaskProject } from "@/types/task";
 import { useState } from "react";
 
 interface TaskCardProps {
-  task: Task;
+  task: TaskProject;
   onDelete: (id: string) => void;
 }
 
@@ -54,20 +54,24 @@ export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
     >
       <Text>{task.title}</Text>
 
-      {task.responsavel && (
+      {task.responsible && (
         <AvatarUser
-          name={task.responsavel.name}
-          imageUrl={task.responsavel.img}
+          user={task.responsible}
           size="2xs"
         />
       )}
 
-      <Button size="xs" colorScheme="red" ml={2} onClick={() => setIsOpen(true)}>
+      <Button
+        size="xs"
+        colorScheme="red"
+        ml={2}
+        onClick={() => setIsOpen(true)}
+      >
         Deletar
       </Button>
 
-      <Dialog.Root 
-        open={isOpen} 
+      <Dialog.Root
+        open={isOpen}
         onOpenChange={(details) => setIsOpen(details.open)}
       >
         <Portal>

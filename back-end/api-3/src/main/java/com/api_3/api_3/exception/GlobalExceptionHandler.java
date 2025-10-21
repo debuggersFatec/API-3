@@ -1,6 +1,7 @@
 package com.api_3.api_3.exception;
 
 import java.util.Map; // Importar a classe Map
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -41,8 +42,15 @@ public class GlobalExceptionHandler {
     }
 
     // Exceções de Equipa
-    @ExceptionHandler(EquipeNotFoundException.class)
-    public ResponseEntity<Map<String, String>> handleEquipeNotFoundException(EquipeNotFoundException ex) {
+    @ExceptionHandler(TeamNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleTeamNotFoundException(TeamNotFoundException ex) {
+        Map<String, String> response = Map.of("erro", ex.getMessage());
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    // Exceções de Projeto
+    @ExceptionHandler(ProjectNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleProjectNotFoundException(ProjectNotFoundException ex) {
         Map<String, String> response = Map.of("erro", ex.getMessage());
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
@@ -53,11 +61,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT); // HTTP 409 Conflict é ideal para este caso
     }
 
-    @ExceptionHandler(EquipeBadRequestException.class)
-    public ResponseEntity<Map<String, String>> handleEquipeBadRequestException(EquipeBadRequestException ex) {
-        Map<String, String> response = Map.of("erro", ex.getMessage());
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
+    // Legacy EquipeBadRequestException removed
 
     // --- Apanhador Genérico ---
     @ExceptionHandler(Exception.class)

@@ -1,11 +1,13 @@
 import { Flex, Heading, VStack } from "@chakra-ui/react";
 import { useDroppable } from "@dnd-kit/core";
-import type { Column as ColumnType, Task } from "@/types/task";
+
 import { TaskCard } from "./TaskCard";
+import type { TaskProject } from "@/types/task";
+import type { Column as ColumnType } from "./QuadroDisplay";
 
 interface ColumnProps {
   column: ColumnType;
-  tasks: Task[];
+  tasks: TaskProject[];
   onDeleteTask: (id: string) => void;
 }
 

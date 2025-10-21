@@ -1,19 +1,20 @@
-import type { TaskTeam } from "@/types/task";
+import { useProject } from "@/context/project/useProject";
+import type { TaskProject } from "@/types/task";
 import { Chart, useChart } from "@chakra-ui/charts";
 import { Box, Text } from "@chakra-ui/react";
 
 import { Cell, Label, Pie, PieChart, Tooltip } from "recharts";
 
-interface ProgressoDisplayProps {
-  tasks: TaskTeam[];
-}
 
-export const ProgressoDisplay = ({ tasks }: ProgressoDisplayProps) => {
+
+export const ProgressoDisplay = () => {
+  const {project} = useProject();
+  const tasks: TaskProject[] = project?.tasks || [];
   let concluidas = 0;
   let naoConcluidas = 0;
   tasks.forEach((t) => {
     const status = (t.status || "").toLowerCase();
-    if (status === "completed" || status === "concluida") {
+    if (status === "completed") {
       concluidas++;
     } else {
       naoConcluidas++;

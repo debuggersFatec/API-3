@@ -6,6 +6,7 @@ import {
   Input,
   Textarea,
   Button,
+  Switch,
 } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -20,72 +21,44 @@ import {
 import { Field } from "@chakra-ui/react/field";
 import { useRef, useState, useEffect } from "react";
 import { MdOutlineMail, MdDelete } from "react-icons/md";
-import axios from "axios";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
-import type { Task, TaskPriority } from "../types/task";
-import { useAuth } from "../context/useAuth";
-import { useEquipe } from "@/context/EquipeContext";
+import type { Priority, Task } from "../types/task";
+import { useAuth } from "../context/auth/useAuth";
 
-interface Member {
-  uuid: string;
-  img: string;
-  name: string;
-}
+import type { UserRef } from "@/types/user";
+import { taskService } from "@/services";
+import { useTeam } from "@/context/team/useTeam";
+import { useProject } from "@/context/project/useProject";
 
 interface ModalEditTaskProps {
-  equipe_uuid: string;
-  membros: Member[];
-  task: Task | null;
+  membros: UserRef[];
+  task: Task;
   open: boolean;
   onClose?: () => void;
 }
 
 export const ModalEditTask = ({
   task,
-  equipe_uuid,
   membros,
   open,
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
-  const { refreshEquipe } = useEquipe();
+  const { refreshTeam } = useTeam();
+  const { refreshProject } = useProject();
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRequeridFile, setIsRequeridFile] = useState(task.isRequerid_file);
 
-  const [formData, setFormData] = useState<Task | null>(
-    task
-      ? {
-          uuid: task.uuid,
-          title: task.title,
-          description: task.description || "",
-          due_date: task.due_date || null,
-          status: task.status,
-          priority: task.priority,
-          equip_uuid: task.equip_uuid || equipe_uuid,
-          responsible: task.responsible,
-        }
-      : null
-  );
+  const [formData, setFormData] = useState(task);
 
   useEffect(() => {
-    if (task) {
-      setFormData({
-        uuid: task.uuid,
-        title: task.title,
-        description: task.description || "",
-        due_date: task.due_date || null,
-        status: task.status,
-        priority: task.priority,
-        equip_uuid: task.equip_uuid || equipe_uuid,
-        responsible: task.responsible,
-      });
-    } else {
-      setFormData(null);
-    }
-  }, [task, equipe_uuid]);
+    setFormData(task);
+  }, [task, task.project_uuid]);
 
   if (!task || !formData) {
     return (
@@ -105,8 +78,8 @@ export const ModalEditTask = ({
     );
   }
 
-  const handleSelectMember = (member: Member) => {
-    setFormData((prev: Task | null) =>
+  const handleSelectMember = (member: UserRef) => {
+    setFormData((prev) =>
       prev
         ? {
             ...prev,
@@ -117,8 +90,8 @@ export const ModalEditTask = ({
     setIsDropdownOpen(false);
   };
 
-  const handleSelectPriority = (priority: TaskPriority) => {
-    setFormData((prev: Task | null) =>
+  const handleSelectPriority = (priority: Priority) => {
+    setFormData((prev) =>
       prev
         ? {
             ...prev,
@@ -130,42 +103,27 @@ export const ModalEditTask = ({
   };
 
   const handleDateChange = (date: Date | null) => {
-    setFormData((prev: Task | null) =>
+    setFormData((prev) =>
       prev
         ? {
             ...prev,
-            due_date: date,
+            due_date: date || undefined,
           }
         : prev
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const payload = {
-      ...formData!,
-      status:
-        formData!.responsible && formData!.responsible.uuid
-          ? "in-progress"
-          : "not-started",
-    };
-
-    axios
-      .put(`http://localhost:8080/api/tasks/${formData!.uuid}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      })
-      .then(async () => {
-        await refreshUser();
-        await refreshEquipe();
-        if (onClose) onClose();
-      })
-      .catch((error: unknown) => {
-        console.error("Ocorreu um erro ao editar:", error);
-      });
+    try {
+      await taskService.updateTask(formData!.uuid, formData!, token);
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
+      if (onClose) onClose();
+    } catch (error) {
+      console.error("Ocorreu um erro ao editar:", error);
+    }
   };
 
   const handleInputChange = (
@@ -174,7 +132,7 @@ export const ModalEditTask = ({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev: Task | null) =>
+    setFormData((prev) =>
       prev
         ? {
             ...prev,
@@ -184,9 +142,17 @@ export const ModalEditTask = ({
     );
   };
 
+  const handleRequiredFileChange = (checked: boolean) => {
+    setIsRequeridFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequerid_file: checked,
+    }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
-    setFormData((prev: Task | null) =>
+    setFormData((prev) =>
       prev
         ? {
             ...prev,
@@ -198,27 +164,22 @@ export const ModalEditTask = ({
 
   const handleDelete = async () => {
     if (!formData) return;
+
     try {
-      await axios
-        .delete(`http://localhost:8080/api/tasks/${formData.uuid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then(async () => {
-          await refreshUser();
-          await refreshEquipe();
-        });
+      await taskService.deleteTask(formData.uuid, token);
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
       if (onClose) onClose();
-    } catch (err) {
-      console.error("Erro ao excluir task:", err);
+    } catch (error) {
+      console.error("Erro ao excluir tarefa:", error);
     }
   };
 
-  const prioritys: { label: string; value: TaskPriority }[] = [
-    { label: "Baixa", value: "baixa" },
-    { label: "Média", value: "media" },
-    { label: "Alta", value: "alta" },
+  const prioritys: { label: string; value: Priority }[] = [
+    { label: "Baixa", value: "low" },
+    { label: "Média", value: "medium" },
+    { label: "Alta", value: "high" },
   ];
 
   return (
@@ -284,12 +245,7 @@ export const ModalEditTask = ({
                             _hover={{ bg: "gray.100" }}
                           >
                             <AvatarUser
-                              name={formData!.responsible!.name}
-                              imageUrl={
-                                formData!.responsible!.img
-                                  ? formData!.responsible!.img
-                                  : ""
-                              }
+                              user={formData!.responsible}
                               size="2xs"
                             />
                             <Text ml={2}>{formData!.responsible!.name}</Text>
@@ -320,11 +276,7 @@ export const ModalEditTask = ({
                               _hover={{ bg: "gray.100" }}
                               onClick={() => handleSelectMember(member)}
                             >
-                              <AvatarUser
-                                name={member.name}
-                                imageUrl={member.img || ""}
-                                size="2xs"
-                              />
+                              <AvatarUser user={member} size="2xs" />
                               <Text ml={2}>{member.name}</Text>
                             </Flex>
                           ))}
@@ -332,6 +284,17 @@ export const ModalEditTask = ({
                       )}
                     </Box>
                   </Field.Root>
+
+                  <Switch.Root
+                    checked={isRequeridFile}
+                    onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                    <Switch.Label>É necessário um arquivo de entrega?</Switch.Label>
+                  </Switch.Root>
 
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"8px"}>
@@ -392,7 +355,7 @@ export const ModalEditTask = ({
                   <Field.Root w={"100%"}>
                     <Box w={"100%"} position="relative" mb={"8px"}>
                       <ChakraDatePicker
-                        selected={formData!.due_date}
+                        selected={formData!.due_date || null}
                         onChange={handleDateChange}
                       />
                     </Box>

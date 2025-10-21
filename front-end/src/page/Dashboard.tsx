@@ -1,23 +1,20 @@
 import { Header } from "@/components/Header";
 import { Sidebar } from "@/components/Sidebar";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useAuth } from "@/context/useAuth";
+import { useAuth } from "@/context/auth/useAuth";
+import { TeamProvider } from "@/context/team/TeamProvider";
+import { ProjectProvider } from "@/context/project/ProjectProvider";
 
 export const Dashboard = () => {
-  const navigate = useNavigate();
-  const { user, token } = useAuth();
+  const { user } = useAuth();
 
-  useEffect(() => {
-    if (user === null || token === null) {
-      navigate("/login");
-    }
-  }, [user, token, navigate]);
+  console.log("User in Dashboard:", user);
 
   return (
-    <>
-      <Header />
-      <Sidebar />
-    </>
+    <TeamProvider>
+      <ProjectProvider>
+        <Header />
+        <Sidebar />
+      </ProjectProvider>
+    </TeamProvider>
   );
 };

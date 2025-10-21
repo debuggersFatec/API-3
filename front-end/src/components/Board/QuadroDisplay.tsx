@@ -3,10 +3,22 @@ import { Flex } from "@chakra-ui/react";
 import { DndContext } from "@dnd-kit/core";
 import type { DragEndEvent } from "@dnd-kit/core";
 
-import type { BoardData } from "../../types/task";
 import { organizarTarefas } from "../../utils/organizarTarefas";
-import { tasks } from "../../data/tasks";
+
 import { Column } from "./Column";
+import type { TaskProject } from "@/types/task";
+import { tasks } from "@/data/tasks";
+
+export interface Column {
+  id: string;
+  title: string;
+  taskIds: string[];
+}
+export interface BoardData {
+  tasks: Record<string, TaskProject>;
+  columns: Record<string, Column>;
+  columnOrder: string[];
+}
 
 export const QuadroDisplay = () => {
   const [boardData, setBoardData] = useState<BoardData>({

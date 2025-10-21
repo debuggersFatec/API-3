@@ -1,64 +1,37 @@
 import { Box } from "@chakra-ui/react";
 import { SectionHeader } from "./SectionHeader";
 import { EquipeTabs } from "./EquipeTabs";
-import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
-import type { EquipeData } from "@/types/equipe";
-import { useAuth } from "@/context/useAuth";
-
-export type Equipe = {
-  uuid: string;
-  name: string;
-};
+import { useTeam } from "@/context/team/useTeam";
+import { useProject } from "@/context/project/useProject";
+import type { TeamRef } from "@/types/team";
+import { ProjectsDisplay } from "./ProjectsDisplay";
 
 export const EquipeDashboard = ({
-  equipe,
-  isActive,
+  team,
 }: {
-  equipe: Equipe;
+  team: TeamRef;
   isActive: boolean;
 }) => {
+  const { teamData } = useTeam();
+  const { project } = useProject();
+  const { isLoading } = useTeam();
 
-  const [name, setName] = useState(equipe.name);
-  const [equipeData, setEquipeData] = useState<EquipeData | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
-  const { token } = useAuth();
-
-  const fetchEquipe = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/equipes/${equipe.uuid}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setName(response.data.name);
-      setEquipeData(response.data);
-    } catch {
-      setName(equipe.name);
-    }
-    setIsLoading(false);
-  }, [equipe.uuid, token, equipe.name]);
-
-  useEffect(() => {
-    if (isActive) {
-      fetchEquipe();
-    }
-  }, [isActive, fetchEquipe]);
+  if (isLoading) return <div>Carregando...</div>;
 
   return (
     <>
-      {isLoading ? (
-        <div>Carregando...</div>
-      ) : equipeData ? (
-        <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
-          <SectionHeader title={name} isTeamSection={true} equipe={equipeData} />
+      <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
+        <SectionHeader
+          title={team.name}
+          isTeamSection={true}
+          project={project}
+        />
+        {project === undefined && teamData ? (
+          <ProjectsDisplay projects={teamData.projects || []} />
+        ) : (
           <EquipeTabs />
-        </Box>
-      ) : null}
+        )}
+      </Box>
     </>
   );
 };

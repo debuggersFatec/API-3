@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { ColorModeProvider } from "./components/ui/color-mode";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider } from "./context/auth/AuthContext";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

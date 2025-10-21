@@ -1,11 +1,11 @@
 import * as Chakra from "@chakra-ui/react";
-import type { Task } from "../types/task";
+import type { TaskProject } from "../types/task";
 
-export const ProximasTasksItem = ({ task }: { task: Task }) => {
-  // Aceita due_date como Date | string | null
+export const ProximasTasksItem = ({ task }: { task: TaskProject }) => {
+  // Converte due_date string para Date
   let dataTask: Date | null = null;
-  if (task.due_date) {
-    dataTask = task.due_date instanceof Date ? task.due_date : new Date(task.due_date);
+  if (task?.due_date) {
+    dataTask = new Date(task.due_date);
     if (isNaN(dataTask.getTime())) dataTask = null;
   }
   let estaAtrasada = false;

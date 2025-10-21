@@ -1,10 +1,10 @@
-import type { TaskTeam } from "@/types/task";
 import { CheckList } from "./CheckList";
+import { useProject } from "@/context/project/useProject";
 
-interface TabTarefasEquipesProps {
-  tasks: TaskTeam[];
-}
 
-export const TabTarefasEquipes = ({ tasks }: TabTarefasEquipesProps) => {
+
+export const TabTarefasEquipes = () => {
+  const { project } = useProject();
+  const tasks = project?.tasks || [];
   return <CheckList tasks={tasks} />;
 };

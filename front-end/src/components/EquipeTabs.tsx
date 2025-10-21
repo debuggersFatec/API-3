@@ -1,12 +1,13 @@
-import { Tabs } from "@chakra-ui/react";
+import { Tabs, Text } from "@chakra-ui/react";
 import { TabDashboard } from "./TabDashboard";
 import { TabQuadro } from "./TabQuadro";
 import { TabTarefasEquipes } from "./TabTarefasEquipes";
-import { useEquipe } from "@/context/EquipeContext";
+
 import { TabLixeiraEquipe } from "./TabLixeiraEquipe";
+import { useProject } from "@/context/project/useProject";
 
 export const EquipeTabs = () => {
-  const { equipeData } = useEquipe();
+  const { project } = useProject();
 
   return (
     <Tabs.Root
@@ -15,6 +16,7 @@ export const EquipeTabs = () => {
       defaultValue="dashboard"
       colorScheme={"blue"}
     >
+      <Text>{project?.name}</Text>
       <Tabs.List>
         <Tabs.Trigger value="dashboard">Dashboard</Tabs.Trigger>
         <Tabs.Trigger value="tarefas">Tarefas</Tabs.Trigger>
@@ -22,16 +24,16 @@ export const EquipeTabs = () => {
         <Tabs.Trigger value="lixo">Lixeira</Tabs.Trigger>
       </Tabs.List>
       <Tabs.Content value="dashboard">
-        <TabDashboard tasks={equipeData?.tasks || []} />
+        <TabDashboard />
       </Tabs.Content>
       <Tabs.Content value="tarefas">
-        <TabTarefasEquipes tasks={equipeData?.tasks || []} />
+        <TabTarefasEquipes />
       </Tabs.Content>
       <Tabs.Content value="Quadro">
         <TabQuadro />
       </Tabs.Content>
       <Tabs.Content value="lixo">
-        <TabLixeiraEquipe lixeira={equipeData?.lixeira || []} />
+        <TabLixeiraEquipe />
       </Tabs.Content>
     </Tabs.Root>
   );

@@ -2,13 +2,14 @@ import { Box } from "@chakra-ui/react";
 import { SectionHeader } from "./SectionHeader";
 import { CheckList } from "./CheckList";
 import { useState, useEffect } from "react";
-import type { tasksUser } from "@/context/authUtils";
+import type { TaskUser } from "@/types/task";
+
 interface VencidasTabProps {
-  tasks?: tasksUser[];
+  tasks?: TaskUser[];
 }
 
 export const VencidasTab = ({ tasks }: VencidasTabProps) => {
-  const [vencidas, setVencidas] = useState<tasksUser[]>([]);
+  const [vencidas, setVencidas] = useState<TaskUser[]>([]);
 
   useEffect(() => {
     if (tasks) {

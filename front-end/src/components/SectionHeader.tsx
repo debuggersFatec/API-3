@@ -1,15 +1,18 @@
 import { Box, Text, Separator, Dialog } from "@chakra-ui/react";
-import { Filtergroup } from "./Filtergroup";
 import { ModalNewTask } from "./ModalNewTask";
-import type { EquipeData } from "@/types/equipe";
+import type { Project } from "@/types/project";
 
 interface SectionHeaderProps {
   title: string;
   isTeamSection?: boolean;
-  equipe?: EquipeData;
+  project?: Project;
 }
 
-export const SectionHeader = ({ title, isTeamSection, equipe }: SectionHeaderProps) => {
+export const SectionHeader = ({
+  title,
+  isTeamSection,
+  project,
+}: SectionHeaderProps) => {
   return (
     <>
       <Box w={"100%"} mb={"24px"} mt={"24px"} px={"32px"}>
@@ -21,16 +24,12 @@ export const SectionHeader = ({ title, isTeamSection, equipe }: SectionHeaderPro
           flexDirection={"row"}
           justifyContent={"space-between"}
         >
-          {isTeamSection && equipe && (
+          {isTeamSection && project && (
             <Dialog.Root placement={"center"}>
               <Dialog.Trigger asChild></Dialog.Trigger>
-              <ModalNewTask
-                equipe_uuid={equipe.uuid}
-                membros={equipe.membros}
-              />
+              <ModalNewTask />
             </Dialog.Root>
           )}
-          <Filtergroup />
         </Box>
         <Separator mt={"24px"} />
       </Box>

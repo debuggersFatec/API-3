@@ -1,6 +1,7 @@
-import type { Task, BoardData } from "@/types/task";
+import type { TaskProject} from "@/types/task";
+import type { BoardData } from "@/components/Board/QuadroDisplay";
 
-export function organizarTarefas(listaDeTarefas: Task[]): BoardData {
+export function organizarTarefas(listaDeTarefas: TaskProject[]): BoardData {
   const quadro: BoardData = {
     tasks: {},
     columns: {
