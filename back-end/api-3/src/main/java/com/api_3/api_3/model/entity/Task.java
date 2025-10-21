@@ -23,7 +23,7 @@ public class Task {
     private Status status;
     private Priority priority;
     private String fileUrl;
-    private boolean isRequiredFile;
+    private Boolean isRequiredFile;
     private String requiredFile;
     private String teamUuid;
     private String projectUuid;

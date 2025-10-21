@@ -19,5 +19,9 @@ public class UpdateTaskRequest {
 
     private String priority;
 
-    private Responsible responsible; // Pode ser nulo se não houver responsável atribuído
+    private Responsible responsible; 
+
+    private String requiredFile;
+
+    private boolean isRequiredFile;
 }
