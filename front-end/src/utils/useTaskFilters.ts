@@ -8,7 +8,7 @@ export interface TaskFilters {
   priority: Priority | "all";
   dueDateFrom?: string;
   dueDateTo?: string;
-  responsibleUuid?: string;
+  responsibleUuid?: string | "unassigned";
 }
 
 type TaskType = TaskProject | TaskUser;
@@ -28,7 +28,10 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
 
     return tasks.filter((task) => {
       // Filtro por busca (título)
-      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+      if (
+        filters.search &&
+        !task.title.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
         return false;
       }
 
@@ -47,22 +50,33 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
         if (!taskStatus || taskStatus !== filters.status) return false;
       }
 
-      // Filtro por prioridade 
+      // Filtro por prioridade
       if (filters.priority !== "all") {
         let taskPriority: Priority | undefined;
-        const rawPriority = (task as unknown as Record<string, unknown>)["priority"] ?? (task as unknown as Record<string, unknown>)["prioridade"];
+        const rawPriority =
+          (task as unknown as Record<string, unknown>)["priority"] ??
+          (task as unknown as Record<string, unknown>)["prioridade"];
         if (typeof rawPriority === "string") {
           const normalized = rawPriority.toLowerCase().replace(/_/g, "-");
-          if (normalized === "low" || normalized === "baixa") taskPriority = "low";
-          else if (normalized === "medium" || normalized === "média" || normalized === "media") taskPriority = "medium";
-          else if (normalized === "high" || normalized === "alta") taskPriority = "high";
+          if (normalized === "low" || normalized === "baixa")
+            taskPriority = "low";
+          else if (
+            normalized === "medium" ||
+            normalized === "média" ||
+            normalized === "media"
+          )
+            taskPriority = "medium";
+          else if (normalized === "high" || normalized === "alta")
+            taskPriority = "high";
         }
 
         if (!taskPriority || taskPriority !== filters.priority) return false;
       }
 
       // Filtro por data de vencimento
-      if ((filters.dueDateFrom || filters.dueDateTo) && task.due_date) {
+      if (filters.dueDateFrom || filters.dueDateTo) {
+        if (!task.due_date) return false;
+
         const taskDate = new Date(task.due_date);
         if (filters.dueDateFrom) {
           const fromDate = new Date(filters.dueDateFrom);
@@ -74,10 +88,20 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
         }
       }
 
-      // Filtro por responsável (usando uuid)
+      // Filtro por responsável (usando uuid ou "unassigned")
       if (filters.responsibleUuid) {
-        if (!('responsible' in task) || !task.responsible || task.responsible.uuid !== filters.responsibleUuid) {
-          return false;
+        if (filters.responsibleUuid === "unassigned") {
+          if ("responsible" in task && task.responsible) {
+            return false;
+          }
+        } else {
+          if (
+            !("responsible" in task) ||
+            !task.responsible ||
+            task.responsible.uuid !== filters.responsibleUuid
+          ) {
+            return false;
+          }
         }
       }
 
@@ -98,10 +122,10 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
   }, []);
 
   const updateDueDateRange = useCallback((from?: string, to?: string) => {
-    setFilters((prev) => ({ 
-      ...prev, 
-      dueDateFrom: from, 
-      dueDateTo: to 
+    setFilters((prev) => ({
+      ...prev,
+      dueDateFrom: from,
+      dueDateTo: to,
     }));
   }, []);
 
