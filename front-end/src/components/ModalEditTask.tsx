@@ -29,6 +29,7 @@ import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
+import { CommentsArea } from "./CommentsArea";
 
 interface ModalEditTaskProps {
   membros: UserRef[];
@@ -57,6 +58,15 @@ export const ModalEditTask = ({
   useEffect(() => {
     setFormData(task);
   }, [task, task.project_uuid]);
+
+  const reloadTask = async () => {
+    try {
+      const fresh = await taskService.getTaskById(task.uuid, token);
+      if (fresh) setFormData(fresh);
+    } catch (err) {
+      console.error("Erro ao recarregar task:", err);
+    }
+  };
 
   if (!task || !formData) {
     return (
@@ -207,7 +217,7 @@ export const ModalEditTask = ({
             <DialogBody>
               <Flex justifyContent={"space-between"} gap={"12px"}>
                 <Box w={"100%"}>
-                  <Field.Root h={"50%"}>
+                  <Field.Root h={"25%"}>
                     <Textarea
                       name="description"
                       placeholder="Descrição"
@@ -216,6 +226,11 @@ export const ModalEditTask = ({
                       value={formData!.description}
                     />
                   </Field.Root>
+                  <CommentsArea
+                    taskUuid={task.uuid}
+                    comments={formData.comments}
+                    onCommentCreated={reloadTask}
+                  />
                 </Box>
 
                 <Box w={"100%"}>

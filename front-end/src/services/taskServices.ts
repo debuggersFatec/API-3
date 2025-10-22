@@ -53,5 +53,16 @@ export const taskService = {
         Authorization: `Bearer ${token}`,
       },
     });
+  },
+
+  async createComment(taskUuid: string, content: string, token: string | null): Promise<void> {
+    if (!token) {
+      throw new Error("Acesso negado: token não fornecido");
+    }
+    await axiosInstance.post(`/tasks/${taskUuid}/comments`, { content }, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 };
