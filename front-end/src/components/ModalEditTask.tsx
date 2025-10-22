@@ -229,7 +229,7 @@ export const ModalEditTask = ({
                   <CommentsArea
                     taskUuid={task.uuid}
                     comments={formData.comments}
-                    onCommentCreated={reloadTask}
+                    onCommentChange={reloadTask}
                   />
                 </Box>
 

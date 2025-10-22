@@ -1,5 +1,5 @@
-import { axiosInstance } from './axiosInstance';
-import type { Task } from '../types/task';
+import { axiosInstance } from "./axiosInstance";
+import type { Task } from "../types/task";
 
 export const taskService = {
 
@@ -64,5 +64,20 @@ export const taskService = {
         Authorization: `Bearer ${token}`,
       },
     });
-  }
+  },
+
+  async deleteComment(
+    taskId: string,
+    commentId: string,
+    token: string | null
+  ): Promise<void> {
+    if (!token) {
+      throw new Error("Acesso negado: token não fornecido");
+    }
+    await axiosInstance.delete(`/tasks/${taskId}/comments/${commentId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  },
 };

@@ -6,18 +6,27 @@ import { Comment } from "./Comment";
 interface CommentsAreaProps {
   comments?: TaskComment[];
   taskUuid: string;
-  onCommentCreated?: () => Promise<void>;
+  onCommentChange?: () => Promise<void>;
 }
 
-export const CommentsArea = ({ comments, taskUuid, onCommentCreated }: CommentsAreaProps) => {
+export const CommentsArea = ({
+  comments,
+  taskUuid,
+  onCommentChange,
+}: CommentsAreaProps) => {
   return (
     <Stack mt={2}>
       <Stack border={"black"} gap="2">
-        <ScrollArea.Root height="8rem" variant={'always'}>
+        <ScrollArea.Root height="8rem" variant={"always"}>
           <ScrollArea.Viewport>
             <ScrollArea.Content paddingEnd="3" textStyle="sm">
               {comments?.map((comment) => (
-                <Comment key={comment.uuid} comment={comment} />
+                <Comment
+                  key={comment.uuid}
+                  comment={comment}
+                  taskUuid={taskUuid}
+                  onCommentDelete={onCommentChange}
+                />
               ))}
             </ScrollArea.Content>
           </ScrollArea.Viewport>
@@ -25,7 +34,7 @@ export const CommentsArea = ({ comments, taskUuid, onCommentCreated }: CommentsA
         </ScrollArea.Root>
       </Stack>
 
-      <NewCommentForm taskUuid={taskUuid} onCommentCreated={onCommentCreated} />
+      <NewCommentForm taskUuid={taskUuid} onCommentCreated={onCommentChange} />
     </Stack>
   );
 };
