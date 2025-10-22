@@ -8,8 +8,8 @@ export type Priority = "low" | "medium" | "high";
 export interface TaskComment {
   uuid: string;
   comment: string;
-  created_at: string;
-  user: UserRef;
+  createdAt: string;
+  author: UserRef;
 }
 
 export interface Task {
