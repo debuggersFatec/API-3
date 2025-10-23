@@ -17,7 +17,8 @@ export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
   const fetchTeam = useCallback(
     async (uuid?: string, fallbackName?: string) => {
       if (!uuid) return;
-      setIsLoading(true);
+      const showLoading = !teamData || teamData.uuid !== uuid;
+      if (showLoading) setIsLoading(true);
       lastUuidRef.current = uuid;
       lastFallbackNameRef.current = fallbackName;
 
@@ -33,10 +34,10 @@ export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
       } catch {
         if (fallbackName) setName(fallbackName);
       } finally {
-        setIsLoading(false);
+        if (showLoading) setIsLoading(false);
       }
     },
-    [token]
+    [token, teamData]
   );
 
   const refreshTeam = useCallback(async () => {

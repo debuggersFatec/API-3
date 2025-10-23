@@ -203,6 +203,7 @@ export const ModalEditTask = ({
 
                   <DialogCloseTrigger asChild>
                     <Button
+                      type="button"
                       variant="ghost"
                       onClick={onClose}
                       aria-label="Fechar modal"
@@ -237,6 +238,7 @@ export const ModalEditTask = ({
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"24px"}>
                       <Button
+                        type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         variant="outline"
                         w="full"
@@ -293,6 +295,7 @@ export const ModalEditTask = ({
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"8px"}>
                       <Button
+                        type="button"
                         onClick={() =>
                           setIsDropdownOpenPriority(!isDropdownOpenPriority)
                         }
