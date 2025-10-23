@@ -14,6 +14,7 @@ import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
@@ -24,6 +25,7 @@ public class UpdateTaskService {
     @Autowired private TaskRepository taskRepository;
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private ProjectsRepository projectsRepository;
 
     @Transactional
     public Task execute(String uuid, UpdateTaskRequest request) {
@@ -57,17 +59,29 @@ public class UpdateTaskService {
     }
 
     private void validateResponsible(Task task) {
-    Teams team = teamsRepository.findById(task.getEquip_uuid())
+        Teams team = teamsRepository.findById(task.getEquip_uuid())
                 .orElseThrow(() -> new TeamNotFoundException("Team com ID " + task.getEquip_uuid() + " não encontrado."));
 
-    if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
-        String responsibleUuid = task.getResponsible().uuid();
+        if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
+            String responsibleUuid = task.getResponsible().uuid();
             userRepository.findById(responsibleUuid)
                     .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));
 
-            boolean isMember = team.getMembers().stream()
-                    .anyMatch(membro -> membro.uuid().equals(responsibleUuid));
-            if (!isMember) {
+            // Enforce project membership
+            if (task.getProjectUuid() == null) {
+                throw new InvalidResponsibleException("Tarefa não está vinculada a um projeto válido.");
+            }
+            com.api_3.api_3.model.entity.Projects project = projectsRepository.findById(task.getProjectUuid())
+                .orElseThrow(() -> new com.api_3.api_3.exception.ProjectNotFoundException("Projeto com ID " + task.getProjectUuid() + " não encontrado."));
+
+            boolean isProjectMember = project.getMembers() != null && project.getMembers().stream()
+                .anyMatch(m -> responsibleUuid.equals(m.getUuid()));
+            if (!isProjectMember) {
+                throw new InvalidResponsibleException("O usuário responsável não é membro do projeto.");
+            }
+
+            boolean isTeamMember = team.getMembers().stream().anyMatch(membro -> membro.uuid().equals(responsibleUuid));
+            if (!isTeamMember) {
                 throw new InvalidResponsibleException("O usuário responsável com ID " + responsibleUuid + " não é membro da equipe " + team.getName() + ".");
             }
         }
