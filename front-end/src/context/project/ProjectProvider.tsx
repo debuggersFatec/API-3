@@ -16,7 +16,8 @@ export const ProjectProvider = ({
 
   const fetchProject = useCallback(
     async (projectUuid: string) => {
-      setIsLoading(true);
+      const showLoading = !project || project.uuid !== projectUuid;
+      if (showLoading) setIsLoading(true);
       try {
         const { data } = await axiosInstance.get(`/projects/${projectUuid}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -25,10 +26,10 @@ export const ProjectProvider = ({
       } catch (error) {
         console.error("Erro ao buscar projeto:", error);
       } finally {
-        setIsLoading(false);
+        if (showLoading) setIsLoading(false);
       }
     },
-    [token]
+    [token, project]
   );
 
   const refreshProject = useCallback(
@@ -36,7 +37,8 @@ export const ProjectProvider = ({
       const id = projectUuid ?? project?.uuid;
       if (!id) return;
 
-      setIsLoading(true);
+      const showLoading = !project || project.uuid !== id;
+      if (showLoading) setIsLoading(true);
       try {
         const { data } = await axiosInstance.get(`/projects/${id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : undefined,
@@ -45,10 +47,10 @@ export const ProjectProvider = ({
       } catch (err) {
         console.error("Erro ao atualizar projeto:", err);
       } finally {
-        setIsLoading(false);
+        if (showLoading) setIsLoading(false);
       }
     },
-    [project?.uuid, token]
+    [project, token]
   );
 
   return (

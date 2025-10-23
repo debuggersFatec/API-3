@@ -1,5 +1,6 @@
 import { useAuth } from "@/context/auth/useAuth";
 import { taskService } from "@/services";
+import { toast } from "@/utils/toast";
 import { Button, Field, Flex, Textarea } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -16,10 +17,12 @@ export const NewCommentForm = ({ taskUuid, onCommentCreated }: NewCommentFormPro
     if (!content.trim()) return;
     try {
       await taskService.createComment(taskUuid, content, token);
+      toast("success", "Comentário criado com sucesso!");
       setContent("");
       if (onCommentCreated) await onCommentCreated();
     } catch (err) {
       console.error("Erro ao criar comentário:", err);
+      toast("error", "Erro ao criar comentário.");
     }
   };
 

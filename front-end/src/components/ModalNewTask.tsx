@@ -29,6 +29,7 @@ import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
 import { useProject } from "@/context/project/useProject";
 import { useTeam } from "@/context/team/useTeam";
+import { toast } from "@/utils/toast";
 
 export function ModalNewTask() {
   const { teamData } = useTeam();
@@ -90,6 +91,7 @@ export function ModalNewTask() {
     console.log(formData);
     try {
       await taskService.createTask(formData, token);
+      toast('success', 'Tarefa criada com sucesso!');
       await refreshUser();
       await refreshProject();
       await refreshTeam();
@@ -161,7 +163,7 @@ export function ModalNewTask() {
                   </Field.Root>
                 </DialogTitle>
                 <DialogCloseTrigger asChild>
-                  <Button variant="ghost" onClick={onClose}>
+                  <Button type="button" variant="ghost" onClick={onClose} aria-label="Fechar">
                     X
                   </Button>
                 </DialogCloseTrigger>
@@ -185,6 +187,7 @@ export function ModalNewTask() {
                     <Field.Root>
                       <Box position="relative" w="100%" mb={"24px"}>
                         <Button
+                          type="button"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           variant="outline"
                           w="full"
@@ -241,6 +244,7 @@ export function ModalNewTask() {
                     <Field.Root>
                       <Box position="relative" w="100%" mb={"8px"}>
                         <Button
+                          type="button"
                           onClick={() =>
                             setIsDropdownOpenPriority(!isDropdownOpenPriority)
                           }
