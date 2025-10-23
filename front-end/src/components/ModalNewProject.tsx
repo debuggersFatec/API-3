@@ -1,9 +1,9 @@
 import { Dialog, Button, CloseButton, Field, Input } from "@chakra-ui/react";
-import { AxiosError } from "axios";
 import { useAuth } from "@/context/auth/useAuth";
 import { useState } from "react";
 import { projectServices } from "@/services/ProjectServices";
 import { useTeam } from "@/context/team/useTeam";
+import { toast } from "@/utils/toast";
 
 interface ModalNewProjectProps {
   onClose?: () => void;
@@ -18,35 +18,23 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!user || !token) {
-      alert("Usuário não autenticado. Faça login novamente.");
+      toast("error", "Usuário não autenticado. Faça login novamente.");
       return;
     }
     if (!teamData) {
-      alert("Dados da equipe não encontrados.");
+      toast("error", "Dados da equipe não encontrados.");
       return;
     }
     try {
       await projectServices.createProject(projectName, teamData.uuid, token);
+      toast("success", "Projeto criado com sucesso!");
       setOpen(false);
       if (onClose) onClose();
       setProjectName("");
       refreshUser();
     } catch (error) {
-      const err = error as AxiosError;
-      console.error("Erro ao criar equipe:", err);
-      if (err.response?.status === 401) {
-        alert("Token inválido ou expirado. Faça login novamente.");
-      } else if (err.response?.status === 403) {
-        alert("Acesso negado. Você não tem permissão.");
-      } else if (err.response?.status === 404) {
-        alert("Endpoint não encontrado no backend.");
-      } else if (err.message?.includes("Network Error")) {
-        alert(
-          "Não foi possível conectar ao backend. Verifique se o servidor está rodando e se o CORS está liberado."
-        );
-      } else {
-        alert( error);
-      }
+      toast("error", "Erro ao criar projeto.");
+      console.error("Erro ao criar projeto:", error);
     }
   };
 

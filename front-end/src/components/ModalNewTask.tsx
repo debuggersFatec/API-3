@@ -29,6 +29,7 @@ import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
 import { useProject } from "@/context/project/useProject";
 import { useTeam } from "@/context/team/useTeam";
+import { toast } from "@/utils/toast";
 
 export function ModalNewTask() {
   const { teamData } = useTeam();
@@ -90,6 +91,7 @@ export function ModalNewTask() {
     console.log(formData);
     try {
       await taskService.createTask(formData, token);
+      toast('success', 'Tarefa criada com sucesso!');
       await refreshUser();
       await refreshProject();
       await refreshTeam();

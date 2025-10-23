@@ -30,6 +30,7 @@ import { taskService } from "@/services";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
 import { CommentsArea } from "./CommentsArea";
+import { toast } from "@/utils/toast";
 
 interface ModalEditTaskProps {
   membros: UserRef[];
@@ -125,6 +126,7 @@ export const ModalEditTask = ({
     e.preventDefault();
     try {
       await taskService.updateTask(formData!.uuid, formData!, token);
+      toast("success", "Tarefa atualizada com sucesso!");
       await refreshUser();
       await refreshProject();
       await refreshTeam();
@@ -167,12 +169,14 @@ export const ModalEditTask = ({
 
     try {
       await taskService.deleteTask(formData.uuid, token);
+      toast("success", "Tarefa excluída com sucesso!");
       await refreshUser();
       await refreshProject();
       await refreshTeam();
       if (onClose) onClose();
-    } catch (error) {
-      console.error("Erro ao excluir tarefa:", error);
+    } catch (err) {
+      console.error("Erro ao excluir tarefa:", err);
+      toast("error", "Erro ao excluir tarefa.");
     }
   };
 

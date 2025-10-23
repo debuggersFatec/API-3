@@ -1,9 +1,9 @@
 import { Dialog, Button, CloseButton, Field, Input } from "@chakra-ui/react";
-import { AxiosError } from "axios";
 import { useAuth } from "@/context/auth/useAuth";
 import { useState } from "react";
 import { teamServices } from "@/services/teamServices";
 import type { UserRef } from "@/types/user";
+import { toast } from "@/utils/toast";
 
 interface ModalNewTeamProps {
   onClose?: () => void;
@@ -22,25 +22,13 @@ export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
     const member: UserRef = { uuid: user.uuid, name: user.name, img: user.img };
     try {
       await teamServices.createTeam(teamName, member, token);
+      toast("success", "Equipe criada com sucesso!");
       await refreshUser();
       if (onClose) onClose();
       setTeamName("");
     } catch (error) {
-      const err = error as AxiosError;
-      console.error("Erro ao criar equipe:", err);
-      if (err.response?.status === 401) {
-        alert("Token inválido ou expirado. Faça login novamente.");
-      } else if (err.response?.status === 403) {
-        alert("Acesso negado. Você não tem permissão.");
-      } else if (err.response?.status === 404) {
-        alert("Endpoint não encontrado no backend.");
-      } else if (err.message?.includes("Network Error")) {
-        alert(
-          "Não foi possível conectar ao backend. Verifique se o servidor está rodando e se o CORS está liberado."
-        );
-      } else {
-        alert("Erro ao criar equipe.");
-      }
+      console.error("Erro ao criar equipe:", error);
+      toast("error", "Erro ao criar equipe.");
     }
   };
 
