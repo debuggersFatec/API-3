@@ -7,9 +7,9 @@ import {
   Input,
   Stack,
   Text,
-  Link,
   Image,
 } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
@@ -92,9 +92,9 @@ export const Login = () => {
 
           <Text fontSize="sm" color="gray.600" mb={6}>
             Não tem uma conta?
-            <Link color="blue.500" href="/register">
-              Registre-se aqui
-            </Link>
+            <RouterLink to="/register" style={{ marginLeft: 8 }}>
+              <Text as="span" color="blue.500">Registre-se aqui</Text>
+            </RouterLink>
           </Text>
 
           <form onSubmit={onSubmit}>
@@ -144,9 +144,9 @@ export const Login = () => {
               />
 
               <Flex justify="flex-end">
-                <Link href="/forgot-password" fontSize="sm" color="blue.500">
-                  Esqueceu a senha?
-                </Link>
+                <RouterLink to="/forgot-password">
+                  <Text as="span" fontSize="sm" color="blue.500">Esqueceu a senha?</Text>
+                </RouterLink>
               </Flex>
 
               <Button

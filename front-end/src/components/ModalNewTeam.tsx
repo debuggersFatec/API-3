@@ -67,7 +67,7 @@ export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
             </Dialog.Body>
             <Dialog.Footer>
               <Dialog.ActionTrigger asChild>
-                <Button variant="outline" onClick={onClose}>
+                <Button type="button" variant="outline" onClick={onClose}>
                   Cancel
                 </Button>
               </Dialog.ActionTrigger>
