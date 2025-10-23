@@ -26,6 +26,7 @@ public class CreateTaskService {
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public Task execute(CreateTaskRequest request) {
@@ -64,6 +65,13 @@ public class CreateTaskService {
         // No longer embed TaskInfo in Equipe; Teams/Projects will maintain references via lists if needed in future
         if (savedTask.getResponsible() != null && savedTask.getResponsible().uuid() != null) {
             addTaskToUser(savedTask, savedTask.getResponsible().uuid());
+        }
+
+        // Notificação para membros do projeto (exclui o ator se autenticado)
+        notificationService.notifyTaskCreated(savedTask);
+        // Notificação específica para o novo responsável, se houver e não for auto-atribuição
+        if (savedTask.getResponsible() != null && savedTask.getResponsible().uuid() != null) {
+            notificationService.notifyTaskAssigned(savedTask, savedTask.getResponsible().uuid());
         }
 
         return savedTask;

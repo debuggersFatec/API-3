@@ -26,6 +26,7 @@ public class UpdateTaskService {
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectsRepository projectsRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public Task execute(String uuid, UpdateTaskRequest request) {
@@ -54,6 +55,19 @@ public class UpdateTaskService {
 
         // A lógica agora é chamada através de métodos privados nesta mesma classe
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
+
+        // Notificações de atribuição/desatribuição para os usuários afetados
+        if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
+            if (oldResponsibleUuid != null && (newResponsibleUuid == null || !oldResponsibleUuid.equals(newResponsibleUuid))) {
+                notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
+            }
+            if (newResponsibleUuid != null && (oldResponsibleUuid == null || !newResponsibleUuid.equals(oldResponsibleUuid))) {
+                notificationService.notifyTaskAssigned(savedTask, newResponsibleUuid);
+            }
+        }
+
+        // Notificação de atualização para membros do projeto
+        notificationService.notifyTaskUpdated(savedTask);
 
         return savedTask;
     }

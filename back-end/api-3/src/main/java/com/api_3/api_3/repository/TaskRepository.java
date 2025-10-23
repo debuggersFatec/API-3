@@ -1,5 +1,6 @@
 package com.api_3.api_3.repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,4 +26,7 @@ public interface TaskRepository extends MongoRepository<Task, String>{
 
     @Query(value = "{ 'projectUuid': ?0, 'responsible.uuid' : ?1 }")
     List<Task> findByProjectUuidAndResponsibleUuid(String projectUuid, String responsibleUuid);
+
+    // Due-soon queries
+    List<Task> findByDueDateBetweenAndStatusNot(Date startInclusive, Date endExclusive, Task.Status status);
 }
