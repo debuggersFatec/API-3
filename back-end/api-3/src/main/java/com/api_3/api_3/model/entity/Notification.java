@@ -36,6 +36,7 @@ public class Notification {
         TASK_DELETED,
         TASK_DUE_SOON,
         TASK_ASSIGNED,
-        TASK_UNASSIGNED
+        TASK_UNASSIGNED,
+        TASK_COMMENT
     }
 }

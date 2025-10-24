@@ -32,8 +32,8 @@ public class DeleteTaskService {
         task.setStatus(Task.Status.DELETED);
         Task saved = taskRepository.save(task);
 
-        // Notificação de exclusão
-        notificationService.notifyTaskDeleted(saved);
+        // Notificação de exclusão com escopo conforme regras
+        notificationService.notifyTaskDeletedScoped(saved);
         return saved;
     }
 

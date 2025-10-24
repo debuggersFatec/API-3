@@ -33,8 +33,12 @@ public class UpdateTaskService {
         Task existingTask = taskRepository.findById(uuid)
                 .orElseThrow(() -> new TaskNotFoundException("Tarefa não encontrada para atualizar com o ID: " + uuid));
 
-    String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
-    String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
+        // Valores anteriores para detecção de mudança em nome/data
+        String oldTitle = existingTask.getTitle();
+        java.util.Date oldDue = existingTask.getDue_date();
+
+        String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
+        String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
 
         existingTask.setTitle(request.getTitle());
         existingTask.setDescription(request.getDescription());
@@ -51,23 +55,33 @@ public class UpdateTaskService {
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
             validateResponsible(existingTask);
         }
-        Task savedTask = taskRepository.save(existingTask);
+    Task savedTask = taskRepository.save(existingTask);
 
         // A lógica agora é chamada através de métodos privados nesta mesma classe
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
 
-        // Notificações de atribuição/desatribuição para os usuários afetados
+        // Notificações de atribuição conforme regras
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
-            if (oldResponsibleUuid != null && (newResponsibleUuid == null || !oldResponsibleUuid.equals(newResponsibleUuid))) {
+            if (oldResponsibleUuid == null && newResponsibleUuid != null) {
+                // Caso anterior sem responsável -> notificar todos do projeto
+                notificationService.notifyTaskCreated(savedTask); // reutiliza mensagem para "mudança relevante" para todos
+            } else if (oldResponsibleUuid != null && newResponsibleUuid == null) {
+                // Desatribuição: notificar membros do projeto e o antigo responsável
                 notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
-            }
-            if (newResponsibleUuid != null && (oldResponsibleUuid == null || !newResponsibleUuid.equals(oldResponsibleUuid))) {
+                notificationService.notifyTaskUpdatedScoped(savedTask); // sem responsável -> notifica todos
+            } else {
+                // Reatribuição: notificar novo e antigo responsável
+                notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
                 notificationService.notifyTaskAssigned(savedTask, newResponsibleUuid);
             }
         }
 
-        // Notificação de atualização para membros do projeto
-        notificationService.notifyTaskUpdated(savedTask);
+        // Notificação de atualização (nome/data):
+        boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
+        boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
+        if (changedTitle || changedDue) {
+            notificationService.notifyTaskUpdatedScoped(savedTask);
+        }
 
         return savedTask;
     }
