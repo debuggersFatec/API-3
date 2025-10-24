@@ -23,20 +23,20 @@ public class Task {
     private Status status;
     private Priority priority;
     private String fileUrl;
-    private boolean isRequiredFile;
+    private Boolean isRequiredFile;
     private String requiredFile;
     private String teamUuid;
     private String projectUuid;
     private User.UserRef responsible;
     private List<TaskComment> comments = new ArrayList<>();
 
-    public Task(String title, Status status, Priority priority, String teamUuid, String projectUuid) {
+    public Task(String title, Status status, Priority priority, String teamUuid, String projectUuid , Boolean isRequiredFile) {
         this.title = title;
         this.status = status;
         this.priority = priority;
         this.teamUuid = teamUuid;
         this.projectUuid = projectUuid;
-        this.isRequiredFile = false;
+        this.isRequiredFile = isRequiredFile;
     }
 
     public enum Status {

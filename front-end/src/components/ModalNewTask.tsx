@@ -6,6 +6,7 @@ import {
   Text,
   Input,
   Textarea,
+  Switch,
 } from "@chakra-ui/react";
 import {
   Dialog,
@@ -35,6 +36,7 @@ export function ModalNewTask() {
   const { teamData } = useTeam();
   const { project } = useProject();
   const { open, onOpen, onClose } = useDisclosure();
+  const [isRequiredFile, setIsRequiredFile] = useState(false);
   const [formData, setFormData] = useState<Task>({
     uuid: "",
     title: "",
@@ -48,7 +50,7 @@ export function ModalNewTask() {
     // file_required: "",
     // file_finish: "",
     responsible: undefined,
-    isRequerid_file: false,
+    isRequiredFile: false,
   });
 
   const { token, refreshUser } = useAuth();
@@ -88,7 +90,6 @@ export function ModalNewTask() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
     try {
       await taskService.createTask(formData, token);
       toast('success', 'Tarefa criada com sucesso!');
@@ -108,7 +109,7 @@ export function ModalNewTask() {
       project_uuid: project?.uuid || "",
       team_uuid: teamData?.uuid || "",
       responsible: undefined,
-      isRequerid_file: false,
+      isRequiredFile: false,
     });
     onClose();
   };
@@ -122,6 +123,15 @@ export function ModalNewTask() {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleRequiredFileChange = (checked: boolean) => {
+    console.log("Checked:", checked);
+    setIsRequiredFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequiredFile: checked,
     }));
   };
 
@@ -185,7 +195,7 @@ export function ModalNewTask() {
 
                   <Box w={"100%"} gap={"8px"}>
                     <Field.Root>
-                      <Box position="relative" w="100%" mb={"24px"}>
+                      <Box position="relative" w="100%" mb={"10px"}>
                         <Button
                           type="button"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -240,6 +250,21 @@ export function ModalNewTask() {
                         )}
                       </Box>
                     </Field.Root>
+                    <Switch.Root
+                      checked={isRequiredFile}
+                      onCheckedChange={(e) =>
+                        handleRequiredFileChange(e.checked)
+                      }
+                      mb={"10px"}
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <Switch.Label>
+                        É necessário um arquivo de entrega?
+                      </Switch.Label>
+                    </Switch.Root>
 
                     <Field.Root>
                       <Box position="relative" w="100%" mb={"8px"}>

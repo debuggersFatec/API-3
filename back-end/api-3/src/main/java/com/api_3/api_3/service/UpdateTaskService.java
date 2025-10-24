@@ -40,6 +40,9 @@ public class UpdateTaskService {
     existingTask.setDue_date(request.getDue_date());
     existingTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : existingTask.getStatus());
         existingTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : existingTask.getPriority());
+        if (request.getIsRequiredFile() != null) { // Verifica se o valor foi enviado
+            existingTask.setIsRequiredFile(request.getIsRequiredFile()); // <- ATUALIZAR AQUI
+        }
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             existingTask.setResponsible(new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img()));
