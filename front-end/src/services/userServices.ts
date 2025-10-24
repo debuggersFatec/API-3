@@ -1,5 +1,5 @@
-import { axiosInstance } from './axiosInstance';
-import type { User } from '../types/user';
+import { axiosInstance } from "./axiosInstance";
+import type { User } from "../types/user";
 
 export const userService = {
 
@@ -17,6 +17,30 @@ export const userService = {
     } catch (error) {
       console.error("Erro ao buscar usuário:", error);
       throw new Error("Erro ao buscar usuário");
+    }
+  },
+
+  async updateUser(
+    name: string,
+    img: string,
+    token: string | null
+  ): Promise<void> {
+    if (!token) {
+      throw new Error("Acesso negado: token não fornecido");
+    }
+    try {
+      await axiosInstance.put(
+        `/users/me`,
+        { name, img },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      throw new Error("Erro ao atualizar usuário");
     }
   },
 };
