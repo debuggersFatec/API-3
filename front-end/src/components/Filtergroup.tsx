@@ -57,7 +57,6 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
     onPriorityChange(localPriority);
     onDueDateRangeChange(localFrom, localTo);
     onResponsibleChange(localResponsible);
-    setShowFilters(false);
   };
 
   const clearLocalAndParent = () => {
@@ -187,6 +186,7 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
                   style={{ width: "100%", padding: "8px", borderRadius: 6 }}
                 >
                   <option value="">Todos os responsáveis</option>
+                  <option value="unassigned">Sem responsável</option>
                   {members.map((m) => (
                     <option key={m.uuid} value={m.uuid}>
                       {m.name}

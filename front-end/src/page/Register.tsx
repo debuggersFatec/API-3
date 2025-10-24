@@ -1,4 +1,5 @@
-import { Box, Button, Flex, Input, Stack, Text, Link, Image } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Stack, Text, Image } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
@@ -117,7 +118,11 @@ export default function Register() {
 
           <Text fontSize="sm" color="gray.600" mb={6}>
             Já tem uma conta?
-            <Link color="blue.500" href="/login">Faça login</Link>
+            <RouterLink to="/login" style={{ marginLeft: 8, color: 'var(--chakra-colors-blue-500)' }}>
+              <Text as="span" color="blue.500" ml={2}>
+                Faça login
+              </Text>
+            </RouterLink>
           </Text>
 
           <form onSubmit={handleSubmit}>

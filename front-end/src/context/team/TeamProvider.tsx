@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "@/context/auth/useAuth";
 import type { Team } from "@/types/team";
@@ -11,13 +11,21 @@ export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
   const [teamData, setTeamData] = useState<Team | undefined>();
   const [isLoading, setIsLoading] = useState(false);
 
+  // ref para evitar que mudanças em teamData recriem fetchTeam (evita loop de chamadas)
+  const teamDataRef = useRef<Team | undefined>(teamData);
+  useEffect(() => {
+    teamDataRef.current = teamData;
+  }, [teamData]);
+
   const lastUuidRef = useRef<string | undefined>(undefined);
   const lastFallbackNameRef = useRef<string | undefined>(undefined);
 
   const fetchTeam = useCallback(
     async (uuid?: string, fallbackName?: string) => {
       if (!uuid) return;
-      setIsLoading(true);
+      const current = teamDataRef.current;
+      const showLoading = !current || current.uuid !== uuid;
+      if (showLoading) setIsLoading(true);
       lastUuidRef.current = uuid;
       lastFallbackNameRef.current = fallbackName;
 
@@ -33,7 +41,7 @@ export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
       } catch {
         if (fallbackName) setName(fallbackName);
       } finally {
-        setIsLoading(false);
+        if (showLoading) setIsLoading(false);
       }
     },
     [token]
