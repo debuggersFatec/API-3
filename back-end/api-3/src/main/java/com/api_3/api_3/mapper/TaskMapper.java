@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.api_3.api_3.dto.response.TaskResponse;
 import com.api_3.api_3.model.entity.Task;
-
+import com.api_3.api_3.model.entity.Responsible;
 
 @Component
 public class TaskMapper {
