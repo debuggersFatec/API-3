@@ -6,6 +6,7 @@ import {
   Input,
   Textarea,
   Button,
+  Switch,
 } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -29,6 +30,8 @@ import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
+import { CommentsArea } from "./CommentsArea";
+import { toast } from "@/utils/toast";
 
 interface ModalEditTaskProps {
   membros: UserRef[];
@@ -51,12 +54,22 @@ export const ModalEditTask = ({
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRequiredFile, setIsRequiredFile] = useState(task.isRequiredFile);
 
   const [formData, setFormData] = useState(task);
 
   useEffect(() => {
     setFormData(task);
   }, [task, task.project_uuid]);
+
+  const reloadTask = async () => {
+    try {
+      const fresh = await taskService.getTaskById(task.uuid, token);
+      if (fresh) setFormData(fresh);
+    } catch (err) {
+      console.error("Erro ao recarregar task:", err);
+    }
+  };
 
   if (!task || !formData) {
     return (
@@ -115,6 +128,7 @@ export const ModalEditTask = ({
     e.preventDefault();
     try {
       await taskService.updateTask(formData!.uuid, formData!, token);
+      toast("success", "Tarefa atualizada com sucesso!");
       await refreshUser();
       await refreshProject();
       await refreshTeam();
@@ -140,6 +154,14 @@ export const ModalEditTask = ({
     );
   };
 
+  const handleRequiredFileChange = (checked: boolean) => {
+    setIsRequiredFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequiredFile: checked,
+    }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) =>
@@ -157,12 +179,14 @@ export const ModalEditTask = ({
 
     try {
       await taskService.deleteTask(formData.uuid, token);
+      toast("success", "Tarefa excluída com sucesso!");
       await refreshUser();
       await refreshProject();
       await refreshTeam();
       if (onClose) onClose();
-    } catch (error) {
-      console.error("Erro ao excluir tarefa:", error);
+    } catch (err) {
+      console.error("Erro ao excluir tarefa:", err);
+      toast("error", "Erro ao excluir tarefa.");
     }
   };
 
@@ -193,6 +217,7 @@ export const ModalEditTask = ({
 
                   <DialogCloseTrigger asChild>
                     <Button
+                      type="button"
                       variant="ghost"
                       onClick={onClose}
                       aria-label="Fechar modal"
@@ -207,7 +232,7 @@ export const ModalEditTask = ({
             <DialogBody>
               <Flex justifyContent={"space-between"} gap={"12px"}>
                 <Box w={"100%"}>
-                  <Field.Root h={"50%"}>
+                  <Field.Root h={"25%"}>
                     <Textarea
                       name="description"
                       placeholder="Descrição"
@@ -216,12 +241,18 @@ export const ModalEditTask = ({
                       value={formData!.description}
                     />
                   </Field.Root>
+                  <CommentsArea
+                    taskUuid={task.uuid}
+                    comments={formData.comments}
+                    onCommentChange={reloadTask}
+                  />
                 </Box>
 
                 <Box w={"100%"}>
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"24px"}>
                       <Button
+                        type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         variant="outline"
                         w="full"
@@ -275,9 +306,23 @@ export const ModalEditTask = ({
                     </Box>
                   </Field.Root>
 
+                  <Switch.Root
+                    checked={isRequiredFile}
+                    onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                    <Switch.Label>
+                      É necessário um arquivo de entrega?
+                    </Switch.Label>
+                  </Switch.Root>
+
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"8px"}>
                       <Button
+                        type="button"
                         onClick={() =>
                           setIsDropdownOpenPriority(!isDropdownOpenPriority)
                         }

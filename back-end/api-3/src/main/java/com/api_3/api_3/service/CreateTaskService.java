@@ -46,6 +46,9 @@ public class CreateTaskService {
         // Atribuir vínculos corretos
         newTask.setEquip_uuid(project.getTeamUuid());
         newTask.setProjectUuid(request.getProject_uuid());
+        newTask.setRequiredFile(request.getRequiredFile());
+        newTask.setIsRequiredFile(request.getIsRequiredFile());
+        
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             newTask.setResponsible(new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img()));
@@ -75,9 +78,22 @@ public class CreateTaskService {
             userRepository.findById(responsibleUuid)
                     .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));
 
-        boolean isMember = team.getMembers().stream()
-            .anyMatch(membro -> membro.uuid().equals(responsibleUuid));
-            if (!isMember) {
+            // Enforce project membership (projects own tasks)
+            if (task.getProjectUuid() == null) {
+                throw new InvalidResponsibleException("Tarefa não está vinculada a um projeto válido.");
+            }
+            com.api_3.api_3.model.entity.Projects project = projectsRepository.findById(task.getProjectUuid())
+                .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + task.getProjectUuid() + " não encontrado."));
+
+            boolean isProjectMember = project.getMembers() != null && project.getMembers().stream()
+                .anyMatch(m -> responsibleUuid.equals(m.getUuid()));
+            if (!isProjectMember) {
+                throw new InvalidResponsibleException("O usuário responsável não é membro do projeto.");
+            }
+
+            // Optional: still ensure team membership consistency
+            boolean isTeamMember = team.getMembers().stream().anyMatch(m -> responsibleUuid.equals(m.getUuid()));
+            if (!isTeamMember) {
                 throw new InvalidResponsibleException("O usuário responsável não é membro da equipe.");
             }
         }

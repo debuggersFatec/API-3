@@ -1,4 +1,5 @@
-import { Box, Button, Flex, Input, Stack, Text, Link, Image } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Stack, Text, Image } from "@chakra-ui/react";
+import { Link as RouterLink } from "react-router-dom";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
@@ -139,11 +140,12 @@ export default function Register() {
           <Image src={logoSrc} alt="Logo" mx="auto" mb={4} maxW="200px" maxH="88px" w="auto" h="auto" objectFit="contain" />
 
           <Text fontSize="2xl" fontWeight="bold" mb={1} color="gray.800">Bem vindo ao FASTASK</Text>
-
           <Text fontSize="sm" color="gray.600" mb={6}>
             Já tem uma conta?
+
             {/* Passa o redirect path para o login */}
             <Link color="blue.500" href={`/login?redirect=${encodeURIComponent(redirectPath)}`}>Faça login</Link>
+
           </Text>
 
           <form onSubmit={handleSubmit}>

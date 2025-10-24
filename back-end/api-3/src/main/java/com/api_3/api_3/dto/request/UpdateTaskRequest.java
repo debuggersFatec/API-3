@@ -1,9 +1,11 @@
 package com.api_3.api_3.dto.request;
 
+import java.util.Date;
+
 import com.api_3.api_3.model.entity.Responsible;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import java.util.Date;
 
 @Data
 public class UpdateTaskRequest {
@@ -19,5 +21,9 @@ public class UpdateTaskRequest {
 
     private String priority;
 
-    private Responsible responsible; // Pode ser nulo se não houver responsável atribuído
+    private Responsible responsible; 
+
+    private String requiredFile;
+
+    private Boolean isRequiredFile;
 }

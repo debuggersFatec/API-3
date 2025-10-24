@@ -1,12 +1,11 @@
 package com.api_3.api_3.dto.response;
 
 import java.util.Date;
-
+import java.util.List; 
 import com.api_3.api_3.model.entity.Responsible;
-
 import lombok.Data;
 
-@Data
+@Data 
 public class TaskResponse {
     private String uuid;
     private String title;
@@ -14,15 +13,13 @@ public class TaskResponse {
     private Date due_date;
     private String status;
     private String priority;
-    /**
-     * Preferred field for team identifier (new naming).
-     */
+    private Boolean isRequiredFile;
+    private String requiredFile;
     private String team_uuid;
-    /**
-     * Legacy alias kept for backward compatibility. Will be removed after frontend migration.
-     */
     @Deprecated
-    private String equip_uuid;
+    private String equip_uuid; 
     private String project_uuid;
     private Responsible responsible;
+
+    private List<CommentResponse> comments;
 }

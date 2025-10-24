@@ -8,8 +8,8 @@ export type Priority = "low" | "medium" | "high";
 export interface TaskComment {
   uuid: string;
   comment: string;
-  created_at: string;
-  user: UserRef;
+  createdAt: string;
+  author: UserRef;
 }
 
 export interface Task {
@@ -20,8 +20,8 @@ export interface Task {
   status: Status;
   priority: Priority;
   file_url?: string;
-  isRequerid_file: boolean;
-  requered_file?: string;
+  isRequiredFile: boolean;
+  required_file?: string;
   team_uuid: string;
   project_uuid: string;
   responsible?: UserRef;
