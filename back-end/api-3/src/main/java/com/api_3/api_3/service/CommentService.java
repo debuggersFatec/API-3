@@ -32,7 +32,7 @@ public class CommentService {
         User author = userRepository.findById(authorUuid)
                 .orElseThrow(() -> new UserNotFoundException("Autor do comentário não encontrado com ID: " + authorUuid));
 
-        TaskComment newComment = new TaskComment(content, new Date(), author.toRef());
+        TaskComment newComment = new TaskComment(content, new Date(), authorUuid);
 
         if (task.getComments() == null) {
             task.setComments(new ArrayList<>());
@@ -58,10 +58,9 @@ public class CommentService {
                 .findFirst()
                 .orElseThrow(() -> new CommentNotFoundException("Comentário não encontrado com ID: " + commentId + " na tarefa " + taskId));
 
-        // Verifica a autoria
-        if (!commentToUpdate.getUser().getUuid().equals(requestingUserUuid)) {
+        if (!commentToUpdate.getAuthorUuid().equals(requestingUserUuid)) {
             throw new SecurityException("Utilizador não autorizado a editar este comentário.");
-        }
+}
 
         commentToUpdate.setComment(updatedContent);
         taskRepository.save(task);
@@ -84,9 +83,9 @@ public class CommentService {
             .orElseThrow(() -> new CommentNotFoundException("Comentário não encontrado com ID: " + commentId + " na tarefa " + taskId));
 
         // Verifica a autoria
-        if (!commentToDelete.getUser().getUuid().equals(requestingUserUuid)) {
+        if (!commentToDelete.getAuthorUuid().equals(requestingUserUuid)) {
             throw new SecurityException("Utilizador não autorizado a excluir este comentário.");
-        }
+}
 
         boolean removed = task.getComments().removeIf(c -> c.getUuid().equals(commentId));
 

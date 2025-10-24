@@ -13,12 +13,12 @@ public class TaskComment {
     private String uuid;
     private String comment;
     private Date createdAt;
-    private User.UserRef user;
+    private String authorUuid;
 
-    public TaskComment(String comment, Date createdAt, User.UserRef user) {
-        this.uuid = UUID.randomUUID().toString(); // Gerar UUID automaticamente
+    public TaskComment(String comment, Date createdAt, String authorUuid) {
+        this.uuid = UUID.randomUUID().toString();
         this.comment = comment;
         this.createdAt = createdAt;
-        this.user = user;
+        this.authorUuid = authorUuid; 
     }
 }
