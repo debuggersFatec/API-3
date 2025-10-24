@@ -1,4 +1,4 @@
-import { Button, Input, HStack, Text, Box, VStack } from "@chakra-ui/react";
+import { Button, HStack, Text, Box, VStack } from "@chakra-ui/react";
 import { FaLink } from "react-icons/fa";
 import type { AxiosError } from "axios";
 import { useAuth } from "@/context/auth/useAuth";

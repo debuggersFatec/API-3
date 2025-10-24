@@ -92,7 +92,7 @@ export const JoinTeamPage = () => {
 
     return (
       <Center w="100vw" h="100vh" bg="gray.50">
-        <VStack spacing={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
+        <VStack gap={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
           <Heading size="lg" color="blue.500">Convite para Equipe</Heading>
           <Text fontSize="md" color="gray.600" textAlign="center">
             Você precisa estar logado para aceitar o convite.
@@ -129,12 +129,12 @@ export const JoinTeamPage = () => {
   if (loading) {
     return (
       <Center w="100vw" h="100vh" bg="gray.50">
-        <VStack spacing={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
+        <VStack gap={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
           <Heading size="lg" color="blue.500">Convite para Equipe</Heading>
           <Text fontSize="md" color="gray.600" textAlign="center">
             Processando sua entrada na equipe...
           </Text>
-          <Spinner size="xl" color="blue.500" thickness="4px" />
+          <Spinner size="xl" color="blue.500" />
         </VStack>
       </Center>
     );
@@ -144,7 +144,7 @@ export const JoinTeamPage = () => {
 
   return (
     <Center w="100vw" h="100vh" bg="gray.50">
-      <VStack spacing={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
+      <VStack gap={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
         <Heading size="lg" color="blue.500">Convite para Equipe</Heading>
         
         {error && (
