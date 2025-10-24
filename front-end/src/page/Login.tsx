@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Box,
   Button,
@@ -17,7 +15,7 @@ import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 import axios from "axios";
 import { useAuth } from "@/context/auth/useAuth";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 
 export const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -25,6 +23,10 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const { setUser, setToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location to read query params
+  
+  // Read redirect path from query parameter, default to dashboard
+  const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +43,23 @@ export const Login = () => {
       .then((response) => {
         setToken(response.data.token);
         setUser(response.data.user);
-        navigate("/");
+        // If there is an explicit redirect, use it. Otherwise, prefer a pending invite token
+        // saved in localStorage (fallback from JoinTeamPage).
+        if (redirectPath && redirectPath !== "/") {
+          navigate(decodeURIComponent(redirectPath));
+          return;
+        }
+
+        const pending = localStorage.getItem('pendingInviteToken');
+        if (pending) {
+          // remove it and navigate to join-team with token
+          localStorage.removeItem('pendingInviteToken');
+          navigate(`/join-team?token=${encodeURIComponent(pending)}`);
+          return;
+        }
+
+        // Default
+        navigate(decodeURIComponent(redirectPath));
       })
       .catch((error) => {
         console.error("Erro no login:", error);
@@ -92,7 +110,8 @@ export const Login = () => {
 
           <Text fontSize="sm" color="gray.600" mb={6}>
             Não tem uma conta?
-            <Link color="blue.500" href="/register">
+            {/* Passa o redirect path para o registro */}
+            <Link color="blue.500" href={`/register?redirect=${encodeURIComponent(redirectPath)}`}>
               Registre-se aqui
             </Link>
           </Text>
