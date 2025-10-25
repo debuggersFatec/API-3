@@ -10,7 +10,7 @@ export const MyTasks = () => {
   return (
     <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
       <SectionHeader title="Minhas tarefas" />
-      <CheckList tasks={filteredTasks} />
+      <CheckList tasks={filteredTasks} isUserArea={true} />
     </Box>
   );
 };

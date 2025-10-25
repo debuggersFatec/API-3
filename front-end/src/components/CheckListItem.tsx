@@ -16,13 +16,13 @@ import { toast } from "@/utils/toast";
 
 interface CheckItemProps {
   task: TaskProject | TaskUser;
+  isUserArea?: boolean;
 }
 
-export const CheckListItem = ({ task }: CheckItemProps) => {
-  const { token } = useAuth();
+export const CheckListItem = ({ task, isUserArea }: CheckItemProps) => {
+  const { token, user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [taskData, setTaskData] = useState<Task>();
-
 
   const handleOpenModal = async () => {
     setModalOpen(true);
@@ -108,9 +108,7 @@ export const CheckListItem = ({ task }: CheckItemProps) => {
                 );
               })()}
               <Text color="gray.500" fontSize="sm">
-                {task.due_date
-                  ? formatDateShort(task.due_date)
-                  : "Sem prazo"}
+                {task.due_date ? formatDateShort(task.due_date) : "Sem prazo"}
               </Text>
             </HStack>
           </VStack>
@@ -118,7 +116,12 @@ export const CheckListItem = ({ task }: CheckItemProps) => {
           <Spacer />
 
           <VStack align="end" gap={0}>
-            {task.responsible ? (
+            {isUserArea && user ? (
+              <>
+                <AvatarUser user={user} size="xs" />
+                <Text fontSize="sm">{user.name}</Text>
+              </>
+            ) : task.responsible ? (
               <>
                 <AvatarUser user={task.responsible} size="xs" />
                 <Text fontSize="sm">{task.responsible.name}</Text>
