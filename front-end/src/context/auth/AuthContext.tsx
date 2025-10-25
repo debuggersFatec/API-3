@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { AuthContext } from "./AuthContextInstance";
-import axios from "axios";
+import { userService } from "@/services/userServices";
 import type { User } from "@/types/user";
 import type { TaskUser, Priority, Status } from "@/types/task";
 import { normalizeUser } from "./authUtils";
@@ -20,13 +20,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   });
   const [token, setTokenState] = useState<string | null>(() => {
-    return localStorage.getItem("token");
+    const stored = localStorage.getItem("token");
+    if (!stored) return null;
+    try {
+      return atob(stored);
+    } catch {
+      return stored;
+    }
   });
 
   const setToken = (newToken: string | null) => {
     setTokenState(newToken);
     if (newToken) {
-      localStorage.setItem("token", newToken);
+      try {
+        localStorage.setItem("token", btoa(newToken));
+      } catch {
+        localStorage.setItem("token", newToken);
+      }
     } else {
       localStorage.removeItem("token");
     }
@@ -52,11 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const refreshUser = async () => {
     if (!token) return;
     try {
-      const response = await axios.get("http://localhost:8080/api/users/me", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await userService.getCurrentUser();
       type Rec = Record<string, unknown>;
       const isRec = (v: unknown): v is Rec => typeof v === "object" && v !== null;
       const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
