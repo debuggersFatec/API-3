@@ -9,15 +9,9 @@ export const ProdutividadeChart = () => {
   const { project } = useProject();
   const tasks = project?.tasks ?? [];
 
-  const notStarted = tasks.filter(
-    (t) => t.status.toLowerCase() === "not_started"
-  ).length;
-  const inProgress = tasks.filter(
-    (t) => t.status.toLowerCase() === "in_progress"
-  ).length;
-  const completed = tasks.filter(
-    (t) => t.status.toLowerCase() === "completed"
-  ).length;
+  const notStarted = tasks.filter((t) => t.status === "NOT_STARTED").length;
+  const inProgress = tasks.filter((t) => t.status === "IN_PROGRESS").length;
+  const completed = tasks.filter((t) => t.status === "COMPLETED").length;
 
   const chart = useChart({
     data: [

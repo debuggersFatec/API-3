@@ -26,7 +26,7 @@ interface CheckItemProps {
 
 export const CheckListItem = ({ task, membros }: CheckItemProps) => {
   const { token } = useAuth();
-  const [checked, setChecked] = useState(status === "completed");
+  const [checked, setChecked] = useState(status === "COMPLETED");
   const [modalOpen, setModalOpen] = useState(false);
   const [taskData, setTaskData] = useState<Task>();
 

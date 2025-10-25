@@ -13,8 +13,8 @@ export const ProgressoDisplay = () => {
   let concluidas = 0;
   let naoConcluidas = 0;
   tasks.forEach((t) => {
-    const status = (t.status || "").toLowerCase();
-    if (status === "completed") {
+    const status = (t.status || "");
+    if (status === "COMPLETED") {
       concluidas++;
     } else {
       naoConcluidas++;

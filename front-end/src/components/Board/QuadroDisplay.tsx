@@ -6,7 +6,7 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import { organizarTarefas } from "../../utils/organizarTarefas";
 
 import { Column } from "./Column";
-import type { TaskProject } from "@/types/task";
+import type { TaskProject, Status } from "@/types/task";
 import { tasks } from "@/data/tasks";
 
 export interface Column {
@@ -44,12 +44,13 @@ export const QuadroDisplay = () => {
 
     if (!startColumnId || startColumnId === destColumnId) return;
 
-    const newStatus =
+    // Map column IDs to backend UPPERCASE status enums
+    const newStatus: Status =
       destColumnId === "nao-atribuidas"
-        ? "not-started"
+        ? "NOT_STARTED"
         : destColumnId === "atribuido"
-        ? "in-progress"
-        : "completed";
+        ? "IN_PROGRESS"
+        : "COMPLETED";
 
     setBoardData((prevData) => {
       const newStartTaskIds = prevData.columns[startColumnId].taskIds.filter(

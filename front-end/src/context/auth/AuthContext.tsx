@@ -115,21 +115,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const toStatus = (s?: string): Status => {
-        if (!s) return "not-started";
+        if (!s) return "NOT_STARTED";
         const v = s.toUpperCase();
-        if (v === "NOT_STARTED") return "not-started";
-        if (v === "IN_PROGRESS") return "in-progress";
-        if (v === "COMPLETED") return "completed";
-        if (v === "DELETED") return "deleted";
-        return "not-started";
+        if (v === "NOT_STARTED") return "NOT_STARTED";
+        if (v === "IN_PROGRESS") return "IN_PROGRESS";
+        if (v === "COMPLETED") return "COMPLETED";
+        if (v === "DELETED") return "DELETED";
+        return "NOT_STARTED";
       };
       const toPriority = (p?: string): Priority => {
-        if (!p) return "low";
+        if (!p) return "LOW";
         const v = p.toUpperCase();
-        if (v === "LOW") return "low";
-        if (v === "MEDIUM") return "medium";
-        if (v === "HIGH") return "high";
-        return "low";
+        if (v === "LOW") return "LOW";
+        if (v === "MEDIUM") return "MEDIUM";
+        if (v === "HIGH") return "HIGH";
+        return "LOW";
       };
 
       const tasks: TaskUser[] = (apiUser.tasks ?? []).map((t) => ({

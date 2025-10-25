@@ -18,11 +18,11 @@ export function organizarTarefas(listaDeTarefas: TaskProject[]): BoardData {
 
   for (const tarefa of listaDeTarefas) {
     quadro.tasks[tarefa.uuid] = tarefa;
-    if (tarefa.status === "not-started") {
+    if (tarefa.status === "NOT_STARTED") {
       quadro.columns["nao-atribuidas"].taskIds.push(tarefa.uuid);
-    } else if (tarefa.status === "in-progress") {
+    } else if (tarefa.status === "IN_PROGRESS") {
       quadro.columns["atribuido"].taskIds.push(tarefa.uuid);
-    } else if (tarefa.status === "completed") {
+    } else if (tarefa.status === "COMPLETED") {
       quadro.columns["concluido"].taskIds.push(tarefa.uuid);
     }
   }

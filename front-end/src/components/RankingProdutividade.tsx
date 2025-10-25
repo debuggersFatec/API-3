@@ -13,8 +13,8 @@ export const RankingProdutividade = () => {
   const tasks: TaskProject[] = project?.tasks || [];
   const ranking: Record<string, { name: string; tasksNumber: number }> = {};
   tasks.forEach((t) => {
-    const status = (t.status || "").toLowerCase();
-    const isConcluida = status === "completed" || status === "concluida";
+    const status = (t.status || "");
+    const isConcluida = status === "COMPLETED";
     const nome = t.responsible?.name?.trim();
     if (isConcluida && nome) {
       if (!ranking[nome]) {

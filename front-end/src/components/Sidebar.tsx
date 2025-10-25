@@ -20,7 +20,7 @@ export const Sidebar = () => {
   const [activeTab, setActiveTab] = useState<string>("minhasTasks");
 
   const filteredTasks =
-    user?.tasks?.filter((task) => task.status !== "deleted") || [];
+    user?.tasks?.filter((task) => task.status !== "DELETED") || [];
 
   useEffect(() => {
     if (activeTab && user?.teams) {
@@ -132,7 +132,7 @@ export const Sidebar = () => {
           >
             Completas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
-              {filteredTasks.filter((t) => t.status === "completed").length}
+              {filteredTasks.filter((t) => t.status === "COMPLETED").length}
             </span>
           </Tabs.Trigger>
           <Button

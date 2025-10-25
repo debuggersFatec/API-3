@@ -191,9 +191,9 @@ export const ModalEditTask = ({
   };
 
   const prioritys: { label: string; value: Priority }[] = [
-    { label: "Baixa", value: "low" },
-    { label: "Média", value: "medium" },
-    { label: "Alta", value: "high" },
+    { label: "Baixa", value: "LOW" },
+    { label: "Média", value: "MEDIUM" },
+    { label: "Alta", value: "HIGH" },
   ];
 
   return (
