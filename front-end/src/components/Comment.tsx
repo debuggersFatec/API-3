@@ -1,7 +1,7 @@
 import type { TaskComment } from "@/types/task";
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import { AvatarUser } from "./AvatarUser";
-import { formatDateShort } from "@/utils/formatDateShort";
+import { formatDateShort } from "@/utils/formatters";
 import { useAuth } from "@/context/auth/useAuth";
 import { GoTrash } from "react-icons/go";
 import { taskService } from "@/services";
