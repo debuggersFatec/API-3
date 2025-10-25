@@ -1,7 +1,7 @@
 import { Dialog, Button, CloseButton, Field, Input } from "@chakra-ui/react";
 import { useAuth } from "@/context/auth/useAuth";
 import { useState } from "react";
-import { teamServices } from "@/services/teamServices";
+import { teamServices } from "@/services";
 import type { UserRef } from "@/types/user";
 import { toast } from "@/utils/toast";
 
@@ -11,7 +11,7 @@ interface ModalNewTeamProps {
 
 export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
   const [teamName, setTeamName] = useState("");
-  const { user, token, refreshUser } = useAuth();
+  const { user, refreshUser } = useAuth();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -21,7 +21,7 @@ export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
     }
     const member: UserRef = { uuid: user.uuid, name: user.name, img: user.img };
     try {
-      await teamServices.createTeam(teamName, member, token);
+      await teamServices.createTeam(teamName, member);
       toast("success", "Equipe criada com sucesso!");
       await refreshUser();
       if (onClose) onClose();

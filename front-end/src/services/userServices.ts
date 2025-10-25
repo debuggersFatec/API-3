@@ -1,4 +1,5 @@
 import { axiosInstance } from './axiosInstance';
+import type { AxiosResponse } from 'axios';
 import type { User } from '../types/user';
 
 export const userService = {
@@ -17,6 +18,15 @@ export const userService = {
     } catch (error) {
       console.error("Erro ao buscar usuário:", error);
       throw new Error("Erro ao buscar usuário");
+    }
+  },
+  async getCurrentUser(): Promise<AxiosResponse<unknown>> {
+    try {
+      const response = await axiosInstance.get(`/users/me`);
+      return response;
+    } catch (error) {
+      console.error("Erro ao buscar usuário atual:", error);
+      throw error;
     }
   },
 };

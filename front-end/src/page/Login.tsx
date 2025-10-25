@@ -15,7 +15,7 @@ import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
-import axios from "axios";
+import { authService } from "@/services/authService";
 import { useAuth } from "@/context/auth/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -36,8 +36,8 @@ export const Login = () => {
       return;
     }
 
-    axios
-      .post("http://localhost:8080/api/auth/login", { email, password })
+    authService
+      .login({ email, password })
       .then((response) => {
         setToken(response.data.token);
         setUser(response.data.user);

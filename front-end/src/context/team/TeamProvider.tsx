@@ -1,11 +1,9 @@
 import { useCallback, useRef, useState, useEffect } from "react";
-import axios from "axios";
-import { useAuth } from "@/context/auth/useAuth";
+import { teamServices } from "@/services";
 import type { Team } from "@/types/team";
 import { TeamContext } from "./TeamContext";
 
 export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
-  const { token } = useAuth();
 
   const [name, setName] = useState("");
   const [teamData, setTeamData] = useState<Team | undefined>();
@@ -30,21 +28,16 @@ export const TeamProvider = ({ children }: { children: React.ReactNode }) => {
       lastFallbackNameRef.current = fallbackName;
 
       try {
-        const response = await axios.get(
-          `http://localhost:8080/api/teams/${uuid}`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-        setName(response.data.name);
-        setTeamData(response.data);
+        const response = await teamServices.getTeam(uuid);
+        setName(response.name);
+        setTeamData(response);
       } catch {
         if (fallbackName) setName(fallbackName);
       } finally {
         if (showLoading) setIsLoading(false);
       }
     },
-    [token]
+    []
   );
 
   const refreshTeam = useCallback(async () => {

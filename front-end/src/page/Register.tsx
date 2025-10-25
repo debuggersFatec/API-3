@@ -5,7 +5,7 @@ import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
-import axios from "axios";
+import { authService } from "@/services/authService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth/useAuth";
 
@@ -82,12 +82,8 @@ export default function Register() {
     try {
       // setLoading(true);
 
-      axios
-        .post("http://localhost:8080/api/auth/register", {
-          email: email,
-          password: password,
-          name: name,
-        })
+      authService
+        .register({ email, password, name })
         .then((response) => {
           setToken(response.data.token);
           setUser(response.data.user);
