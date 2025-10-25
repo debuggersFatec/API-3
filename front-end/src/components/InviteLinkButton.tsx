@@ -2,7 +2,7 @@ import { Button, HStack, Text, Box, VStack } from "@chakra-ui/react";
 import { FaLink } from "react-icons/fa";
 import type { AxiosError } from "axios";
 import { useAuth } from "@/context/auth/useAuth";
-import { toaster } from "@/components/ui/toaster";
+import { toaster } from "@/components/ui/toasterClient";
 import { useEffect, useState } from "react";
 import axios from "axios";
 

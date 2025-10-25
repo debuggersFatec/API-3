@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Input, Stack, Text, Image } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
+import { Box, Button, Flex, Input, Stack, Text, Image, Link } from "@chakra-ui/react";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
