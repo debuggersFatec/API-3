@@ -21,6 +21,7 @@ import {
 import { Field } from "@chakra-ui/react/field";
 import { useRef, useState, useEffect } from "react";
 import { MdOutlineMail, MdDelete } from "react-icons/md";
+import DestructiveButton from "@/components/ui/DestructiveButton";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Priority, Task } from "../types/task";
@@ -28,6 +29,7 @@ import { useAuth } from "../context/auth/useAuth";
 
 import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
+import useTaskActions from "@/hooks/useTaskActions";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
 import { CommentsArea } from "./CommentsArea";
@@ -49,6 +51,7 @@ export const ModalEditTask = ({
   const { token, refreshUser } = useAuth();
   const { refreshTeam } = useTeam();
   const { refreshProject } = useProject();
+  const { deleteTask } = useTaskActions();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
@@ -174,21 +177,7 @@ export const ModalEditTask = ({
     );
   };
 
-  const handleDelete = async () => {
-    if (!formData) return;
-
-    try {
-      await taskService.deleteTask(formData.uuid, token);
-      toast("success", "Tarefa excluída com sucesso!");
-      await refreshUser();
-      await refreshProject();
-      await refreshTeam();
-      if (onClose) onClose();
-    } catch (err) {
-      console.error("Erro ao excluir tarefa:", err);
-      toast("error", "Erro ao excluir tarefa.");
-    }
-  };
+  // centralized task actions hook is called above with other hooks
 
   const prioritys: { label: string; value: Priority }[] = [
     { label: "Baixa", value: "LOW" },
@@ -422,23 +411,24 @@ export const ModalEditTask = ({
                     />
                   </Field.Root>
 
-                  <Flex gap={2} maxW={"100%"}>
-                    <Button
-                      bg="red.500"
-                      color="white"
-                      _hover={{ bg: "red.600" }}
-                      onClick={handleDelete}
-                      aria-label="Excluir tarefa"
-                      flex={1}
-                      px={2}
-                    >
-                      Excluir
-                      <MdDelete size={22} color="#fff" />
-                    </Button>
-                    <Button flex={1} type="submit" colorScheme={"blue"}>
-                      Salvar alterações
-                    </Button>
-                  </Flex>
+                    <Flex gap={2} maxW={"100%"}>
+                      {/* Reusable destructive button opens confirmation dialog */}
+                      <DestructiveButton
+                        icon={MdDelete}
+                        onConfirm={async () => {
+                          if (!formData) return;
+                          await deleteTask(formData.uuid, { onSuccess: () => onClose && onClose() });
+                        }}
+                        flex={1}
+                        px={2}
+                      >
+                        Excluir
+                      </DestructiveButton>
+
+                      <Button flex={1} type="submit" colorScheme={"blue"}>
+                        Salvar alterações
+                      </Button>
+                    </Flex>
                 </Box>
               </Flex>
             </DialogBody>
