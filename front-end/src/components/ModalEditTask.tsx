@@ -36,7 +36,6 @@ import { CommentsArea } from "./CommentsArea";
 import { toast } from "@/utils/toast";
 
 interface ModalEditTaskProps {
-  membros: UserRef[];
   task: Task;
   open: boolean;
   onClose?: () => void;
@@ -44,13 +43,12 @@ interface ModalEditTaskProps {
 
 export const ModalEditTask = ({
   task,
-  membros,
   open,
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
   const { refreshTeam } = useTeam();
-  const { refreshProject } = useProject();
+  const { refreshProject, project } = useProject();
   const { deleteTask } = useTaskActions();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -101,6 +99,11 @@ export const ModalEditTask = ({
           }
         : prev
     );
+    setIsDropdownOpen(false);
+  };
+
+  const handleUnassign = async () => {
+    setFormData((prev) => (prev ? { ...prev, responsible: undefined } : prev));
     setIsDropdownOpen(false);
   };
 
@@ -184,7 +187,7 @@ export const ModalEditTask = ({
     { label: "Média", value: "MEDIUM" },
     { label: "Alta", value: "HIGH" },
   ];
-
+console.log(formData);
   return (
     <DialogRoot open={open} onOpenChange={onClose}>
       <DialogBackdrop />
@@ -277,19 +280,37 @@ export const ModalEditTask = ({
                           zIndex="10"
                           boxShadow="md"
                         >
-                          {membros.map((member) => (
+                          {project?.members && project.members.length > 0 ? (
+                            project.members.map((member) => (
+                              <Flex
+                                key={member.uuid}
+                                p={2}
+                                align="center"
+                                cursor="pointer"
+                                _hover={{ bg: "gray.100" }}
+                                onClick={() => handleSelectMember(member)}
+                              >
+                                <AvatarUser user={member} size="2xs" />
+                                <Text ml={2}>{member.name}</Text>
+                              </Flex>
+                            ))
+                          ) : (
+                            <Box p={3} color="gray.600">
+                              Nenhum membro disponível
+                            </Box>
+                          )}
                             <Flex
-                              key={member.uuid}
+                              key="unassigned"
                               p={2}
                               align="center"
                               cursor="pointer"
                               _hover={{ bg: "gray.100" }}
-                              onClick={() => handleSelectMember(member)}
+                              onClick={() => handleUnassign()}
                             >
-                              <AvatarUser user={member} size="2xs" />
-                              <Text ml={2}>{member.name}</Text>
+                              <Text ml={2} fontWeight={500} color="gray.700">
+                                Sem responsável
+                              </Text>
                             </Flex>
-                          ))}
                         </Box>
                       )}
                     </Box>

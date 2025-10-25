@@ -14,21 +14,15 @@ import {
 import { AvatarUser } from "./AvatarUser";
 import { toast } from "@/utils/toast";
 
-type Member = {
-  uuid: string;
-  img: string;
-  name: string;
-};
-
 interface CheckItemProps {
   task: TaskProject | TaskUser;
-  membros?: Member[];
 }
 
-export const CheckListItem = ({ task, membros }: CheckItemProps) => {
+export const CheckListItem = ({ task }: CheckItemProps) => {
   const { token } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [taskData, setTaskData] = useState<Task>();
+
 
   const handleOpenModal = async () => {
     setModalOpen(true);
@@ -142,7 +136,6 @@ export const CheckListItem = ({ task, membros }: CheckItemProps) => {
         <ModalEditTask
           open={modalOpen}
           task={taskData}
-          membros={membros || []}
           onClose={() => {
             setModalOpen(false);
           }}
