@@ -7,7 +7,10 @@ export const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children 
   const location = useLocation();
 
   if (!user || !token) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Preserve the full path and query (e.g. /join-team?token=...) so Login/Register
+    // can redirect the user back to the invite URL after successful auth.
+    const redirect = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?redirect=${redirect}`} replace />;
   }
   return <>{children}</>;
 };
