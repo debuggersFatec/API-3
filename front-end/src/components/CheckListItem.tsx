@@ -17,9 +17,10 @@ import { toast } from "@/utils/toast";
 interface CheckItemProps {
   task: TaskProject | TaskUser;
   isUserArea?: boolean;
+  isTeashcan?: boolean;
 }
 
-export const CheckListItem = ({ task, isUserArea }: CheckItemProps) => {
+export const CheckListItem = ({ task, isUserArea, isTeashcan }: CheckItemProps) => {
   const { token, user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [taskData, setTaskData] = useState<Task>();
@@ -75,14 +76,14 @@ export const CheckListItem = ({ task, isUserArea }: CheckItemProps) => {
                   colorPalet.status.DEFAULT;
                 return (
                   <Badge
-                    bg={s.bg}
+                    bg={isTeashcan ? 'red.100' : s.bg}
                     color={s.color}
                     borderRadius="md"
                     px={2}
                     py={0.5}
                     fontSize="xs"
                   >
-                    {formatStatus(task.status)}
+                    {isTeashcan ? 'Deletada' : formatStatus(task.status)}
                   </Badge>
                 );
               })()}

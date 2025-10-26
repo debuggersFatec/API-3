@@ -9,6 +9,6 @@ export const TabLixeiraEquipe = () => {
     return <div>Sem tarefas na lixeira</div>;
   }
   return (
-    <CheckList tasks={lixeira} />
+    <CheckList tasks={lixeira} isTrashcan={true} />
   );
 };

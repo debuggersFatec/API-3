@@ -9,12 +9,14 @@ interface CheckListProps {
   tasks: TaskProject[] | TaskUser[] | undefined;
   hideStatusFilter?: boolean;
   isUserArea?: boolean;
+  isTrashcan?: boolean;
 }
 
 export const CheckList = ({
   tasks,
   hideStatusFilter,
   isUserArea,
+  isTrashcan,
 }: CheckListProps) => {
   const { project } = useProject();
   const {
@@ -73,7 +75,7 @@ export const CheckList = ({
         </Box>
       ) : (
         filteredTasks.map((task) => (
-          <CheckListItem key={task.uuid} task={task} isUserArea={isUserArea} />
+          <CheckListItem key={task.uuid} task={task} isUserArea={isUserArea} isTeashcan={isTrashcan} />
         ))
       )}
     </VStack>
