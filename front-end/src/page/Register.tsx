@@ -6,7 +6,6 @@ import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 
 import { authService } from "@/services/authService";
-import axios from "axios";
 import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { useAuth } from "@/context/auth/useAuth";
 
