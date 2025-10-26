@@ -209,4 +209,32 @@ public class ProjectsController {
 
         return ResponseEntity.ok(toProjectResponse(p));
     }
+
+    @PostMapping("/{projectUuid}/members/{userUuid}")
+    public ResponseEntity<ProjectResponse> addMember(@PathVariable String projectUuid, @PathVariable String userUuid,
+            Authentication authentication) {
+        String email = currentUserEmail(authentication);
+        // verifica se quem está chamando é membro do projeto (ou da equipe do projeto)
+        assertMemberOfProject(projectUuid, email);
+
+        Projects p = projectsRepository.findById(projectUuid).orElseThrow();
+        User user = userRepository.findById(userUuid).orElseThrow();
+
+        // garante que o usuário selecionado é membro da equipe do projeto
+        Teams team = teamsRepository.findById(p.getTeamUuid()).orElseThrow();
+        boolean isTeamMember = team.getMembers().stream().anyMatch(m -> userUuid.equals(m.getUuid()));
+        if (!isTeamMember) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .header("Error-Message", "Usuário não é membro da equipe do projeto.")
+                    .build();
+        }
+
+        boolean already = p.getMembers().stream().anyMatch(m -> userUuid.equals(m.getUuid()));
+        if (!already) {
+            p.getMembers().add(user.toRef());
+            projectsRepository.save(p);
+        }
+
+        return ResponseEntity.ok(toProjectResponse(p));
+    }
 }
