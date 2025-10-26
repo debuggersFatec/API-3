@@ -22,7 +22,7 @@ export const ProgressoDisplay = () => {
   });
   const chart = useChart({
     data: [
-      { name: "Não concluidas", value: naoConcluidas, color: "white" },
+      { name: "Não concluidas", value: naoConcluidas, color: "gray.300" },
       { name: "Concluidas", value: concluidas, color: "blue.solid" },
     ],
   });
