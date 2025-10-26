@@ -1,4 +1,4 @@
-
+import type { Project } from "@/types/project";
 import { axiosInstance } from "./axiosInstance";
 
 export const projectServices = {
@@ -18,6 +18,16 @@ export const projectServices = {
       );
     } catch (error) {
       console.error("Erro ao criar projeto:", error);
+      throw error;
+    }
+  },
+
+  async getProjectByUuid(projectUuid: string): Promise<Project> {
+    try {
+      const response = await axiosInstance.get(`/projects/${projectUuid}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar projeto:", error);
       throw error;
     }
   },
