@@ -14,21 +14,24 @@ export const ProjectCard = ({ project }: ProjectDisplayItemProps) => {
   const { fetchProject } = useProject();
 
   return (
-    <Card.Root bgColor={project.active ? "green" : "red"}>
+    <Card.Root bgColor={project.active ? "#10B981" : "#E53E3E"}>
       <Card.Header>
         <Heading size="md">{project.name}</Heading>
       </Card.Header>
       <Card.Body />
       <Card.Footer>
-        <Button
-          onClick={async () => {
-            await fetchProject(project.uuid);
-            await refreshUser();
-          }}
-          variant="outline"
-        >
-          Ver detalhes
-        </Button>
+        {project.active && (
+          <Button
+            onClick={async () => {
+              await fetchProject(project.uuid);
+              await refreshUser();
+            }}
+            variant="outline"
+          >
+            Ver detalhes
+          </Button>
+        )}
+
         {project.active ? (
           <Button
             onClick={async () => {
