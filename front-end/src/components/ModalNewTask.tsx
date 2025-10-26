@@ -151,7 +151,7 @@ export function ModalNewTask() {
 
   return (
     <>
-      <Button onClick={onOpen} variant={"outline"}>
+      <Button onClick={onOpen} size={'sm'} variant={"outline"}>
         Criar nova tarefa
       </Button>
 

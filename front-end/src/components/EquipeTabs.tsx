@@ -1,10 +1,12 @@
-import { Tabs, Text } from "@chakra-ui/react";
+import { Dialog, Flex, Tabs, Text } from "@chakra-ui/react";
 import { TabDashboard } from "./TabDashboard";
 import { TabQuadro } from "./TabQuadro";
 import { TabTarefasEquipes } from "./TabTarefasEquipes";
 
 import { TabLixeiraEquipe } from "./TabLixeiraEquipe";
 import { useProject } from "@/context/project/useProject";
+import { ModalNewTask } from "./ModalNewTask";
+import { SelectAddMemberProject } from "./SelectAddMemberProject";
 
 export const EquipeTabs = () => {
   const { project } = useProject();
@@ -16,7 +18,19 @@ export const EquipeTabs = () => {
       defaultValue="dashboard"
       colorScheme={"blue"}
     >
-      <Text>{project?.name}</Text>
+      <Text textStyle={"xl"} fontWeight="bold" mb={"20px"}>
+        {project?.name}
+      </Text>
+      {project && (
+        // Mantém o ModalNewTask
+        <Flex gap={4}>
+          <Dialog.Root placement={"center"}>
+            <Dialog.Trigger asChild></Dialog.Trigger>
+            <ModalNewTask />
+          </Dialog.Root>
+          <SelectAddMemberProject />
+        </Flex>
+      )}
       <Tabs.List>
         <Tabs.Trigger value="dashboard">Dashboard</Tabs.Trigger>
         <Tabs.Trigger value="tarefas">Tarefas</Tabs.Trigger>

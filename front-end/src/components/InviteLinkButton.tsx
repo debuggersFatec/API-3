@@ -119,7 +119,7 @@ export const InviteLinkButton = ({ teamUuid }: InviteLinkButtonProps) => {
 
   return (
     <>
-      <Button onClick={onOpen} loading={loading} variant="outline">
+      <Button onClick={onOpen} loading={loading} variant="outline" size={'sm'}>
         <FaLink style={{ marginRight: 8 }} />
         {copied ? "Link copiado!" : "Convidar Membro"}
       </Button>
