@@ -42,7 +42,7 @@ export const Sidebar = () => {
       >
         <Tabs.List
           pr={"16px"}
-          w={"200px"}
+          w={"300px"}
           flexDir={"column"}
           display={"flex"}
           pl={"24px"}
@@ -94,7 +94,7 @@ export const Sidebar = () => {
               onOpenChange={() => setModalOpen(!modalOpen)}
             >
               <Dialog.Trigger asChild>
-                <Box bg="blue.500" borderRadius="md" p={0.5} border="none">
+                <Box bg="blue.500" borderRadius="md" mr={2.5} p={0.5} border="none">
                   <FaPlus color="white" />
                 </Box>
               </Dialog.Trigger>
@@ -139,7 +139,7 @@ export const Sidebar = () => {
             onClick={() => logout()}
             variant="plain"
             color={"red.500"}
-            alignContent={"flex-start"}
+            justifyContent={"flex-start"}
           >
             Logout <RiLogoutCircleRLine color="red" size={22} />
           </Button>
