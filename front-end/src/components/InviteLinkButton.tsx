@@ -119,7 +119,7 @@ export const InviteLinkButton = ({ teamUuid }: InviteLinkButtonProps) => {
 
   return (
     <>
-      <Button onClick={onOpen} loading={loading} size="sm" variant="outline">
+      <Button onClick={onOpen} loading={loading} variant="outline">
         <FaLink style={{ marginRight: 8 }} />
         {copied ? "Link copiado!" : "Convidar Membro"}
       </Button>
@@ -134,10 +134,6 @@ export const InviteLinkButton = ({ teamUuid }: InviteLinkButtonProps) => {
               </HStack>
 
               <Text color="gray.600">Copie e compartilhe o link de convite com o membro que deseja adicionar à equipe.</Text>
-              
-              <Box p={3} bg="gray.50" borderRadius="md" borderWidth="1px" borderColor="gray.200">
-                <Text fontSize="sm" color="gray.700">Link de Convite Genérico (após clicar no botão)</Text>
-              </Box>
 
               <HStack justify="flex-end" gap={2}>
                 <Button variant="ghost" onClick={onClose}>Cancelar</Button>
