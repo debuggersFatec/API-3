@@ -3,6 +3,7 @@ import { Dashboard } from "./page/Dashboard";
 import { Login } from "./page/Login";
 import Register from "./page/Register";
 import { RequireAuth } from "./components/RequireAuth";
+import { JoinTeamPage } from "./page/JoinTeamPage";
 
 export const App = () => {
   const location = useLocation();
@@ -19,6 +20,7 @@ export const App = () => {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+  <Route path="join-team" element={<JoinTeamPage />} />
     </Routes>
   );
 };

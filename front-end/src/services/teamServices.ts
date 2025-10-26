@@ -46,4 +46,23 @@ export const teamServices = {
       throw error;
     }
   },
+
+  // NOVO: Método para entrar na equipe com token de convite
+  async joinTeamWithInvite(token: string, authToken: string | null): Promise<Team> {
+    if (!authToken) {
+      throw new Error("Acesso negado: token de usuário não fornecido");
+    }
+    try {
+      // O endpoint do backend é POST /api/teams/join/invite/{token}
+      const response = await axiosInstance.post(`/teams/join/invite/${token}`, {}, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao entrar na equipe com token de convite:", error);
+      throw error;
+    }
+  },
 };

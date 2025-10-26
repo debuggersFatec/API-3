@@ -27,11 +27,15 @@ import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.security.JwtUtil; 
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.service.LeaveTeamService;
 import com.api_3.api_3.service.TaskMaintenanceService;
+
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 
 import jakarta.validation.Valid;
 
@@ -44,6 +48,7 @@ public class TeamsController {
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TaskMaintenanceService taskMaintenanceService;
     @Autowired private LeaveTeamService leaveTeamService;
+    @Autowired private JwtUtil jwtUtil;
 
     private String currentUserEmail(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
@@ -215,5 +220,59 @@ public class TeamsController {
         leaveTeamService.execute(teamUuid, currentUser.getUuid());
 
         return ResponseEntity.noContent().build(); // Resposta 204 No Content
+    }
+
+    // Endpoint para Gerar Token de Convite
+    @PostMapping("/{teamUuid}/invite")
+    public ResponseEntity<String> generateInviteToken(@PathVariable String teamUuid, Authentication authentication) {
+        String email = currentUserEmail(authentication);
+        try {
+            assertMember(teamUuid, email);
+            String token = jwtUtil.generateInviteToken(teamUuid);
+            return ResponseEntity.ok("{\"token\": \"" + token + "\"}");
+        } catch (TeamNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    // EndPoint Para Entrar na equipe com o token 
+    @PostMapping("/join/invite/{token}")
+    public ResponseEntity<TeamResponse> joinTeamWithInvite(@PathVariable String token, Authentication authentication) {
+        String email = currentUserEmail(authentication);
+        String teamUuid;
+
+        try {
+            teamUuid = jwtUtil.extractInviteTeamId(token);
+            if (teamUuid == null || teamUuid.isBlank()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).header("Error-Message", "Token inválido ou malformado.").build();
+            }
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("Error-Message", "Token de convite expirado.").build();
+        } catch (SignatureException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("Error-Message", "Token de convite inválido ou adulterado.").build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).header("Error-Message", "Erro ao processar o token.").build();
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new com.api_3.api_3.exception.UserNotFoundException("Utilizador não encontrado."));
+
+        Teams team = teamsRepository.findById(teamUuid)
+                .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
+
+        boolean alreadyMember = team.getMembers().stream().anyMatch(m -> user.getUuid().equals(m.getUuid()));
+        if (alreadyMember) {
+            return ResponseEntity.ok(toTeamResponse(team));
+        }
+
+        team.getMembers().add(user.toRef());
+        teamsRepository.save(team);
+
+        user.getTeams().add(team.toRef());
+        userRepository.save(user);
+
+        return ResponseEntity.ok(toTeamResponse(team));
     }
 }
