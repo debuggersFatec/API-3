@@ -57,4 +57,18 @@ export const projectServices = {
       throw error;
     }
   },
+
+  async addMemberToProject(
+    projectUuid: string,
+    memberUuid: string
+  ): Promise<void> {
+    try {
+      await axiosInstance.post(
+        `/projects/${projectUuid}/members/${memberUuid}`
+      );
+    } catch (error) {
+      console.error("Erro ao adicionar membro ao projeto:", error);
+      throw error;
+    }
+  },
 };
