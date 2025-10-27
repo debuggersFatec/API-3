@@ -1,3 +1,4 @@
+
 import { axiosInstance } from './axiosInstance';
 import type { AxiosResponse } from 'axios';
 import type { User } from '../types/user';
@@ -20,6 +21,7 @@ export const userService = {
       throw new Error("Erro ao buscar usuário");
     }
   },
+
   async getCurrentUser(): Promise<AxiosResponse<unknown>> {
     try {
       const response = await axiosInstance.get(`/users/me`);
@@ -29,4 +31,16 @@ export const userService = {
       throw error;
     }
   },
+
+  async updateUser(
+    name: string,
+    img: string
+  ): Promise<void> {
+    try {
+      await axiosInstance.put(`/users/me`, { name, img });
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      throw error;
+    }
+  }
 };
