@@ -1,5 +1,7 @@
 package com.api_3.api_3.controller;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
+import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.service.AuthService;
 
@@ -28,8 +31,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> registerUser(@Valid @RequestBody User newUser) {
-        AuthResponse response = authService.register(newUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public ResponseEntity<?> registerUser(@Valid @RequestBody User newUser) {
+        try {
+            AuthResponse response = authService.register(newUser);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        } catch (EmailAlreadyExistsException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "Erro ao registrar usuário."));
+        }
     }
 }
