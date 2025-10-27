@@ -1,15 +1,15 @@
 import type { UserRef } from "./user";
 
-export type Status = "not-started" | "in-progress" | "completed" | "deleted";
-export type Priority = "low" | "medium" | "high";
+export type Status = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "DELETED";
+export type Priority = "LOW" | "MEDIUM" | "HIGH";
 
 
 
 export interface TaskComment {
   uuid: string;
   comment: string;
-  created_at: string;
-  user: UserRef;
+  createdAt: string;
+  author: UserRef;
 }
 
 export interface Task {
@@ -20,8 +20,8 @@ export interface Task {
   status: Status;
   priority: Priority;
   file_url?: string;
-  isRequerid_file: boolean;
-  requered_file?: string;
+  isRequiredFile: boolean;
+  required_file?: string;
   team_uuid: string;
   project_uuid: string;
   responsible?: UserRef;

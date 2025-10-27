@@ -1,11 +1,12 @@
-import { Box, Button, Flex, Input, Stack, Text, Link, Image } from "@chakra-ui/react";
+import { Box, Button, Flex, Input, Stack, Text, Image, Link } from "@chakra-ui/react";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
 import { useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+
+import { authService } from "@/services/authService";
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { useAuth } from "@/context/auth/useAuth";
 
 const PasswordStrengthMeter = ({ value }: { value: number }) => {
@@ -45,12 +46,23 @@ export default function Register() {
   const [passwordStrength, setPasswordStrength] = useState(0);
   const { setUser, setToken } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location to read query params
 
   const strongPasswordRegex =
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+  // Read redirect path from query parameter, default to dashboard
+  const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
+
+  // The original component had logic to pre-fill email from query param, I'll keep it simple for now, as the user only asked for the link logic.
+  // I will read the initial email value from the 'email' query parameter if it exists.
+  const initialEmail = new URLSearchParams(location.search).get('email') || '';
+  useState(() => {
+    if (initialEmail) setEmail(initialEmail);
+  });
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -81,16 +93,26 @@ export default function Register() {
     try {
       // setLoading(true);
 
-      axios
-        .post("http://localhost:8080/api/auth/register", {
-          email: email,
-          password: password,
-          name: name,
-        })
+      authService
+        .register({ email, password, name })
         .then((response) => {
           setToken(response.data.token);
           setUser(response.data.user);
-          navigate("/");
+          // If there is an explicit redirect, use it. Otherwise use any pending invite token.
+          if (redirectPath && redirectPath !== "/") {
+            navigate(decodeURIComponent(redirectPath));
+            return;
+          }
+
+          const pending = localStorage.getItem('pendingInviteToken');
+          if (pending) {
+            localStorage.removeItem('pendingInviteToken');
+            navigate(`/join-team?token=${encodeURIComponent(pending)}`);
+            return;
+          }
+
+          // Default
+          navigate(decodeURIComponent(redirectPath));
         })
         .catch((error) => {
           setError(
@@ -114,10 +136,12 @@ export default function Register() {
           <Image src={logoSrc} alt="Logo" mx="auto" mb={4} maxW="200px" maxH="88px" w="auto" h="auto" objectFit="contain" />
 
           <Text fontSize="2xl" fontWeight="bold" mb={1} color="gray.800">Bem vindo ao FASTASK</Text>
-
           <Text fontSize="sm" color="gray.600" mb={6}>
             Já tem uma conta?
-            <Link color="blue.500" href="/login">Faça login</Link>
+
+            {/* Passa o redirect path para o login */}
+            <Link color="blue.500" href={`/login?redirect=${encodeURIComponent(redirectPath)}`}>Faça login</Link>
+
           </Text>
 
           <form onSubmit={handleSubmit}>

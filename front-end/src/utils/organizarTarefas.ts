@@ -5,25 +5,25 @@ export function organizarTarefas(listaDeTarefas: TaskProject[]): BoardData {
   const quadro: BoardData = {
     tasks: {},
     columns: {
-      "nao-atribuidas": {
-        id: "nao-atribuidas",
-        title: "Não atribuídas",
+      "nao-iniciada": {
+        id: "nao-iniciada",
+        title: "Não Iniciada",
         taskIds: [],
       },
-      atribuido: { id: "atribuido", title: "Atribuído", taskIds: [] },
-      concluido: { id: "concluido", title: "Concluído", taskIds: [] },
+      "em-progresso": { id: "em-progresso", title: "Em Progresso", taskIds: [] },
+      "concluida": { id: "concluida", title: "Concluída", taskIds: [] },
     },
-    columnOrder: ["nao-atribuidas", "atribuido", "concluido"],
+    columnOrder: ["nao-iniciada", "em-progresso", "concluida"],
   };
 
   for (const tarefa of listaDeTarefas) {
     quadro.tasks[tarefa.uuid] = tarefa;
-    if (tarefa.status === "not-started") {
-      quadro.columns["nao-atribuidas"].taskIds.push(tarefa.uuid);
-    } else if (tarefa.status === "in-progress") {
-      quadro.columns["atribuido"].taskIds.push(tarefa.uuid);
-    } else if (tarefa.status === "completed") {
-      quadro.columns["concluido"].taskIds.push(tarefa.uuid);
+    if (tarefa.status === "NOT_STARTED") {
+      quadro.columns["nao-iniciada"].taskIds.push(tarefa.uuid);
+    } else if (tarefa.status === "IN_PROGRESS") {
+      quadro.columns["em-progresso"].taskIds.push(tarefa.uuid);
+    } else if (tarefa.status === "COMPLETED") {
+      quadro.columns["concluida"].taskIds.push(tarefa.uuid);
     }
   }
   return quadro;

@@ -1,4 +1,5 @@
 import { useProject } from "@/context/project/useProject";
+import { CheckList } from "./CheckList";
 
 export const TabLixeiraEquipe = () => {
   const { project } = useProject();
@@ -8,10 +9,6 @@ export const TabLixeiraEquipe = () => {
     return <div>Sem tarefas na lixeira</div>;
   }
   return (
-    <>
-      {lixeira.map((task) => (
-        <h1 key={task.uuid}>{task.title}</h1>
-      ))}
-    </>
+    <CheckList tasks={lixeira} isTrashcan={true} />
   );
 };

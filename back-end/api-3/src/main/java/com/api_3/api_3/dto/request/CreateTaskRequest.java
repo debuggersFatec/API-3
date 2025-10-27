@@ -19,10 +19,10 @@ public class CreateTaskRequest {
     @NotBlank(message = "O ID do projeto é obrigatório.")
     private String project_uuid;
 
-    private String equip_uuid; // Legado
+    private String equip_uuid; 
     private Responsible responsible;
 
-    // --- Adicionar estes campos ---
+
     private Boolean isRequiredFile; 
     private String requiredFile;
 }

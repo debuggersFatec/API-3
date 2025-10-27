@@ -45,34 +45,16 @@ export const normalizeUser = (raw: unknown): User => {
   const tasksRaw = getArr(raw.tasks);
   const tasks: TaskUser[] = tasksRaw.map((t) => {
     const o = isObj(t) ? t : {};
-    // status/priority normalizados de forma conservadora
+    // Status/priority are expected as UPPERCASE enum strings from backend.
     const rawStatus = getStr(o.status);
-    const statusMap: Record<string, TaskUser["status"]> = {
-      not_started: "not-started",
-      "not-started": "not-started",
-      in_progress: "in-progress",
-      "in-progress": "in-progress",
-      completed: "completed",
-      deleted: "deleted",
-      NOT_STARTED: "not-started",
-      IN_PROGRESS: "in-progress",
-      COMPLETED: "completed",
-      DELETED: "deleted",
-    } as const;
-    const status =
-      rawStatus && statusMap[rawStatus] ? statusMap[rawStatus] : "not-started";
+    const statusValues = ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DELETED"];
+    const status: TaskUser["status"] =
+      rawStatus && statusValues.includes(rawStatus) ? (rawStatus as TaskUser["status"]) : "NOT_STARTED";
 
     const rawPriority = getStr(o.priority);
-    const prioMap: Record<string, TaskUser["priority"]> = {
-      low: "low",
-      medium: "medium",
-      high: "high",
-      LOW: "low",
-      MEDIUM: "medium",
-      HIGH: "high",
-    } as const;
-    const priority =
-      rawPriority && prioMap[rawPriority] ? prioMap[rawPriority] : "low";
+    const priorityValues = ["LOW", "MEDIUM", "HIGH"];
+    const priority: TaskUser["priority"] =
+      rawPriority && priorityValues.includes(rawPriority) ? (rawPriority as TaskUser["priority"]) : "LOW";
 
     const responsible = isObj(o.responsible)
       ? ({

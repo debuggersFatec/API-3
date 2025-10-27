@@ -8,7 +8,7 @@ export interface TaskFilters {
   priority: Priority | "all";
   dueDateFrom?: string;
   dueDateTo?: string;
-  responsibleUuid?: string;
+  responsibleUuid?: string | "unassigned";
 }
 
 type TaskType = TaskProject | TaskUser;
@@ -28,18 +28,22 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
 
     return tasks.filter((task) => {
       // Filtro por busca (título)
-      if (filters.search && !task.title.toLowerCase().includes(filters.search.toLowerCase())) {
+      if (
+        filters.search &&
+        !task.title.toLowerCase().includes(filters.search.toLowerCase())
+      ) {
         return false;
       }
 
+      // Status now comes from backend as UPPERCASE enum strings. Accept those
+      // directly and avoid legacy normalizations.
       let taskStatus: Status | undefined;
       const rawStatus = (task as unknown as Record<string, unknown>)["status"];
       if (typeof rawStatus === "string") {
-        const normalized = rawStatus.toLowerCase().replace(/_/g, "-");
-        if (normalized === "not-started") taskStatus = "not-started";
-        else if (normalized === "in-progress") taskStatus = "in-progress";
-        else if (normalized === "completed") taskStatus = "completed";
-        else if (normalized === "deleted") taskStatus = "deleted";
+        const upper = rawStatus.toUpperCase();
+        if (upper === "NOT_STARTED" || upper === "IN_PROGRESS" || upper === "COMPLETED" || upper === "DELETED") {
+          taskStatus = upper as Status;
+        }
       }
 
       // Filtro por status
@@ -47,22 +51,27 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
         if (!taskStatus || taskStatus !== filters.status) return false;
       }
 
-      // Filtro por prioridade 
+      // Filtro por prioridade
       if (filters.priority !== "all") {
+        // Priority expected as UPPERCASE enum strings from backend.
         let taskPriority: Priority | undefined;
-        const rawPriority = (task as unknown as Record<string, unknown>)["priority"] ?? (task as unknown as Record<string, unknown>)["prioridade"];
+        const rawPriority =
+          (task as unknown as Record<string, unknown>)["priority"] ??
+          (task as unknown as Record<string, unknown>)["prioridade"];
         if (typeof rawPriority === "string") {
-          const normalized = rawPriority.toLowerCase().replace(/_/g, "-");
-          if (normalized === "low" || normalized === "baixa") taskPriority = "low";
-          else if (normalized === "medium" || normalized === "média" || normalized === "media") taskPriority = "medium";
-          else if (normalized === "high" || normalized === "alta") taskPriority = "high";
+          const upper = rawPriority.toUpperCase();
+          if (upper === "LOW" || upper === "MEDIUM" || upper === "HIGH") {
+            taskPriority = upper as Priority;
+          }
         }
 
         if (!taskPriority || taskPriority !== filters.priority) return false;
       }
 
       // Filtro por data de vencimento
-      if ((filters.dueDateFrom || filters.dueDateTo) && task.due_date) {
+      if (filters.dueDateFrom || filters.dueDateTo) {
+        if (!task.due_date) return false;
+
         const taskDate = new Date(task.due_date);
         if (filters.dueDateFrom) {
           const fromDate = new Date(filters.dueDateFrom);
@@ -74,10 +83,20 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
         }
       }
 
-      // Filtro por responsável (usando uuid)
+      // Filtro por responsável (usando uuid ou "unassigned")
       if (filters.responsibleUuid) {
-        if (!('responsible' in task) || !task.responsible || task.responsible.uuid !== filters.responsibleUuid) {
-          return false;
+        if (filters.responsibleUuid === "unassigned") {
+          if ("responsible" in task && task.responsible) {
+            return false;
+          }
+        } else {
+          if (
+            !("responsible" in task) ||
+            !task.responsible ||
+            task.responsible.uuid !== filters.responsibleUuid
+          ) {
+            return false;
+          }
         }
       }
 
@@ -98,10 +117,10 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
   }, []);
 
   const updateDueDateRange = useCallback((from?: string, to?: string) => {
-    setFilters((prev) => ({ 
-      ...prev, 
-      dueDateFrom: from, 
-      dueDateTo: to 
+    setFilters((prev) => ({
+      ...prev,
+      dueDateFrom: from,
+      dueDateTo: to,
     }));
   }, []);
 

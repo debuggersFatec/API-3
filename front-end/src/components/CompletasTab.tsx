@@ -10,7 +10,7 @@ interface CompletasTabProps {
 
 export const CompletasTab = ({ tasks }: CompletasTabProps) => {
   const completas = tasks
-    ? tasks.filter((t) => (t.status || "").toLowerCase() === "completed")
+    ? tasks.filter((t) => (t.status || "") === "COMPLETED")
     : [];
 
   return (

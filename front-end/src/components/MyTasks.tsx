@@ -6,11 +6,11 @@ import { useAuth } from "@/context/auth/useAuth";
 export const MyTasks = () => {
   const { user } = useAuth();
   const filteredTasks =
-    user?.tasks?.filter((task) => task.status !== "deleted") || [];
+    user?.tasks?.filter((task) => task.status !== "DELETED") || [];
   return (
     <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
       <SectionHeader title="Minhas tarefas" />
-      <CheckList tasks={filteredTasks} />
+      <CheckList tasks={filteredTasks} isUserArea={true} />
     </Box>
   );
 };

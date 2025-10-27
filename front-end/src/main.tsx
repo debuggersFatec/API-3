@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { ColorModeProvider } from "./components/ui/color-mode";
 import { AuthProvider } from "./context/auth/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById("root")!).render(
         <ColorModeProvider>
           <BrowserRouter>
             <App />
+            <Toaster />
           </BrowserRouter>
         </ColorModeProvider>
       </Provider>
