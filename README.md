@@ -65,8 +65,8 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | **Kick Off** | 25/08/2025 – 29/08/2025 | ✅ Concluído | | |
 | **Sprint 1** | 08/09/2025 – 28/09/2025 | ✅ Concluído | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
 | **Sprint Review / Planning** | 29/09/2025 – 03/10/2025 | ✅ Concluído | | |
-| **Sprint 2** | 06/10/2025 – 26/10/2025 | 🔄 Em andamento | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.27br5mqml95v#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo]() |
-| **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | ⏳ Não iniciado | | |
+| **Sprint 2** | 06/10/2025 – 26/10/2025 | ✅ Concluído | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.27br5mqml95v#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo](https://youtu.be/SuTKCbuTiGU) |
+| **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | 🔄 Em andamento | | |
 | **Sprint 3** | 03/11/2025 – 23/11/2025 | ⏳ Não iniciado |  [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.iyux6hln9nfr#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo]() |
 | **Sprint Review** | 24/11/2025 – 28/11/2025 | ⏳ Não iniciado | | |
 | **Feira de Soluções** | 04/12/2025 | ⏳ Não iniciado | | |
@@ -128,22 +128,24 @@ Certifique-se de ter instalado em sua máquina:
    # Instala todas as bibliotecas e dependências necessárias para o frontend funcionar
    npm install
    ```
-3. **Execute o Backend**:
+3. **Execute o Frontend**:
    ```bash
-   # Inicia o servidor backend - a API que fornece os dados para o frontend
-   mvn spring-boot:run
-   ```
-4. **Em outro terminal, execute o Frontend**:
-   ```bash
-   # Entra na pasta do frontend (em um terminal SEPARADO)
+   # Entra na pasta do frontend
    cd ../front-end
    
    # Inicia o servidor de desenvolvimento do frontend
    npm start
    ```
-## Documentação
-📂 [Acessar Documentação](https://github.com/debuggersFatec/API-3/docs)
+4. **Em outro terminal, execute o Backend**:
+   ```bash
+   # Entra na pasta do backend
+   cd back-end/api-3
 
+   # Inicia o servidor backend - a API que fornece os dados para o frontend
+   mvn spring-boot:run
+   ```
+## Documentação
+📂 [Acessar Documentação](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.eqaqtbqbxswp)
 ## Equipe
 | Foto | Função | Nome | LinkedIn & GitHub |
 | :--: | :--: | :--: | :--: |
