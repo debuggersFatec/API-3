@@ -1,7 +1,7 @@
 import type { UserRef } from "./user";
 
-export type Status = "not-started" | "in-progress" | "completed" | "deleted";
-export type Priority = "low" | "medium" | "high";
+export type Status = "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "DELETED";
+export type Priority = "LOW" | "MEDIUM" | "HIGH";
 
 
 

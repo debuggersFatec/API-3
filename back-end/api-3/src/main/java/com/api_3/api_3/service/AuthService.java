@@ -31,7 +31,7 @@ import com.api_3.api_3.security.JwtUtil;
 
 @Service
 public class AuthService {
-
+    
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     @Autowired

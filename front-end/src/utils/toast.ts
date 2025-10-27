@@ -3,7 +3,7 @@ import { toaster } from "@/components/ui/toasterClient";
 export const toast = (status: string, message: string) => {
   const type =
     status === "error"
-      ? "danger"
+      ? "error"
       : status === "success"
       ? "success"
       : "default";

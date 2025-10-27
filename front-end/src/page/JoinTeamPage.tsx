@@ -93,14 +93,13 @@ export const JoinTeamPage = () => {
     return (
       <Center w="100vw" h="100vh" bg="gray.50">
         <VStack gap={4} p={8} bg="white" boxShadow="xl" borderRadius="lg" w="md">
-          <Heading size="lg" color="blue.500">Convite para Equipe</Heading>
+          <Heading size="xl" color="blue.500">Convite para Equipe</Heading>
           <Text fontSize="md" color="gray.600" textAlign="center">
             Você precisa estar logado para aceitar o convite.
           </Text>
-          <Alert status="info" borderRadius="md" mb={3}>
-              <AlertIcon />
-              <Text>Faça login ou crie uma conta para entrar na equipe automaticamente.</Text>
-          </Alert>
+          
+          <Text>Faça login ou crie uma conta para entrar na equipe automaticamente.</Text>
+          
           <HStack gap={3} justify="center">
             {/* Redirect to login, passing the current path with token as the redirect target */}
             <Button 
@@ -117,9 +116,6 @@ export const JoinTeamPage = () => {
               Criar Conta
             </Button>
           </HStack>
-          <Button onClick={() => navigate("/")} colorScheme="gray" variant="outline">
-              Ir para Dashboard
-          </Button>
         </VStack>
       </Center>
     );

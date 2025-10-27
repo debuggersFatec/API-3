@@ -42,8 +42,8 @@ export function ModalNewTask() {
     title: "",
     description: "",
     due_date: undefined,
-    status: "not-started",
-    priority: "medium",
+    status: "NOT_STARTED",
+    priority: "MEDIUM",
     project_uuid: project?.uuid || "",
     team_uuid: teamData?.uuid || "",
     // arquivo: null as File | null,
@@ -104,8 +104,8 @@ export function ModalNewTask() {
       title: "",
       description: "",
       due_date: undefined,
-      status: "not-started",
-      priority: "medium",
+      status: "NOT_STARTED",
+      priority: "MEDIUM",
       project_uuid: project?.uuid || "",
       team_uuid: teamData?.uuid || "",
       responsible: undefined,
@@ -144,14 +144,14 @@ export function ModalNewTask() {
   };
 
   const prioritys: { label: string; value: Priority }[] = [
-    { label: "Baixa", value: "low" },
-    { label: "Média", value: "medium" },
-    { label: "Alta", value: "high" },
+    { label: "Baixa", value: "LOW" },
+    { label: "Média", value: "MEDIUM" },
+    { label: "Alta", value: "HIGH" },
   ];
 
   return (
     <>
-      <Button onClick={onOpen} variant={"outline"}>
+      <Button onClick={onOpen} size={'sm'} variant={"outline"}>
         Criar nova tarefa
       </Button>
 

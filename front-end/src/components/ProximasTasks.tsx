@@ -27,7 +27,7 @@ export const ProximasTasks = () => {
 
   const proximas10Tasks = [...tasks]
     .filter(
-      (task) => task.status === "not-started" || task.status === "in-progress"
+      (task) => task.status === "NOT_STARTED" || task.status === "IN_PROGRESS"
     )
     .sort((a, b) => {
       if (!a.due_date && !b.due_date) return 0;
