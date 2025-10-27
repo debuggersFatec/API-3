@@ -15,9 +15,10 @@ import {
 import { useState } from "react";
 import { AvatarUser } from "./AvatarUser";
 import { Navigate } from "react-router-dom";
+import { toast } from "@/utils/toast";
 
 export const ModalEditUser = () => {
-  const { user, token, refreshUser } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { refreshProject } = useProject();
   const { refreshTeam } = useTeam();
   const { open, onOpen, onClose } = useDisclosure();
@@ -28,7 +29,8 @@ export const ModalEditUser = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await userService.updateUser(formData.name, formData.img, token);
+    await userService.updateUser(formData.name, formData.img);
+    toast("success", "Usuário atualizado com sucesso!");
     await refreshUser();
     await refreshProject();
     await refreshTeam();
@@ -47,10 +49,7 @@ export const ModalEditUser = () => {
         />
       </Button>
 
-      <Dialog.Root
-        open={open}
-        onOpenChange={onClose}
-      >
+      <Dialog.Root open={open} onOpenChange={onClose}>
         <Portal>
           <Dialog.Backdrop />
           <Dialog.Positioner>

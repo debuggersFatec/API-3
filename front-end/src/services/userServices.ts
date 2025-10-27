@@ -31,4 +31,16 @@ export const userService = {
       throw error;
     }
   },
+
+  async updateUser(
+    name: string,
+    img: string
+  ): Promise<void> {
+    try {
+      await axiosInstance.put(`/users/me`, { name, img });
+    } catch (error) {
+      console.error("Erro ao atualizar usuário:", error);
+      throw error;
+    }
+  }
 };
