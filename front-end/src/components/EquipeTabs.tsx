@@ -7,6 +7,7 @@ import { TabLixeiraEquipe } from "./TabLixeiraEquipe";
 import { useProject } from "@/context/project/useProject";
 import { ModalNewTask } from "./ModalNewTask";
 import { SelectAddMemberProject } from "./SelectAddMemberProject";
+import { ModalLeaveProject } from "./ModalLeaveProject";
 
 export const EquipeTabs = () => {
   const { project } = useProject();
@@ -18,9 +19,13 @@ export const EquipeTabs = () => {
       defaultValue="dashboard"
       colorScheme={"blue"}
     >
-      <Text textStyle={"xl"} fontWeight="bold" mb={"20px"}>
-        {project?.name}
-      </Text>
+      <Flex mb={"10px"} alignItems="center">
+        <Text textStyle={"xl"} fontWeight="bold" mb={"20px"}>
+          {project?.name}
+        </Text>
+       <ModalLeaveProject />
+      </Flex>
+
       {project && (
         // Mantém o ModalNewTask
         <Flex gap={4}>

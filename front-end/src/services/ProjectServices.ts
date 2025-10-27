@@ -81,4 +81,13 @@ export const projectServices = {
       throw error;
     }
   },
+
+  async leaveProject(projectUuid: string): Promise<void> {
+    try {
+      await axiosInstance.delete(`/projects/${projectUuid}/leave`);
+    } catch (error) {
+      console.error("Erro ao remover membro do projeto:", error);
+      throw error;
+    }
+  },
 };
