@@ -1,5 +1,7 @@
-import { axiosInstance } from "./axiosInstance";
-import type { User } from "../types/user";
+
+import { axiosInstance } from './axiosInstance';
+import type { AxiosResponse } from 'axios';
+import type { User } from '../types/user';
 
 export const userService = {
 
@@ -20,27 +22,13 @@ export const userService = {
     }
   },
 
-  async updateUser(
-    name: string,
-    img: string,
-    token: string | null
-  ): Promise<void> {
-    if (!token) {
-      throw new Error("Acesso negado: token não fornecido");
-    }
+  async getCurrentUser(): Promise<AxiosResponse<unknown>> {
     try {
-      await axiosInstance.put(
-        `/users/me`,
-        { name, img },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosInstance.get(`/users/me`);
+      return response;
     } catch (error) {
-      console.error("Erro ao atualizar usuário:", error);
-      throw new Error("Erro ao atualizar usuário");
+      console.error("Erro ao buscar usuário atual:", error);
+      throw error;
     }
   },
 };

@@ -57,7 +57,6 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
     onPriorityChange(localPriority);
     onDueDateRangeChange(localFrom, localTo);
     onResponsibleChange(localResponsible);
-    setShowFilters(false);
   };
 
   const clearLocalAndParent = () => {
@@ -139,7 +138,7 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
                   <option value="all">Todos os status</option>
                   <option value="not-started">Não iniciada</option>
                   <option value="in-progress">Em progresso</option>
-                  <option value="completed">Concluída</option>
+                  <option value="COMPLETED">Concluída</option>
                 </select>
               </Box>
             )}
@@ -153,9 +152,9 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
                 style={{ width: "100%", padding: "8px", borderRadius: 6 }}
               >
                 <option value="all">Todas as prioridades</option>
-                <option value="low">Baixa</option>
-                <option value="medium">Média</option>
-                <option value="high">Alta</option>
+                <option value="LOW">Baixa</option>
+                <option value="MEDIUM">Média</option>
+                <option value="HIGH">Alta</option>
               </select>
             </Box>
 
@@ -187,6 +186,7 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
                   style={{ width: "100%", padding: "8px", borderRadius: 6 }}
                 >
                   <option value="">Todos os responsáveis</option>
+                  <option value="unassigned">Sem responsável</option>
                   {members.map((m) => (
                     <option key={m.uuid} value={m.uuid}>
                       {m.name}
