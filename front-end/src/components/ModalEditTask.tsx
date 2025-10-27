@@ -37,18 +37,20 @@ import { toast } from "@/utils/toast";
 
 interface ModalEditTaskProps {
   task: Task;
+  members: UserRef[];
   open: boolean;
   onClose?: () => void;
 }
 
 export const ModalEditTask = ({
   task,
+  members,
   open,
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
   const { refreshTeam } = useTeam();
-  const { refreshProject, project } = useProject();
+  const { refreshProject } = useProject();
   const { deleteTask } = useTaskActions();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -66,6 +68,7 @@ export const ModalEditTask = ({
   const reloadTask = async () => {
     try {
       const fresh = await taskService.getTaskById(task.uuid, token);
+      console.log(fresh);
       if (fresh) setFormData(fresh);
     } catch (err) {
       console.error("Erro ao recarregar task:", err);
@@ -187,7 +190,7 @@ export const ModalEditTask = ({
     { label: "Média", value: "MEDIUM" },
     { label: "Alta", value: "HIGH" },
   ];
-console.log(formData);
+  console.log(members);
   return (
     <DialogRoot open={open} onOpenChange={onClose}>
       <DialogBackdrop />
@@ -280,8 +283,8 @@ console.log(formData);
                           zIndex="10"
                           boxShadow="md"
                         >
-                          {project?.members && project.members.length > 0 ? (
-                            project.members.map((member) => (
+                          {members && members.length > 0 ? (
+                            members.map((member) => (
                               <Flex
                                 key={member.uuid}
                                 p={2}
@@ -299,18 +302,18 @@ console.log(formData);
                               Nenhum membro disponível
                             </Box>
                           )}
-                            <Flex
-                              key="unassigned"
-                              p={2}
-                              align="center"
-                              cursor="pointer"
-                              _hover={{ bg: "gray.100" }}
-                              onClick={() => handleUnassign()}
-                            >
-                              <Text ml={2} fontWeight={500} color="gray.700">
-                                Sem responsável
-                              </Text>
-                            </Flex>
+                          <Flex
+                            key="unassigned"
+                            p={2}
+                            align="center"
+                            cursor="pointer"
+                            _hover={{ bg: "gray.100" }}
+                            onClick={() => handleUnassign()}
+                          >
+                            <Text ml={2} fontWeight={500} color="gray.700">
+                              Sem responsável
+                            </Text>
+                          </Flex>
                         </Box>
                       )}
                     </Box>
@@ -432,24 +435,26 @@ console.log(formData);
                     />
                   </Field.Root>
 
-                    <Flex gap={2} maxW={"100%"}>
-                      {/* Reusable destructive button opens confirmation dialog */}
-                      <DestructiveButton
-                        icon={MdDelete}
-                        onConfirm={async () => {
-                          if (!formData) return;
-                          await deleteTask(formData.uuid, { onSuccess: () => onClose && onClose() });
-                        }}
-                        flex={1}
-                        px={2}
-                      >
-                        Excluir
-                      </DestructiveButton>
+                  <Flex gap={2} maxW={"100%"}>
+                    {/* Reusable destructive button opens confirmation dialog */}
+                    <DestructiveButton
+                      icon={MdDelete}
+                      onConfirm={async () => {
+                        if (!formData) return;
+                        await deleteTask(formData.uuid, {
+                          onSuccess: () => onClose && onClose(),
+                        });
+                      }}
+                      flex={1}
+                      px={2}
+                    >
+                      Excluir
+                    </DestructiveButton>
 
-                      <Button flex={1} type="submit" colorScheme={"blue"}>
-                        Salvar alterações
-                      </Button>
-                    </Flex>
+                    <Button flex={1} type="submit" colorScheme={"blue"}>
+                      Salvar alterações
+                    </Button>
+                  </Flex>
                 </Box>
               </Flex>
             </DialogBody>

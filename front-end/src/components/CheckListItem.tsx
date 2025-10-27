@@ -13,6 +13,8 @@ import {
 } from "@/utils/formatters";
 import { AvatarUser } from "./AvatarUser";
 import { toast } from "@/utils/toast";
+import type { UserRef } from "@/types/user";
+import { projectServices } from "@/services/ProjectServices";
 
 interface CheckItemProps {
   task: TaskProject | TaskUser;
@@ -20,15 +22,30 @@ interface CheckItemProps {
   isTeashcan?: boolean;
 }
 
-export const CheckListItem = ({ task, isUserArea, isTeashcan }: CheckItemProps) => {
+export const CheckListItem = ({
+  task,
+  isUserArea,
+  isTeashcan,
+}: CheckItemProps) => {
   const { token, user } = useAuth();
   const [modalOpen, setModalOpen] = useState(false);
   const [taskData, setTaskData] = useState<Task>();
+  const [members, setMembers] = useState<UserRef[]>([]);
 
   const handleOpenModal = async () => {
     setModalOpen(true);
     try {
-      setTaskData(await taskService.getTaskById(task.uuid, token));
+      // fetch the full task first and use the returned object (don't rely on state update synchronously)
+      const fetched = await taskService.getTaskById(task.uuid, token);
+      setTaskData(fetched);
+
+      if (fetched?.project_uuid) {
+        const proj = await projectServices.getProjectByUuid(
+          fetched.project_uuid
+        );
+        console.log(proj);
+        setMembers(proj.members ?? []);
+      }
     } catch (err) {
       toast("error", "Erro ao buscar detalhes da tarefa.");
       console.error("Erro ao buscar task:", err);
@@ -76,14 +93,14 @@ export const CheckListItem = ({ task, isUserArea, isTeashcan }: CheckItemProps) 
                   colorPalet.status.DEFAULT;
                 return (
                   <Badge
-                    bg={isTeashcan ? 'red.100' : s.bg}
+                    bg={isTeashcan ? "red.100" : s.bg}
                     color={s.color}
                     borderRadius="md"
                     px={2}
                     py={0.5}
                     fontSize="xs"
                   >
-                    {isTeashcan ? 'Deletada' : formatStatus(task.status)}
+                    {isTeashcan ? "Deletada" : formatStatus(task.status)}
                   </Badge>
                 );
               })()}
@@ -140,6 +157,7 @@ export const CheckListItem = ({ task, isUserArea, isTeashcan }: CheckItemProps) 
         <ModalEditTask
           open={modalOpen}
           task={taskData}
+          members={members}
           onClose={() => {
             setModalOpen(false);
           }}
