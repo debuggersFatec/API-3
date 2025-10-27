@@ -49,20 +49,23 @@ public class ProjectServiceImpl implements ProjectService {
         assertMemberOfTeam(teamUuid, userEmail);
 
         Teams team = findTeamByIdOrThrow(teamUuid);
+        User creator = findUserByEmailOrThrow(userEmail);
 
-        
         Projects p = new Projects();
         p.setUuid(UUID.randomUUID().toString());
         p.setName(request.getName());
         p.setActive(true);
-        p.setTeamUuid(teamUuid);
-        
-        if(team.getMembers() != null) {
-            p.setMembers(new java.util.ArrayList<>(team.getMembers())); 
+        p.setTeamUuid(teamUuid); // Vincula o projeto à equipe
+
+        //  Adiciona APENAS o criador como membro inicial
+        if (p.getMembers() == null) {
+            p.setMembers(new java.util.ArrayList<>());
         }
+        p.getMembers().add(creator.toRef()); 
 
         Projects savedProject = projectsRepository.save(p);
 
+        //Adiciona a referência do novo projeto à lista de projetos da equipe
         if (team.getProjects() == null) {
             team.setProjects(new java.util.ArrayList<>());
         }
