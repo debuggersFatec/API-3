@@ -15,6 +15,7 @@ import { AvatarUser } from "./AvatarUser";
 import { toast } from "@/utils/toast";
 import type { UserRef } from "@/types/user";
 import { projectServices } from "@/services/ProjectServices";
+import { ModalDisplayTask } from "./ModalDisplayTask";
 
 interface CheckItemProps {
   task: TaskProject | TaskUser;
@@ -153,16 +154,23 @@ export const CheckListItem = ({
         </HStack>
       </Box>
 
-      {taskData && (
-        <ModalEditTask
-          open={modalOpen}
-          task={taskData}
-          members={members}
-          onClose={() => {
-            setModalOpen(false);
-          }}
-        />
-      )}
+      {taskData &&
+        (isTeashcan ? (
+          <ModalDisplayTask
+            task={taskData}
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+          />
+        ) : (
+          <ModalEditTask
+            open={modalOpen}
+            task={taskData}
+            members={members}
+            onClose={() => {
+              setModalOpen(false);
+            }}
+          />
+        ))}
     </>
   );
 };
