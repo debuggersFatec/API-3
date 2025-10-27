@@ -1,32 +1,16 @@
-import { Box, Text, Button, Dialog, Portal } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { useDraggable } from "@dnd-kit/core";
 import { AvatarUser } from "../AvatarUser";
 import type { TaskProject } from "@/types/task";
-import { useState } from "react";
 
 interface TaskCardProps {
   task: TaskProject;
-  onDelete: (id: string) => void;
 }
 
-export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
+export const TaskCard = ({ task }: TaskCardProps) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: task.uuid,
   });
-
-  const [isOpen, setIsOpen] = useState(false);
-
-  const handleDelete = async () => {
-    try {
-      await fetch(`http://localhost:5173/tasks/${task.uuid}`, {
-        method: "DELETE",
-      });
-      onDelete(task.uuid);
-      setIsOpen(false);
-    } catch (err) {
-      console.error("Erro ao deletar tarefa:", err);
-    }
-  };
 
   const style = transform
     ? {
@@ -60,41 +44,6 @@ export const TaskCard = ({ task, onDelete }: TaskCardProps) => {
           size="2xs"
         />
       )}
-
-      <Button
-        size="xs"
-        colorScheme="red"
-        ml={2}
-        onClick={() => setIsOpen(true)}
-      >
-        Deletar
-      </Button>
-
-      <Dialog.Root
-        open={isOpen}
-        onOpenChange={(details) => setIsOpen(details.open)}
-      >
-        <Portal>
-          <Dialog.Backdrop />
-          <Dialog.Positioner>
-            <Dialog.Content>
-              <Dialog.Header>Confirmar Exclusão</Dialog.Header>
-              <Dialog.Body>
-                Deseja realmente excluir a tarefa "{task.title}"?
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
-                  <Button variant="outline">Cancelar</Button>
-                </Dialog.ActionTrigger>
-                <Button colorScheme="red" onClick={handleDelete} ml={3}>
-                  Deletar
-                </Button>
-              </Dialog.Footer>
-              <Dialog.CloseTrigger />
-            </Dialog.Content>
-          </Dialog.Positioner>
-        </Portal>
-      </Dialog.Root>
     </Box>
   );
 };
