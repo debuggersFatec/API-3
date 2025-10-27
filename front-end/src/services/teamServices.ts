@@ -54,6 +54,14 @@ export const teamServices = {
       throw error;
     }
   },
+  async leaveTeam(teamUuid: string): Promise<void> {    
+    try {
+      await axiosInstance.delete(`/teams/${teamUuid}/leave`);
+    } catch (error) {
+      console.error("Erro ao sair da equipe:", error);
+      throw error;
+    }
+  },
 };
 export default teamServices;
 
