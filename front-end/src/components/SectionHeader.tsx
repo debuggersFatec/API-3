@@ -1,7 +1,8 @@
-import { Box, Text, Separator } from "@chakra-ui/react";
+import { Box, Text, Separator, Flex } from "@chakra-ui/react";
 import type { Project } from "@/types/project";
 import { InviteLinkButton } from "./InviteLinkButton";
 import { useTeam } from "@/context/team/useTeam";
+import { ModalLeaveTeam } from "./ModalLeaveTeam";
 
 interface SectionHeaderProps {
   title: string;
@@ -18,14 +19,16 @@ export const SectionHeader = ({
   return (
     <>
       <Box w={"100%"} mb={"24px"} mt={"24px"} pr={"32px"}>
-        <Text textStyle={"2xl"} fontWeight="bold" mb={"20px"}>
-          {title}
-        </Text>
-        <Box
-          display={"flex"}
-          flexDirection={"row"}
-          gap="10px"
-        >
+        <Flex mb={"10px"} alignItems="center">
+          <Text textStyle={"2xl"} fontWeight="bold" mr={4}>
+            {title}
+          </Text>
+          {isTeamSection && (
+            <ModalLeaveTeam/>
+          )}
+        </Flex>
+
+        <Box display={"flex"} flexDirection={"row"} gap="10px">
           {isTeamSection && teamData && (
             // Renderiza o botão de convite para a equipe atual
             <InviteLinkButton teamUuid={teamData.uuid} />
