@@ -30,16 +30,15 @@ public class Projects {
         this.teamUuid = teamUuid;
     }
 
-    public record ProjectRef(String uuid, String name, boolean isActive) {
+    public record ProjectRef(String uuid, String name, Boolean isActive) {
         public ProjectRef(String uuid, String name) {
-            this(uuid, name, true);
+            this(uuid, name, Boolean.TRUE);
         }
 
-        // Compatibility getters for legacy code
+        // Compatibility getters for legacy code (safe default when null)
         public String getUuid() { return uuid; }
         public String getName() { return name; }
-        public boolean getIsActive() { return isActive; }
-        public boolean isActive() { return isActive; }
+        public boolean getIsActive() { return isActive != null ? isActive : true; }
     }
 
     public ProjectRef toRef() {
