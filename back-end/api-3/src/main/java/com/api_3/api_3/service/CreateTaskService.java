@@ -77,7 +77,7 @@ public class CreateTaskService {
     }
 
     private void validateResponsible(Task task, Teams team) {
-        if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
+    if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
             String responsibleUuid = task.getResponsible().uuid();
             userRepository.findById(responsibleUuid)
                     .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));
@@ -90,13 +90,16 @@ public class CreateTaskService {
                 .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + task.getProjectUuid() + " não encontrado."));
 
             boolean isProjectMember = project.getMembers() != null && project.getMembers().stream()
+                .filter(java.util.Objects::nonNull)
                 .anyMatch(m -> responsibleUuid.equals(m.getUuid()));
             if (!isProjectMember) {
                 throw new InvalidResponsibleException("O usuário responsável não é membro do projeto.");
             }
 
             // Optional: still ensure team membership consistency
-            boolean isTeamMember = team.getMembers().stream().anyMatch(m -> responsibleUuid.equals(m.getUuid()));
+            boolean isTeamMember = team.getMembers() != null && team.getMembers().stream()
+                .filter(java.util.Objects::nonNull)
+                .anyMatch(m -> responsibleUuid.equals(m.getUuid()));
             if (!isTeamMember) {
                 throw new InvalidResponsibleException("O usuário responsável não é membro da equipe.");
             }

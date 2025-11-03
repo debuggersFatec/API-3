@@ -1,5 +1,4 @@
 package com.api_3.api_3.controller;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,11 +22,13 @@ public class NotificationController {
     @Autowired private NotificationService notificationService;
 
     @GetMapping
+    // GET /api/notifications?unreadOnly=true|false -> lista notificações do usuário
     public List<Notification> list(@RequestParam(name = "unreadOnly", required = false, defaultValue = "false") boolean unreadOnly) {
         return notificationService.listForCurrentUser(unreadOnly);
     }
 
     @PostMapping("/{id}/read")
+    // POST /api/notifications/{id}/read -> marca como lida
     public ResponseEntity<Notification> markRead(@PathVariable String id) {
         return notificationService.markRead(id)
             .map(ResponseEntity::ok)
@@ -35,6 +36,7 @@ public class NotificationController {
     }
 
     @DeleteMapping("/{id}")
+    // DELETE /api/notifications/{id} -> apaga notificação
     public ResponseEntity<Void> delete(@PathVariable String id) {
         notificationService.delete(id);
         return ResponseEntity.noContent().build();

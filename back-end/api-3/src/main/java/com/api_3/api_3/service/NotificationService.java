@@ -21,10 +21,12 @@ import com.api_3.api_3.model.entity.Notification;
 import com.api_3.api_3.model.entity.Notification.Type;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.NotificationRepository;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 
 @Service
@@ -33,10 +35,13 @@ public class NotificationService {
     @Autowired private NotificationRepository notificationRepository;
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TaskRepository taskRepository;
+    @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
 
     // -------- Public API for task events --------
     public void notifyTaskCreated(Task task) { notifyProjectMembers(task, Type.TASK_CREATED, "Tarefa criada", false); }
+    // Broadcast de atualização para todos os membros do projeto (exclui ator)
+    public void notifyTaskUpdatedBroadcast(Task task) { notifyProjectMembers(task, Type.TASK_UPDATED, "Tarefa atualizada", false); }
     // Escopo: se houver responsável, notifica apenas ele; caso contrário, notifica todos do projeto (exclui ator)
     public void notifyTaskUpdatedScoped(Task task) {
         if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
@@ -126,6 +131,131 @@ public class NotificationService {
     public void delete(String id) { notificationRepository.deleteById(id); }
 
     // -------- Internal helpers --------
+    // Notifica todos os membros de um projeto (exclui o ator se includeActor=false), com exclusões adicionais
+    private void notifyProjectMembers(Projects project, Type type, String message, boolean includeActor, java.util.Set<String> exclude) {
+        if (project == null || project.getMembers() == null || project.getMembers().isEmpty()) return;
+        String actorUuid = getCurrentUserUuid();
+        java.util.Set<String> recipients = new java.util.HashSet<>();
+        for (User.UserRef m : project.getMembers()) {
+            if (m == null || m.getUuid() == null) continue;
+            if (!includeActor && m.getUuid().equals(actorUuid)) continue;
+            if (exclude != null && exclude.contains(m.getUuid())) continue;
+            recipients.add(m.getUuid());
+        }
+        if (recipients.isEmpty()) return;
+        List<Notification> toSave = new ArrayList<>();
+        for (String dest : recipients) {
+            Notification n = new Notification();
+            n.setType(type);
+            n.setProjectUuid(project.getUuid());
+            n.setTeamUuid(project.getTeamUuid());
+            n.setMessage(message);
+            n.setCreatedAt(Date.from(Instant.now()));
+            n.setUserUuid(dest);
+            n.setActorUuid(actorUuid);
+            toSave.add(n);
+        }
+        if (!toSave.isEmpty()) notificationRepository.saveAll(toSave);
+    }
+
+    // Eventos de Projeto
+    public void notifyProjectMemberJoined(String projectUuid, String joinedUserUuid) {
+        Projects project = projectsRepository.findById(projectUuid).orElse(null);
+        if (project == null) return;
+        String userName = userRepository.findById(joinedUserUuid).map(User::getName).orElse("Um usuário");
+        java.util.Set<String> exclude = new java.util.HashSet<>();
+        exclude.add(joinedUserUuid); // não notificar o próprio que entrou
+        // Notifica outros membros (exclui ator e o próprio que entrou)
+        notifyProjectMembers(project, Type.PROJECT_MEMBER_JOINED, userName + " entrou no projeto " + project.getName(), false, exclude);
+
+        // Fallback: se não houver destinatários além do ator e do próprio usuário que entrou,
+        // notifica o ator para registrar o evento (evita ficar sem registro no banco)
+        String actorUuid = getCurrentUserUuid();
+        boolean hasOtherRecipients = project.getMembers() != null && project.getMembers().stream()
+            .anyMatch(m -> m != null && m.getUuid() != null && !m.getUuid().equals(actorUuid) && !m.getUuid().equals(joinedUserUuid));
+        if (!hasOtherRecipients && actorUuid != null) {
+            Notification n = new Notification();
+            n.setType(Type.PROJECT_MEMBER_JOINED);
+            n.setProjectUuid(project.getUuid());
+            n.setTeamUuid(project.getTeamUuid());
+            n.setMessage(userName + " entrou no projeto " + project.getName());
+            n.setCreatedAt(Date.from(Instant.now()));
+            n.setUserUuid(actorUuid);
+            n.setActorUuid(actorUuid);
+            notificationRepository.save(n);
+        }
+    }
+
+    public void notifyProjectMemberLeft(String projectUuid, String leftUserUuid) {
+        Projects project = projectsRepository.findById(projectUuid).orElse(null);
+        if (project == null) return;
+        String userName = userRepository.findById(leftUserUuid).map(User::getName).orElse("Um usuário");
+        java.util.Set<String> exclude = new java.util.HashSet<>();
+        exclude.add(leftUserUuid); // não notificar quem saiu
+        // Notifica outros membros (exclui ator e quem saiu)
+        notifyProjectMembers(project, Type.PROJECT_MEMBER_LEFT, userName + " saiu do projeto " + project.getName(), false, exclude);
+
+        // Fallback semelhante: se não houver outros destinatários, notifica o ator
+        String actorUuid = getCurrentUserUuid();
+        boolean hasOtherRecipients = project.getMembers() != null && project.getMembers().stream()
+            .anyMatch(m -> m != null && m.getUuid() != null && !m.getUuid().equals(actorUuid) && !m.getUuid().equals(leftUserUuid));
+        if (!hasOtherRecipients && actorUuid != null) {
+            Notification n = new Notification();
+            n.setType(Type.PROJECT_MEMBER_LEFT);
+            n.setProjectUuid(project.getUuid());
+            n.setTeamUuid(project.getTeamUuid());
+            n.setMessage(userName + " saiu do projeto " + project.getName());
+            n.setCreatedAt(Date.from(Instant.now()));
+            n.setUserUuid(actorUuid);
+            n.setActorUuid(actorUuid);
+            notificationRepository.save(n);
+        }
+    }
+    // Notifica todos os membros de um time (exclui o ator se includeActor=false), com exclusões adicionais
+    private void notifyTeamMembers(Teams team, Type type, String message, boolean includeActor, java.util.Set<String> exclude) {
+        if (team == null || team.getMembers() == null || team.getMembers().isEmpty()) return;
+        String actorUuid = getCurrentUserUuid();
+        java.util.Set<String> recipients = new java.util.HashSet<>();
+        for (User.UserRef m : team.getMembers()) {
+            if (m == null || m.getUuid() == null) continue;
+            if (!includeActor && m.getUuid().equals(actorUuid)) continue;
+            if (exclude != null && exclude.contains(m.getUuid())) continue;
+            recipients.add(m.getUuid());
+        }
+        if (recipients.isEmpty()) return;
+        List<Notification> toSave = new ArrayList<>();
+        for (String dest : recipients) {
+            Notification n = new Notification();
+            n.setType(type);
+            n.setTeamUuid(team.getUuid());
+            n.setMessage(message);
+            n.setCreatedAt(Date.from(Instant.now()));
+            n.setUserUuid(dest);
+            n.setActorUuid(actorUuid);
+            toSave.add(n);
+        }
+        if (!toSave.isEmpty()) notificationRepository.saveAll(toSave);
+    }
+
+    // Eventos de Team
+    public void notifyTeamMemberJoined(String teamUuid, String joinedUserUuid) {
+        Teams team = teamsRepository.findById(teamUuid).orElse(null);
+        if (team == null) return;
+        String userName = userRepository.findById(joinedUserUuid).map(User::getName).orElse("Um usuário");
+        java.util.Set<String> exclude = new java.util.HashSet<>();
+        exclude.add(joinedUserUuid); // não notificar o próprio que entrou
+        notifyTeamMembers(team, Type.TEAM_MEMBER_JOINED, userName + " entrou na equipe " + team.getName(), false, exclude);
+    }
+
+    public void notifyTeamMemberLeft(String teamUuid, String leftUserUuid) {
+        Teams team = teamsRepository.findById(teamUuid).orElse(null);
+        if (team == null) return;
+        String userName = userRepository.findById(leftUserUuid).map(User::getName).orElse("Um usuário");
+        java.util.Set<String> exclude = new java.util.HashSet<>();
+        exclude.add(leftUserUuid); // não notificar quem saiu
+        notifyTeamMembers(team, Type.TEAM_MEMBER_LEFT, userName + " saiu da equipe " + team.getName(), false, exclude);
+    }
+
     private void notifyProjectMembers(Task task, Type type, String defaultMessage, boolean includeActor) {
         if (task.getProjectUuid() == null) return;
         Projects project = projectsRepository.findById(task.getProjectUuid()).orElse(null);

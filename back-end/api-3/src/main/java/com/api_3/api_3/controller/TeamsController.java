@@ -1,5 +1,4 @@
 package com.api_3.api_3.controller;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -27,16 +26,16 @@ import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.security.JwtUtil; 
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.security.JwtUtil;
 import com.api_3.api_3.service.LeaveTeamService;
+import com.api_3.api_3.service.NotificationService;
 import com.api_3.api_3.service.TaskMaintenanceService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
-
 import jakarta.validation.Valid;
 
 @RestController
@@ -48,6 +47,7 @@ public class TeamsController {
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TaskMaintenanceService taskMaintenanceService;
     @Autowired private LeaveTeamService leaveTeamService;
+    @Autowired private NotificationService notificationService;
     @Autowired private JwtUtil jwtUtil;
 
     private String currentUserEmail(Authentication authentication) {
@@ -154,6 +154,7 @@ public class TeamsController {
         return ResponseEntity.noContent().build();
     }
 
+    // POST /api/teams/{teamUuid}/members/{userUuid} -> adiciona membro à equipe (gera TEAM_MEMBER_JOINED)
     @PostMapping("/{teamUuid}/members/{userUuid}")
     public ResponseEntity<TeamResponse> addMember(@PathVariable String teamUuid, @PathVariable String userUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -167,10 +168,13 @@ public class TeamsController {
 
             user.getTeams().add(team.toRef());
             userRepository.save(user);
+            // Notificar membros do time sobre a entrada
+            notificationService.notifyTeamMemberJoined(teamUuid, userUuid);
         }
         return ResponseEntity.ok(toTeamResponse(team));
     }
 
+    // DELETE /api/teams/{teamUuid}/members/{userUuid} -> remove membro da equipe (gera TEAM_MEMBER_LEFT; exclui equipe se sem membros)
     @DeleteMapping("/{teamUuid}/members/{userUuid}")
     public ResponseEntity<TeamResponse> removeMember(@PathVariable String teamUuid, @PathVariable String userUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -190,6 +194,8 @@ public class TeamsController {
             return ResponseEntity.noContent().build();
         } else {
             teamsRepository.save(team);
+            // Notificar membros do time sobre a saída
+            notificationService.notifyTeamMemberLeft(teamUuid, userUuid);
         }
 
         userRepository.findById(userUuid).ifPresent(u -> {
@@ -210,6 +216,7 @@ public class TeamsController {
         return ResponseEntity.ok(projects);
     }
 
+    // DELETE /api/teams/{teamUuid}/leave -> usuário sai da equipe (gera TEAM_MEMBER_LEFT)
     @DeleteMapping("/{teamUuid}/leave")
     public ResponseEntity<Void> leaveTeam(@PathVariable String teamUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -223,6 +230,7 @@ public class TeamsController {
     }
 
     // Endpoint para Gerar Token de Convite
+    // POST /api/teams/{teamUuid}/invite -> gera token de convite para ingresso
     @PostMapping("/{teamUuid}/invite")
     public ResponseEntity<String> generateInviteToken(@PathVariable String teamUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -238,6 +246,7 @@ public class TeamsController {
     }
 
     // EndPoint Para Entrar na equipe com o token 
+    // POST /api/teams/join/invite/{token} -> entra na equipe usando token (gera TEAM_MEMBER_JOINED)
     @PostMapping("/join/invite/{token}")
     public ResponseEntity<TeamResponse> joinTeamWithInvite(@PathVariable String token, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -272,6 +281,9 @@ public class TeamsController {
 
         user.getTeams().add(team.toRef());
         userRepository.save(user);
+
+        // Notificar membros do time sobre a entrada por convite
+        notificationService.notifyTeamMemberJoined(teamUuid, user.getUuid());
 
         return ResponseEntity.ok(toTeamResponse(team));
     }

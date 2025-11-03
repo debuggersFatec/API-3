@@ -29,6 +29,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectMapper projectMapper; 
+    @Autowired private NotificationService notificationService;
     @Override
     public List<ProjectResponse> listProjectsByTeam(String teamUuid, String userEmail) {
         assertMemberOfTeam(teamUuid, userEmail); // Autorização
@@ -136,6 +137,9 @@ public class ProjectServiceImpl implements ProjectService {
             }
             p.getMembers().add(userToAdd.toRef());
             projectsRepository.save(p);
+
+            // Notificar membros do projeto (exclui ator e o próprio que entrou)
+            notificationService.notifyProjectMemberJoined(projectUuid, userUuidToAdd);
         }
 
         return projectMapper.toProjectResponse(p); 

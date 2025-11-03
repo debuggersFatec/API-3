@@ -37,6 +37,10 @@ public class Notification {
         TASK_DUE_SOON,
         TASK_ASSIGNED,
         TASK_UNASSIGNED,
-        TASK_COMMENT
+        TASK_COMMENT,
+        TEAM_MEMBER_JOINED,
+        TEAM_MEMBER_LEFT,
+        PROJECT_MEMBER_JOINED,
+        PROJECT_MEMBER_LEFT
     }
 }

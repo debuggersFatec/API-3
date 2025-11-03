@@ -39,6 +39,10 @@ public class UpdateTaskService {
         String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
         String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
 
+    // Capturar valores antigos antes de sobrescrever
+    String oldTitle = existingTask.getTitle();
+    java.util.Date oldDue = existingTask.getDue_date();
+
         existingTask.setTitle(request.getTitle());
         existingTask.setDescription(request.getDescription());
         existingTask.setDue_date(request.getDue_date());
@@ -99,8 +103,8 @@ public class UpdateTaskService {
         // Notificações de atribuição conforme regras
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
             if (oldResponsibleUuid == null && newResponsibleUuid != null) {
-                // Caso anterior sem responsável -> notificar todos do projeto
-                notificationService.notifyTaskCreated(savedTask); // reutiliza mensagem para "mudança relevante" para todos
+                // Primeira atribuição: broadcast de atualização para todos (exclui ator)
+                notificationService.notifyTaskUpdatedBroadcast(savedTask);
             } else if (oldResponsibleUuid != null && newResponsibleUuid == null) {
                 // Desatribuição: notificar membros do projeto e o antigo responsável
                 notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
@@ -113,8 +117,8 @@ public class UpdateTaskService {
         }
 
         // Notificação de atualização (nome/data):
-        boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
-        boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
+    boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
+    boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
         if (changedTitle || changedDue) {
             notificationService.notifyTaskUpdatedScoped(savedTask);
         }
