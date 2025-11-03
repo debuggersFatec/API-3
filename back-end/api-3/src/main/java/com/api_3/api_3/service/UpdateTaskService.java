@@ -29,6 +29,7 @@ public class UpdateTaskService {
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectsRepository projectsRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public Task execute(String uuid, UpdateTaskRequest request) {
@@ -37,6 +38,10 @@ public class UpdateTaskService {
 
         String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
         String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
+
+    // Capturar valores antigos antes de sobrescrever
+    String oldTitle = existingTask.getTitle();
+    java.util.Date oldDue = existingTask.getDue_date();
 
         existingTask.setTitle(request.getTitle());
         existingTask.setDescription(request.getDescription());
@@ -58,7 +63,7 @@ public class UpdateTaskService {
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
              validateResponsible(existingTask);
         }
-        Task savedTask = taskRepository.save(existingTask);
+    Task savedTask = taskRepository.save(existingTask);
 
         if (savedTask.getProjectUuid() != null) {
             projectsRepository.findById(savedTask.getProjectUuid()).ifPresent(project -> {
@@ -94,6 +99,29 @@ public class UpdateTaskService {
 
 
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
+
+        // Notificações de atribuição conforme regras
+        if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
+            if (oldResponsibleUuid == null && newResponsibleUuid != null) {
+                // Primeira atribuição: broadcast de atualização para todos (exclui ator)
+                notificationService.notifyTaskUpdatedBroadcast(savedTask);
+            } else if (oldResponsibleUuid != null && newResponsibleUuid == null) {
+                // Desatribuição: notificar membros do projeto e o antigo responsável
+                notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
+                notificationService.notifyTaskUpdatedScoped(savedTask); // sem responsável -> notifica todos
+            } else {
+                // Reatribuição: notificar novo e antigo responsável
+                notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
+                notificationService.notifyTaskAssigned(savedTask, newResponsibleUuid);
+            }
+        }
+
+        // Notificação de atualização (nome/data):
+    boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
+    boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
+        if (changedTitle || changedDue) {
+            notificationService.notifyTaskUpdatedScoped(savedTask);
+        }
 
         return savedTask;
     }

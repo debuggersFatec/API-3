@@ -22,8 +22,8 @@ import com.api_3.api_3.dto.response.ProjectResponse;
 import com.api_3.api_3.exception.ProjectNotFoundException;
 import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.service.LeaveProjectService;
 import com.api_3.api_3.service.ProjectService;
 
@@ -129,6 +129,7 @@ public class ProjectsController {
         }
     }
 
+    // POST /api/projects/{projectUuid}/members/{userUuid} -> adiciona membro ao projeto (gera PROJECT_MEMBER_JOINED)
     @PostMapping("/{projectUuid}/members/{userUuid}")
     public ResponseEntity<ProjectResponse> addMember(@PathVariable String projectUuid, @PathVariable String userUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
@@ -147,6 +148,7 @@ public class ProjectsController {
         }
     }
 
+    // DELETE /api/projects/{projectUuid}/leave -> usuário sai do projeto (gera PROJECT_MEMBER_LEFT; remove projeto se sem membros)
     @DeleteMapping("/{projectUuid}/leave")
     public ResponseEntity<Void> leaveProject(@PathVariable String projectUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);

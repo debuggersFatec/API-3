@@ -30,6 +30,9 @@ public class LeaveTeamService {
     @Autowired
     private TaskMaintenanceService taskMaintenanceService; // Injetamos o serviço existente
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Transactional
     public void execute(String teamUuid, String userUuid) {
         Teams team = teamsRepository.findById(teamUuid)
@@ -44,15 +47,15 @@ public class LeaveTeamService {
             throw new SecurityException("Acesso negado. O utilizador não é membro desta equipa.");
         }
 
-        // Remover o utilizador da lista de membros da equipa
+        // Remover o utilizador da lista de membros da equipe
         team.getMembers().removeIf(member -> member.getUuid().equals(userUuid));
         teamsRepository.save(team);
 
-        // Remover a equipa da lista de equipas do utilizador
+        // Remover a equipe da lista de equipas do utilizador
         user.getTeams().removeIf(teamRef -> teamRef.getUuid().equals(teamUuid));
         userRepository.save(user);
 
-        // Remover o utilizador de todos os projetos associados à equipa (NOVA LÓGICA)
+        // Remover o utilizador de todos os projetos associados à equipe (NOVA LÓGICA)
         List<Projects> projects = projectsRepository.findByTeamUuid(teamUuid);
         for (Projects project : projects) {
             project.getMembers().removeIf(member -> member.getUuid().equals(userUuid));
@@ -62,11 +65,14 @@ public class LeaveTeamService {
         // Chamar o serviço de manutenção para desatribuir as tarefas (REUTILIZAÇÃO)
         taskMaintenanceService.unassignForTeam(teamUuid, userUuid);
 
-        // Se a equipa ficar sem membros, removê-la do banco
+        // Se a equipe ficar sem membros, removê-la do banco
         if (team.getMembers() == null || team.getMembers().isEmpty()) {
             teamsRepository.deleteById(teamUuid);
             // Opcional: remover/arquivar projetos e tarefas associados ao time
             // Mantido simples conforme requisito: apenas excluir o Team quando sem participantes
+        } else {
+            // Notificar os membros restantes sobre a saída
+            notificationService.notifyTeamMemberLeft(teamUuid, userUuid);
         }
     }
 }

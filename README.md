@@ -12,26 +12,31 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 
 ## Backlog do produto
  
-| Rank | Prioridade | User Story | Estimativa | Sprint |
-|------|------------|------------|------------|--------|
-| 1  | Alta   | Como usuário, quero criar uma nova tarefa com título e descrição para organizar minhas atividades | 5  | 1 |
-| 2  | Média  | Como usuário, quero editar uma tarefa existente para atualizar informações | 5  | 1 |
-| 3  | Média  | Como usuário, quero deletar uma tarefa para remover itens que não são mais necessários | 5  | 1 |
-| 4  | Alta   | Como usuário, quero visualizar todas as minhas tarefas em uma lista para ter visão geral do que preciso fazer | 8  | 1 |
-| 5  | Média  | Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso | 3  | 1 |
-| 6  | Alta   | Como usuário, quero me cadastrar com nome, e-mail e senha para acessar minhas tarefas | 5  | 1 |
-| 7  | Alta   | Como usuário, quero fazer login para acessar meu painel de tarefas | 3  | 1 |
-| 8  | Alta   | Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades | 8  | 1 |
-| 9  | Média  | Como usuário, quero recuperar minha senha caso a esqueça, para não perder acesso às minhas tarefas | 13 | 2 |
-| 10 | Média  | Como usuário, quero conseguir criar uma equipe para organizar minhas tarefas | 5  | 2 |
-| 11 | Média  | Como usuário, quero realizar login utilizando minha conta do Google, para ter mais praticidade | 8  | 2 |
-| 12 | Média  | Como usuário, quero ter um botão para convidar alguém para a minha equipe, para facilitar a colaboração | 8  | 2 |
-| 13 | Média  | Como usuário, quero receber notificações quando tarefas forem criadas, editadas ou excluídas, para acompanhar mudanças em tempo real | 13 | 2 |
-| 14 | Baixa  | Como usuário, quero filtrar minhas tarefas por status para visualizar melhor minhas tarefas | 5  | 2 |
-| 15 | Baixa  | Como usuário, quero ordenar minhas tarefas por data de criação ou conclusão para facilitar a priorização | 5  | 2 |
-| 16 | Baixa  | Como usuário, quero escolher um avatar para o meu perfil | 3  | 2 |
-| 17 | Baixa  | Como usuário, quero comentar nas tarefas de outros colaboradores | 8  | 2 |
-| 18 | Média  | Como usuário, quero acessar minhas tarefas pelo celular e pelo computador para ter flexibilidade de uso | 13 | 3 |
+|Rank|Prioridade|User Story|Estimativa|Sprint|
+|---|---|---|---|---|
+|1|Alta|Como usuário, quero criar uma nova tarefa com título e descrição para organizar minhas atividades|5|1|
+|2|Alta|Como usuário, quero visualizar todas as minhas tarefas em uma lista para ter visão geral do que preciso fazer|8|1|
+|3|Alta|Como usuário, quero me cadastrar com nome, e-mail e senha para acessar minhas tarefas|5|1|
+|4|Alta|Como usuário, quero fazer login para acessar meu painel de tarefas|3|1|
+|5|Alta|Como usuário, quero visualizar uma sidebar com minhas tarefas, equipes e status (vencidas, concluídas, lixeira), para facilitar a navegação e o acompanhamento das atividades|8|1|
+|6|Média|Como usuário, quero editar uma tarefa existente para atualizar informações|5|1|
+|7|Média|Como usuário, quero deletar uma tarefa para remover itens que não são mais necessários|5|1|
+|8|Média|Como usuário, quero marcar uma tarefa como concluída para acompanhar meu progresso|3|1|
+|9|Média|Como usuário, quero ter um botão para convidar alguém para a minha equipe, para facilitar a colaboração|8|2|
+|10|Média|Como usuário, quero definir se é obrigatório ou não entregar uma tarefa com anexo, para que eu tenha controle sobre quando documentos são realmente necessários|8|2|
+|11|Média|Como usuário, quero que apareça um alerta sempre que ocorrer uma ação relevante no banco de dados, para que eu seja informado em tempo real|8|2|
+|12|Baixa|Como usuário, quero filtrar minhas tarefas por categoria para visualizar melhor minhas tarefas|5|2|
+|13|Baixa|Como usuário, desejo sair de um projeto|3|2|
+|14|Baixa|Como usuário, desejo fechar um projeto|5|2|
+|15|Baixa|Como usuário, quero conseguir sair de uma equipe|5|2|
+|16|Baixa|Como usuário, quero comentar nas tarefas de outros colaboradores|8|2|
+|17|Baixa|Como usuário, quero anexar um arquivo quando entregar a tarefa|5|3|
+|18|Baixa|Como usuário, quero atualizar minha imagem e nome de perfil para manter minhas informações pessoais sempre corretas e personalizadas|5|3|
+|19|Baixa|Como usuário, quero ativar o modo escuro na aplicação para reduzir o cansaço visual e melhorar a experiência em ambientes de pouca luz|5|3|
+|20|Baixa|Como usuário, quero receber notificações quando minhas tarefas forem criadas, editadas, excluídas e quando faltar 1 dia para o vencimento, para acompanhar mudanças em tempo real e não perder prazos|13|3|
+|21|Baixa|Como usuário, quero recuperar minha senha caso a esqueça, para não perder acesso às minhas tarefas|13|3|
+|22|Baixa|Como usuário, quero realizar login utilizando minha conta do Google, para ter mais praticidade|8|3|
+|23|Baixa|Como usuário, quero visualizar um calendário, para acompanhar a data de entrega das minhas tarefas|13|3|
 
 ---
 
@@ -60,11 +65,11 @@ Desnvolver uma aplicação web para facilitar o gerenciamento de tarefas individ
 | Entrega | Período | Status | Relatório | Vídeo |
 | --- | :--: | --- | :--: | :--: |
 | **Kick Off** | 25/08/2025 – 29/08/2025 | ✅ Concluído | | |
-| **Sprint 1** | 08/09/2025 – 28/09/2025 | 🔄 Em andamento | [📋 relatório](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
-| **Sprint Review / Planning** | 29/09/2025 – 03/10/2025 | ⏳ Não iniciado | | |
-| **Sprint 2** | 06/10/2025 – 26/10/2025 | ⏳ Não iniciado | [📋 relatório]() | [🎥 Vídeo]() |
-| **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | ⏳ Não iniciado | | |
-| **Sprint 3** | 03/11/2025 – 23/11/2025 | ⏳ Não iniciado |  [📋 relatório]() | [🎥 Vídeo]() |
+| **Sprint 1** | 08/09/2025 – 28/09/2025 | ✅ Concluído | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.3gla0tvdwl7r#heading=h.ii4slvnpevzr) | [🎥 Vídeo](https://youtu.be/NjMV3tNhkF0) |
+| **Sprint Review / Planning** | 29/09/2025 – 03/10/2025 | ✅ Concluído | | |
+| **Sprint 2** | 06/10/2025 – 26/10/2025 | ✅ Concluído | [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.27br5mqml95v#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo](https://youtu.be/SuTKCbuTiGU) |
+| **Sprint Review / Planning** | 27/10/2025 – 31/10/2025 | 🔄 Em andamento | | |
+| **Sprint 3** | 03/11/2025 – 23/11/2025 | ⏳ Não iniciado |  [📋 Backlog](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.iyux6hln9nfr#heading=h.8jdbkn7hq5hs) | [🎥 Vídeo]() |
 | **Sprint Review** | 24/11/2025 – 28/11/2025 | ⏳ Não iniciado | | |
 | **Feira de Soluções** | 04/12/2025 | ⏳ Não iniciado | | |
 
@@ -125,22 +130,24 @@ Certifique-se de ter instalado em sua máquina:
    # Instala todas as bibliotecas e dependências necessárias para o frontend funcionar
    npm install
    ```
-3. **Execute o Backend**:
+3. **Execute o Frontend**:
    ```bash
-   # Inicia o servidor backend - a API que fornece os dados para o frontend
-   mvn spring-boot:run
-   ```
-4. **Em outro terminal, execute o Frontend**:
-   ```bash
-   # Entra na pasta do frontend (em um terminal SEPARADO)
+   # Entra na pasta do frontend
    cd ../front-end
    
    # Inicia o servidor de desenvolvimento do frontend
    npm start
    ```
-## Documentação
-📂 [Acessar Documentação](https://github.com/debuggersFatec/API-3/docs)
+4. **Em outro terminal, execute o Backend**:
+   ```bash
+   # Entra na pasta do backend
+   cd back-end/api-3
 
+   # Inicia o servidor backend - a API que fornece os dados para o frontend
+   mvn spring-boot:run
+   ```
+## Documentação
+📂 [Acessar Documentação](https://docs.google.com/document/d/1E55FZtkzN4XeQlno_Z1_m2z3qLNZsB8dBi-vnuFyLJA/edit?tab=t.eqaqtbqbxswp)
 ## Equipe
 | Foto | Função | Nome | LinkedIn & GitHub |
 | :--: | :--: | :--: | :--: |

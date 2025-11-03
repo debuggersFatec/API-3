@@ -11,8 +11,8 @@ import com.api_3.api_3.exception.ProjectNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.repository.ProjectsRepository;
-import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 
 @Service
@@ -33,6 +33,9 @@ public class LeaveProjectService {
     @Autowired
     private TaskMaintenanceService taskMaintenanceService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @Transactional
     public void execute(String projectUuid, String userUuid) {
         Projects project = projectsRepository.findById(projectUuid)
@@ -46,7 +49,7 @@ public class LeaveProjectService {
 
         // remover utilizador dos membros do projeto
         project.getMembers().removeIf(member -> member.getUuid().equals(userUuid));
-        projectsRepository.save(project);
+    projectsRepository.save(project);
 
         // buscar apenas as tasks deste projeto que têm o user como responsible
         List<Task> tasks = taskRepository.findByProjectUuidAndResponsibleUuid(projectUuid, userUuid);
@@ -70,7 +73,7 @@ public class LeaveProjectService {
         taskMaintenanceService.unassignForProject(projectUuid, userUuid);
 
         // se o projeto ficar sem membros, remover o projeto e remover referência no
-        // Team
+        // Team; caso contrário, notificar os membros que o usuário saiu
         if (project.getMembers() == null || project.getMembers().isEmpty()) {
             projectsRepository.deleteById(projectUuid);
 
@@ -83,6 +86,9 @@ public class LeaveProjectService {
                     teamsRepository.save(team);
                 });
             }
+        } else {
+            // Notificar membros restantes do projeto sobre a saída
+            notificationService.notifyProjectMemberLeft(projectUuid, userUuid);
         }
     }
 }
