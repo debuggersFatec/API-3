@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.api_3.api_3.dto.response.TaskResponse;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Responsible;
+
 @Component
 public class TaskMapper {
 
@@ -30,11 +31,11 @@ public class TaskMapper {
 
         dto.setStatus(task.getStatus() != null ? task.getStatus().name() : null);
         dto.setPriority(task.getPriority() != null ? task.getPriority().name() : null);
-
-        dto.setTeam_uuid(task.getTeamUuid()); 
-
+        dto.setTeam_uuid(task.getEquip_uuid());
         dto.setProject_uuid(task.getProjectUuid());
-
+        dto.setRequiredFile(task.getRequiredFile());
+        dto.setIsRequiredFile(task.getIsRequiredFile());
+        
         if (task.getResponsible() != null) {
           
             Responsible resp = new Responsible();

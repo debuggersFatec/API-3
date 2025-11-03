@@ -6,6 +6,7 @@ import {
   Input,
   Textarea,
   Button,
+  Switch,
 } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -20,6 +21,7 @@ import {
 import { Field } from "@chakra-ui/react/field";
 import { useRef, useState, useEffect } from "react";
 import { MdOutlineMail, MdDelete } from "react-icons/md";
+import DestructiveButton from "@/components/ui/DestructiveButton";
 import { AvatarUser } from "./AvatarUser";
 import ChakraDatePicker from "./chakraDatePicker/ChakraDatePicker";
 import type { Priority, Task } from "../types/task";
@@ -27,31 +29,35 @@ import { useAuth } from "../context/auth/useAuth";
 
 import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
+import useTaskActions from "@/hooks/useTaskActions";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
 import { CommentsArea } from "./CommentsArea";
+import { toast } from "@/utils/toast";
 
 interface ModalEditTaskProps {
-  membros: UserRef[];
   task: Task;
+  members: UserRef[];
   open: boolean;
   onClose?: () => void;
 }
 
 export const ModalEditTask = ({
   task,
-  membros,
+  members,
   open,
   onClose,
 }: ModalEditTaskProps) => {
   const { token, refreshUser } = useAuth();
   const { refreshTeam } = useTeam();
   const { refreshProject } = useProject();
+  const { deleteTask } = useTaskActions();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isRequiredFile, setIsRequiredFile] = useState(task.isRequiredFile);
 
   const [formData, setFormData] = useState(task);
 
@@ -62,6 +68,7 @@ export const ModalEditTask = ({
   const reloadTask = async () => {
     try {
       const fresh = await taskService.getTaskById(task.uuid, token);
+      console.log(fresh);
       if (fresh) setFormData(fresh);
     } catch (err) {
       console.error("Erro ao recarregar task:", err);
@@ -98,6 +105,11 @@ export const ModalEditTask = ({
     setIsDropdownOpen(false);
   };
 
+  const handleUnassign = async () => {
+    setFormData((prev) => (prev ? { ...prev, responsible: undefined } : prev));
+    setIsDropdownOpen(false);
+  };
+
   const handleSelectPriority = (priority: Priority) => {
     setFormData((prev) =>
       prev
@@ -125,6 +137,7 @@ export const ModalEditTask = ({
     e.preventDefault();
     try {
       await taskService.updateTask(formData!.uuid, formData!, token);
+      toast("success", "Tarefa atualizada com sucesso!");
       await refreshUser();
       await refreshProject();
       await refreshTeam();
@@ -150,6 +163,14 @@ export const ModalEditTask = ({
     );
   };
 
+  const handleRequiredFileChange = (checked: boolean) => {
+    setIsRequiredFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequiredFile: checked,
+    }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) =>
@@ -162,26 +183,14 @@ export const ModalEditTask = ({
     );
   };
 
-  const handleDelete = async () => {
-    if (!formData) return;
-
-    try {
-      await taskService.deleteTask(formData.uuid, token);
-      await refreshUser();
-      await refreshProject();
-      await refreshTeam();
-      if (onClose) onClose();
-    } catch (error) {
-      console.error("Erro ao excluir tarefa:", error);
-    }
-  };
+  // centralized task actions hook is called above with other hooks
 
   const prioritys: { label: string; value: Priority }[] = [
-    { label: "Baixa", value: "low" },
-    { label: "Média", value: "medium" },
-    { label: "Alta", value: "high" },
+    { label: "Baixa", value: "LOW" },
+    { label: "Média", value: "MEDIUM" },
+    { label: "Alta", value: "HIGH" },
   ];
-
+  console.log(members);
   return (
     <DialogRoot open={open} onOpenChange={onClose}>
       <DialogBackdrop />
@@ -203,6 +212,7 @@ export const ModalEditTask = ({
 
                   <DialogCloseTrigger asChild>
                     <Button
+                      type="button"
                       variant="ghost"
                       onClick={onClose}
                       aria-label="Fechar modal"
@@ -237,6 +247,7 @@ export const ModalEditTask = ({
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"24px"}>
                       <Button
+                        type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         variant="outline"
                         w="full"
@@ -272,27 +283,59 @@ export const ModalEditTask = ({
                           zIndex="10"
                           boxShadow="md"
                         >
-                          {membros.map((member) => (
-                            <Flex
-                              key={member.uuid}
-                              p={2}
-                              align="center"
-                              cursor="pointer"
-                              _hover={{ bg: "gray.100" }}
-                              onClick={() => handleSelectMember(member)}
-                            >
-                              <AvatarUser user={member} size="2xs" />
-                              <Text ml={2}>{member.name}</Text>
-                            </Flex>
-                          ))}
+                          {members && members.length > 0 ? (
+                            members.map((member) => (
+                              <Flex
+                                key={member.uuid}
+                                p={2}
+                                align="center"
+                                cursor="pointer"
+                                _hover={{ bg: "gray.100" }}
+                                onClick={() => handleSelectMember(member)}
+                              >
+                                <AvatarUser user={member} size="2xs" />
+                                <Text ml={2}>{member.name}</Text>
+                              </Flex>
+                            ))
+                          ) : (
+                            <Box p={3} color="gray.600">
+                              Nenhum membro disponível
+                            </Box>
+                          )}
+                          <Flex
+                            key="unassigned"
+                            p={2}
+                            align="center"
+                            cursor="pointer"
+                            _hover={{ bg: "gray.100" }}
+                            onClick={() => handleUnassign()}
+                          >
+                            <Text ml={2} fontWeight={500} color="gray.700">
+                              Sem responsável
+                            </Text>
+                          </Flex>
                         </Box>
                       )}
                     </Box>
                   </Field.Root>
 
+                  <Switch.Root
+                    checked={isRequiredFile}
+                    onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
+                  >
+                    <Switch.HiddenInput />
+                    <Switch.Control>
+                      <Switch.Thumb />
+                    </Switch.Control>
+                    <Switch.Label>
+                      É necessário um arquivo de entrega?
+                    </Switch.Label>
+                  </Switch.Root>
+
                   <Field.Root>
                     <Box position="relative" w="100%" mb={"8px"}>
                       <Button
+                        type="button"
                         onClick={() =>
                           setIsDropdownOpenPriority(!isDropdownOpenPriority)
                         }
@@ -393,18 +436,21 @@ export const ModalEditTask = ({
                   </Field.Root>
 
                   <Flex gap={2} maxW={"100%"}>
-                    <Button
-                      bg="red.500"
-                      color="white"
-                      _hover={{ bg: "red.600" }}
-                      onClick={handleDelete}
-                      aria-label="Excluir tarefa"
+                    {/* Reusable destructive button opens confirmation dialog */}
+                    <DestructiveButton
+                      icon={MdDelete}
+                      onConfirm={async () => {
+                        if (!formData) return;
+                        await deleteTask(formData.uuid, {
+                          onSuccess: () => onClose && onClose(),
+                        });
+                      }}
                       flex={1}
                       px={2}
                     >
                       Excluir
-                      <MdDelete size={22} color="#fff" />
-                    </Button>
+                    </DestructiveButton>
+
                     <Button flex={1} type="submit" colorScheme={"blue"}>
                       Salvar alterações
                     </Button>

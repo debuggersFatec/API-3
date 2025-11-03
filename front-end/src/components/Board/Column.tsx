@@ -8,10 +8,9 @@ import type { Column as ColumnType } from "./QuadroDisplay";
 interface ColumnProps {
   column: ColumnType;
   tasks: TaskProject[];
-  onDeleteTask: (id: string) => void;
 }
 
-export const Column = ({ column, tasks, onDeleteTask }: ColumnProps) => {
+export const Column = ({ column, tasks }: ColumnProps) => {
   const { setNodeRef } = useDroppable({ id: column.id });
 
   return (
@@ -33,7 +32,7 @@ export const Column = ({ column, tasks, onDeleteTask }: ColumnProps) => {
         p={1}
       >
         {tasks.map((task) => (
-          <TaskCard key={task.uuid} task={task} onDelete={onDeleteTask} />
+          <TaskCard key={task.uuid} task={task} />
         ))}
       </VStack>
     </Flex>

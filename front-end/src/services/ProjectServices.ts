@@ -1,4 +1,4 @@
-
+import type { Project } from "@/types/project";
 import { axiosInstance } from "./axiosInstance";
 
 export const projectServices = {
@@ -18,6 +18,16 @@ export const projectServices = {
       );
     } catch (error) {
       console.error("Erro ao criar projeto:", error);
+      throw error;
+    }
+  },
+
+  async getProjectByUuid(projectUuid: string): Promise<Project> {
+    try {
+      const response = await axiosInstance.get(`/projects/${projectUuid}`);
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar projeto:", error);
       throw error;
     }
   },
@@ -54,6 +64,29 @@ export const projectServices = {
       });
     } catch (error) {
       console.error("Erro ao desativar projeto:", error);
+      throw error;
+    }
+  },
+
+  async addMemberToProject(
+    projectUuid: string,
+    memberUuid: string
+  ): Promise<void> {
+    try {
+      await axiosInstance.post(
+        `/projects/${projectUuid}/members/${memberUuid}`
+      );
+    } catch (error) {
+      console.error("Erro ao adicionar membro ao projeto:", error);
+      throw error;
+    }
+  },
+
+  async leaveProject(projectUuid: string): Promise<void> {
+    try {
+      await axiosInstance.delete(`/projects/${projectUuid}/leave`);
+    } catch (error) {
+      console.error("Erro ao remover membro do projeto:", error);
       throw error;
     }
   },

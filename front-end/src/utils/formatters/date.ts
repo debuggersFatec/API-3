@@ -7,3 +7,5 @@ export const formatDateShort = (d?: string | Date) => {
   const year = String(date.getFullYear()).slice(-2);
   return `${day}/${month}/${year}`;
 };
+
+export default formatDateShort;

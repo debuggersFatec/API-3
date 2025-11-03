@@ -13,8 +13,9 @@ public class TaskResponse {
     private Date due_date;
     private String status;
     private String priority;
+    private Boolean isRequiredFile;
+    private String requiredFile;
     private String team_uuid;
-    
     @Deprecated
     private String equip_uuid; 
     private String project_uuid;

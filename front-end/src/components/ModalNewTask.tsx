@@ -6,6 +6,7 @@ import {
   Text,
   Input,
   Textarea,
+  Switch,
 } from "@chakra-ui/react";
 import {
   Dialog,
@@ -29,25 +30,27 @@ import type { UserRef } from "@/types/user";
 import { taskService } from "@/services";
 import { useProject } from "@/context/project/useProject";
 import { useTeam } from "@/context/team/useTeam";
+import { toast } from "@/utils/toast";
 
 export function ModalNewTask() {
   const { teamData } = useTeam();
   const { project } = useProject();
   const { open, onOpen, onClose } = useDisclosure();
+  const [isRequiredFile, setIsRequiredFile] = useState(false);
   const [formData, setFormData] = useState<Task>({
     uuid: "",
     title: "",
     description: "",
     due_date: undefined,
-    status: "not-started",
-    priority: "medium",
+    status: "NOT_STARTED",
+    priority: "MEDIUM",
     project_uuid: project?.uuid || "",
     team_uuid: teamData?.uuid || "",
     // arquivo: null as File | null,
     // file_required: "",
     // file_finish: "",
     responsible: undefined,
-    isRequerid_file: false,
+    isRequiredFile: false,
   });
 
   const { token, refreshUser } = useAuth();
@@ -87,9 +90,9 @@ export function ModalNewTask() {
   };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(formData);
     try {
       await taskService.createTask(formData, token);
+      toast('success', 'Tarefa criada com sucesso!');
       await refreshUser();
       await refreshProject();
       await refreshTeam();
@@ -101,12 +104,12 @@ export function ModalNewTask() {
       title: "",
       description: "",
       due_date: undefined,
-      status: "not-started",
-      priority: "medium",
+      status: "NOT_STARTED",
+      priority: "MEDIUM",
       project_uuid: project?.uuid || "",
       team_uuid: teamData?.uuid || "",
       responsible: undefined,
-      isRequerid_file: false,
+      isRequiredFile: false,
     });
     onClose();
   };
@@ -123,6 +126,15 @@ export function ModalNewTask() {
     }));
   };
 
+  const handleRequiredFileChange = (checked: boolean) => {
+    console.log("Checked:", checked);
+    setIsRequiredFile(checked);
+    setFormData((prev) => ({
+      ...prev,
+      isRequiredFile: checked,
+    }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     setFormData((prev) => ({
@@ -132,14 +144,14 @@ export function ModalNewTask() {
   };
 
   const prioritys: { label: string; value: Priority }[] = [
-    { label: "Baixa", value: "low" },
-    { label: "Média", value: "medium" },
-    { label: "Alta", value: "high" },
+    { label: "Baixa", value: "LOW" },
+    { label: "Média", value: "MEDIUM" },
+    { label: "Alta", value: "HIGH" },
   ];
 
   return (
     <>
-      <Button onClick={onOpen} variant={"outline"}>
+      <Button onClick={onOpen} size={'sm'} variant={"outline"}>
         Criar nova tarefa
       </Button>
 
@@ -161,7 +173,7 @@ export function ModalNewTask() {
                   </Field.Root>
                 </DialogTitle>
                 <DialogCloseTrigger asChild>
-                  <Button variant="ghost" onClick={onClose}>
+                  <Button type="button" variant="ghost" onClick={onClose} aria-label="Fechar">
                     X
                   </Button>
                 </DialogCloseTrigger>
@@ -183,8 +195,9 @@ export function ModalNewTask() {
 
                   <Box w={"100%"} gap={"8px"}>
                     <Field.Root>
-                      <Box position="relative" w="100%" mb={"24px"}>
+                      <Box position="relative" w="100%" mb={"10px"}>
                         <Button
+                          type="button"
                           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                           variant="outline"
                           w="full"
@@ -237,10 +250,26 @@ export function ModalNewTask() {
                         )}
                       </Box>
                     </Field.Root>
+                    <Switch.Root
+                      checked={isRequiredFile}
+                      onCheckedChange={(e) =>
+                        handleRequiredFileChange(e.checked)
+                      }
+                      mb={"10px"}
+                    >
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <Switch.Label>
+                        É necessário um arquivo de entrega?
+                      </Switch.Label>
+                    </Switch.Root>
 
                     <Field.Root>
                       <Box position="relative" w="100%" mb={"8px"}>
                         <Button
+                          type="button"
                           onClick={() =>
                             setIsDropdownOpenPriority(!isDropdownOpenPriority)
                           }

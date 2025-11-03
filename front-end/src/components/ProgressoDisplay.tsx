@@ -13,8 +13,8 @@ export const ProgressoDisplay = () => {
   let concluidas = 0;
   let naoConcluidas = 0;
   tasks.forEach((t) => {
-    const status = (t.status || "").toLowerCase();
-    if (status === "completed") {
+    const status = (t.status || "");
+    if (status === "COMPLETED") {
       concluidas++;
     } else {
       naoConcluidas++;
@@ -22,7 +22,7 @@ export const ProgressoDisplay = () => {
   });
   const chart = useChart({
     data: [
-      { name: "Não concluidas", value: naoConcluidas, color: "white" },
+      { name: "Não concluidas", value: naoConcluidas, color: "gray.300" },
       { name: "Concluidas", value: concluidas, color: "blue.solid" },
     ],
   });

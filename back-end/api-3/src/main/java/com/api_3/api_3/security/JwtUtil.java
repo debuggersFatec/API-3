@@ -40,6 +40,21 @@ public class JwtUtil {
                 .compact();
     }
 
+    public String generateInviteToken(String teamUuid) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("invite_team_id", teamUuid);
+        
+        long inviteExpiration = 86400;
+        
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject("TEAM_INVITE_" + teamUuid) 
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + inviteExpiration * 1000))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
     public boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
@@ -47,6 +62,11 @@ public class JwtUtil {
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractInviteTeamId(String token) {
+        final Claims claims = extractAllClaims(token);
+        return claims.get("invite_team_id", String.class);
     }
 
     private boolean isTokenExpired(String token) {

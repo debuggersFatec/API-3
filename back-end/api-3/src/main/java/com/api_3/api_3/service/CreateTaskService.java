@@ -47,6 +47,9 @@ public class CreateTaskService {
         // Atribuir vínculos corretos
         newTask.setEquip_uuid(project.getTeamUuid());
         newTask.setProjectUuid(request.getProject_uuid());
+        newTask.setRequiredFile(request.getRequiredFile());
+        newTask.setIsRequiredFile(request.getIsRequiredFile());
+        
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             newTask.setResponsible(new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img()));

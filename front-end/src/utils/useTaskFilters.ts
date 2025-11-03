@@ -35,14 +35,15 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
         return false;
       }
 
+      // Status now comes from backend as UPPERCASE enum strings. Accept those
+      // directly and avoid legacy normalizations.
       let taskStatus: Status | undefined;
       const rawStatus = (task as unknown as Record<string, unknown>)["status"];
       if (typeof rawStatus === "string") {
-        const normalized = rawStatus.toLowerCase().replace(/_/g, "-");
-        if (normalized === "not-started") taskStatus = "not-started";
-        else if (normalized === "in-progress") taskStatus = "in-progress";
-        else if (normalized === "completed") taskStatus = "completed";
-        else if (normalized === "deleted") taskStatus = "deleted";
+        const upper = rawStatus.toUpperCase();
+        if (upper === "NOT_STARTED" || upper === "IN_PROGRESS" || upper === "COMPLETED" || upper === "DELETED") {
+          taskStatus = upper as Status;
+        }
       }
 
       // Filtro por status
@@ -52,22 +53,16 @@ export const useTaskFilters = (tasks: TaskType[] | undefined) => {
 
       // Filtro por prioridade
       if (filters.priority !== "all") {
+        // Priority expected as UPPERCASE enum strings from backend.
         let taskPriority: Priority | undefined;
         const rawPriority =
           (task as unknown as Record<string, unknown>)["priority"] ??
           (task as unknown as Record<string, unknown>)["prioridade"];
         if (typeof rawPriority === "string") {
-          const normalized = rawPriority.toLowerCase().replace(/_/g, "-");
-          if (normalized === "low" || normalized === "baixa")
-            taskPriority = "low";
-          else if (
-            normalized === "medium" ||
-            normalized === "média" ||
-            normalized === "media"
-          )
-            taskPriority = "medium";
-          else if (normalized === "high" || normalized === "alta")
-            taskPriority = "high";
+          const upper = rawPriority.toUpperCase();
+          if (upper === "LOW" || upper === "MEDIUM" || upper === "HIGH") {
+            taskPriority = upper as Priority;
+          }
         }
 
         if (!taskPriority || taskPriority !== filters.priority) return false;
