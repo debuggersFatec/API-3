@@ -1,5 +1,12 @@
 package com.api_3.api_3.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.api_3.api_3.exception.CommentNotFoundException;
 import com.api_3.api_3.exception.TaskNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
@@ -7,22 +14,14 @@ import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.TaskComment;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Date;
-import java.util.ArrayList; 
+import com.api_3.api_3.repository.UserRepository; 
 
 @Service
 public class CommentService {
 
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private TaskRepository taskRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public TaskComment addComment(String taskId, String content, String authorUuid) {
@@ -38,8 +37,11 @@ public class CommentService {
             task.setComments(new ArrayList<>());
         }
 
-        task.getComments().add(newComment);
-        taskRepository.save(task);
+    task.getComments().add(newComment);
+    taskRepository.save(task);
+
+    // Notificações conforme regra: responsável apenas, senão todos do projeto
+    notificationService.notifyTaskComment(task, authorUuid);
 
         return newComment;
     }

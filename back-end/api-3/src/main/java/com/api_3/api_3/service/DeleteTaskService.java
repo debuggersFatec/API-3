@@ -17,6 +17,7 @@ public class DeleteTaskService {
     @Autowired private TaskRepository taskRepository;
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public Task execute(String uuid) {
@@ -29,7 +30,11 @@ public class DeleteTaskService {
         }
 
         task.setStatus(Task.Status.DELETED);
-        return taskRepository.save(task);
+        Task saved = taskRepository.save(task);
+
+        // Notificação de exclusão com escopo conforme regras
+        notificationService.notifyTaskDeletedScoped(saved);
+        return saved;
     }
 
     private void moveTaskToProjectTrashcan(Task task) {

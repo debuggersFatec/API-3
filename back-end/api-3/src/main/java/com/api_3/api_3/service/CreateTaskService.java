@@ -26,6 +26,7 @@ public class CreateTaskService {
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired private NotificationService notificationService;
 
     @Transactional
     public Task execute(CreateTaskRequest request) {
@@ -68,6 +69,9 @@ public class CreateTaskService {
         if (savedTask.getResponsible() != null && savedTask.getResponsible().uuid() != null) {
             addTaskToUser(savedTask, savedTask.getResponsible().uuid());
         }
+
+    // Notificação para todos os membros do projeto (exclui o ator)
+        notificationService.notifyTaskCreated(savedTask);
 
         return savedTask;
     }
