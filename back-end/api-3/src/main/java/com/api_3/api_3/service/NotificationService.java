@@ -310,8 +310,16 @@ public class NotificationService {
     private String getCurrentUserUuid() {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            if (auth == null || auth.getName() == null) return null;
-            return userRepository.findByEmailIgnoreCase(auth.getName())
+            if (auth == null) return null;
+            String username = null;
+            Object principal = auth.getPrincipal();
+            if (principal instanceof org.springframework.security.core.userdetails.UserDetails ud) {
+                username = ud.getUsername();
+            } else {
+                username = auth.getName();
+            }
+            if (username == null) return null;
+            return userRepository.findByEmailIgnoreCase(username)
                     .map(User::getUuid)
                     .orElse(null);
         } catch (Exception e) {
