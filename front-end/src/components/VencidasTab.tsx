@@ -15,7 +15,7 @@ export const VencidasTab = ({ tasks }: VencidasTabProps) => {
     if (tasks) {
       const hoje = new Date();
       const vencidas = tasks.filter((t) => {
-        if (!t.due_date) return false;
+        if (!t.due_date || t.status === "COMPLETED") return false;
         let data: Date;
         if (typeof t.due_date === "object" && t.due_date !== null && "getTime" in t.due_date) {
           data = t.due_date as Date;
@@ -35,7 +35,7 @@ export const VencidasTab = ({ tasks }: VencidasTabProps) => {
   return (
     <Box w={"100%"} display={"flex"} flexDir={"column"} alignItems={"center"}>
       <SectionHeader title="Vencidas" />
-      <CheckList tasks={vencidas} />
+      <CheckList tasks={vencidas} isUserArea/>
     </Box>
   );
 };

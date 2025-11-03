@@ -34,6 +34,7 @@ import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
 import { CommentsArea } from "./CommentsArea";
 import { toast } from "@/utils/toast";
+import { formatPriority } from "@/utils/formatters";
 
 interface ModalEditTaskProps {
   task: Task;
@@ -245,7 +246,7 @@ export const ModalEditTask = ({
 
                 <Box w={"100%"}>
                   <Field.Root>
-                    <Box position="relative" w="100%" mb={"24px"}>
+                    <Box position="relative" w="100%" mb={"10px"}>
                       <Button
                         type="button"
                         onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -322,6 +323,7 @@ export const ModalEditTask = ({
                   <Switch.Root
                     checked={isRequiredFile}
                     onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
+                    mb={"10px"}
                   >
                     <Switch.HiddenInput />
                     <Switch.Control>
@@ -351,7 +353,7 @@ export const ModalEditTask = ({
                             cursor="pointer"
                             _hover={{ bg: "gray.100" }}
                           >
-                            <Text ml={2}>{formData!.priority}</Text>
+                            <Text ml={2}>{formatPriority(formData!.priority)}</Text>
                           </Flex>
                         ) : (
                           "Defina uma prioridade"

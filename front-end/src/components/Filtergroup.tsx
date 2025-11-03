@@ -136,8 +136,8 @@ export const Filtergroup: React.FC<FiltergroupProps> = ({
                   style={{ width: "100%", padding: "8px", borderRadius: 6 }}
                 >
                   <option value="all">Todos os status</option>
-                  <option value="not-started">Não iniciada</option>
-                  <option value="in-progress">Em progresso</option>
+                  <option value="NOT_STARTED">Não iniciada</option>
+                  <option value="IN_PROGRESS">Em progresso</option>
                   <option value="COMPLETED">Concluída</option>
                 </select>
               </Box>

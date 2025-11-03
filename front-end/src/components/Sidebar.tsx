@@ -67,7 +67,7 @@ export const Sidebar = () => {
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {
                 filteredTasks.filter((t) => {
-                  if (!t.due_date) return false;
+                  if (!t.due_date || t.status === "COMPLETED") return false;
                   const hoje = new Date();
                   const data = new Date(t.due_date);
                   if (isNaN(data.getTime())) return false;
@@ -86,6 +86,16 @@ export const Sidebar = () => {
               }
             </span>
           </Tabs.Trigger>
+          <Tabs.Trigger
+            value="completas"
+            justifyContent={"space-between"}
+            onClick={() => setProject(undefined)}
+          >
+            Completas
+            <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
+              {filteredTasks.filter((t) => t.status === "COMPLETED").length}
+            </span>
+          </Tabs.Trigger>
           <Flex alignItems={"center"} justify={"space-between"}>
             <h1>Teams</h1>
             <Dialog.Root
@@ -94,7 +104,13 @@ export const Sidebar = () => {
               onOpenChange={() => setModalOpen(!modalOpen)}
             >
               <Dialog.Trigger asChild>
-                <Box bg="blue.500" borderRadius="md" mr={2.5} p={0.5} border="none">
+                <Box
+                  bg="blue.500"
+                  borderRadius="md"
+                  mr={2.5}
+                  p={0.5}
+                  border="none"
+                >
                   <FaPlus color="white" />
                 </Box>
               </Dialog.Trigger>
@@ -125,16 +141,6 @@ export const Sidebar = () => {
               );
             })}
           <Separator maxW={"200px"} />
-          <Tabs.Trigger
-            value="completas"
-            justifyContent={"space-between"}
-            onClick={() => setProject(undefined)}
-          >
-            Completas
-            <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
-              {filteredTasks.filter((t) => t.status === "COMPLETED").length}
-            </span>
-          </Tabs.Trigger>
           <Button
             onClick={() => logout()}
             variant="plain"

@@ -62,7 +62,7 @@ export const CheckListItem = ({
     priority: {
       HIGH: { bg: "red.100", color: "red.800" },
       MEDIUM: { bg: "orange.100", color: "orange.800" },
-      LOW: { bg: "green.100", color: "green.800" },
+      LOW: { bg: "yellow.100", color: "yellow.800" },
       DEFAULT: { bg: "blue.100", color: "blue.800" },
     },
   } as const;

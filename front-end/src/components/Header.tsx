@@ -1,6 +1,6 @@
 import { Box, Dialog, Icon, Image } from "@chakra-ui/react";
 import { ColorModeButton } from "./ui/color-mode";
-import { FaBell, FaLink } from "react-icons/fa";
+import { FaBell } from "react-icons/fa";
 import logo from "@/assets/logo.svg";
 import { ModalEditUser } from "./ModalEditUser";
 
@@ -23,7 +23,6 @@ export const Header = () => {
         gap={4}
         padding={4}
       >
-        <Icon as={FaLink} boxSize={5} cursor="pointer" />
         <Icon as={FaBell} boxSize={5} cursor="pointer" />
         <ColorModeButton w="24px" h="24px" fontSize="12px" minW={0} />
         <Dialog.Root placement={"center"}>

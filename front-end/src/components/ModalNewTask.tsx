@@ -31,6 +31,7 @@ import { taskService } from "@/services";
 import { useProject } from "@/context/project/useProject";
 import { useTeam } from "@/context/team/useTeam";
 import { toast } from "@/utils/toast";
+import { formatPriority } from "@/utils/formatters";
 
 export function ModalNewTask() {
   const { teamData } = useTeam();
@@ -285,7 +286,7 @@ export function ModalNewTask() {
                               cursor="pointer"
                               _hover={{ bg: "gray.100" }}
                             >
-                              <Text ml={2}>{formData.priority}</Text>
+                              <Text ml={2}>{formatPriority(formData.priority)}</Text>
                             </Flex>
                           ) : (
                             "Defina uma prioridade"
