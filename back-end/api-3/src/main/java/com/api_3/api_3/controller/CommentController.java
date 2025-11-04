@@ -1,13 +1,26 @@
 package com.api_3.api_3.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.api_3.api_3.dto.request.CreateCommentRequest;
 import com.api_3.api_3.dto.request.UpdateCommentRequest;
 import com.api_3.api_3.dto.response.CommentResponse;
-import com.api_3.api_3.exception.CommentNotFoundException; // Certifique-se que esta importação está correta
+import com.api_3.api_3.exception.CommentNotFoundException;
 import com.api_3.api_3.exception.ProjectNotFoundException;
 import com.api_3.api_3.exception.TaskNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.mapper.CommentMapper; // Importar o CommentMapper
+import com.api_3.api_3.mapper.CommentMapper;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.TaskComment;
@@ -15,17 +28,9 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.service.CommentService;
-import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import com.api_3.api_3.service.task.CommentService;
 
-// Remover a importação de Optional se não for mais usada diretamente
-// import java.util.Optional;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/tasks/{taskId}/comments") // Base path para os comentários de uma tarefa
@@ -35,7 +40,7 @@ public class CommentController {
     @Autowired private TaskRepository taskRepository;
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private UserRepository userRepository;
-    @Autowired private CommentMapper commentMapper; // Injetar o CommentMapper
+    @Autowired private CommentMapper commentMapper;
 
     // --- Helper de Autorização ---
     private UserDetails getUserDetails(Authentication authentication) {
@@ -76,10 +81,6 @@ public class CommentController {
             throw new SecurityException("Acesso negado. Usuário não é membro do projeto '" + project.getName() + "'.");
         }
     }
-
-    // --- REMOVER o método mapToResponse daqui ---
-
-    // --- Endpoints CRUD (Usando o CommentMapper injetado) ---
 
     @PostMapping
     public ResponseEntity<CommentResponse> addComment(

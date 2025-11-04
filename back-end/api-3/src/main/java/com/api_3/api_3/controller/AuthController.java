@@ -14,7 +14,7 @@ import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.service.AuthService;
+import com.api_3.api_3.service.auth.AuthService;
 
 import jakarta.validation.Valid;
 

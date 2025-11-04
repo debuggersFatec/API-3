@@ -13,24 +13,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.model.entity.Notification;
-import com.api_3.api_3.service.NotificationService;
+import com.api_3.api_3.service.notification.NotificationManagementService;
+import com.api_3.api_3.service.notification.NotificationQueryService;
 
 @RestController
 @RequestMapping("/api/notifications")
 public class NotificationController {
 
-    @Autowired private NotificationService notificationService;
+    @Autowired private NotificationQueryService notificationQueryService;
+    @Autowired private NotificationManagementService notificationManagementService;
 
     @GetMapping
     // GET /api/notifications?unreadOnly=true|false -> lista notificações do usuário
     public List<Notification> list(@RequestParam(name = "unreadOnly", required = false, defaultValue = "false") boolean unreadOnly) {
-        return notificationService.listForCurrentUser(unreadOnly);
+        return notificationQueryService.listForCurrentUser(unreadOnly);
     }
 
     @PostMapping("/{id}/read")
     // POST /api/notifications/{id}/read -> marca como lida
     public ResponseEntity<Notification> markRead(@PathVariable String id) {
-        return notificationService.markRead(id)
+        return notificationManagementService.markRead(id)
             .map(ResponseEntity::ok)
             .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
@@ -38,7 +40,7 @@ public class NotificationController {
     @DeleteMapping("/{id}")
     // DELETE /api/notifications/{id} -> apaga notificação
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        notificationService.delete(id);
+        notificationManagementService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

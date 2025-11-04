@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.user;
 
 import java.util.List;
 
@@ -39,7 +39,6 @@ public class GetUserService {
                 .orElseThrow(() -> new UserNotFoundException("Utilizador autenticado não encontrado com o email: " + userEmail));
 
         List<Teams> teams = teamsRepository.findAllById(user.getEquipeIds());
-        // Assigned-only: only tasks where the user is responsible
         List<Task> tasks = taskRepository.findByResponsibleUuid(user.getUuid());
         if (tasks != null && !tasks.isEmpty()) {
             log.debug("GetUserService.findCurrentUserProfile: tasks from responsibleUuid -> {}", tasks.size());

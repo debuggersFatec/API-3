@@ -1,8 +1,7 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.auth;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -29,8 +28,8 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.repository.NotificationRepository;
 import com.api_3.api_3.security.JwtUtil;
+import com.api_3.api_3.service.notification.NotificationQueryService;
 
 @Service
 public class AuthService {
@@ -58,10 +57,9 @@ public class AuthService {
     @Autowired
     private UserMapper userMapper;
     @Autowired
-    private NotificationRepository notificationRepository;
+    private NotificationQueryService notificationQueryService;
 
     public AuthResponse login(AuthRequest authRequest) {
-        // Authenticate credentials
         Authentication authentication;
         try {
             authentication = authenticationManager.authenticate(
@@ -71,16 +69,13 @@ public class AuthService {
             throw new InvalidCredentialsException("Credenciais inválidas!");
         }
 
-        // Generate JWT
         UserDetails principal = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(principal);
 
-        // Load user and related data
         User user = userRepository.findByEmailIgnoreCase(authRequest.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado"));
 
         List<Teams> teams = teamsRepository.findAllById(user.getEquipeIds());
-        // Assigned-only: only tasks where the user is responsible
         List<Task> tasks = taskRepository.findByResponsibleUuid(user.getUuid());
         if (tasks != null && !tasks.isEmpty()) {
             log.debug("AuthService.login: tasks from responsibleUuid -> {}", tasks.size());
@@ -94,27 +89,12 @@ public class AuthService {
             "/api/tasks"
         );
 
-        // Build response including notifications
         AuthResponse resp = new AuthResponse();
         resp.setToken(token);
         resp.setRoutes(routes);
         resp.setUser(userInfo);
-        long unread = notificationRepository.countByUserUuidAndReadFalse(user.getUuid());
-        List<NotificationDto> recent = notificationRepository
-            .findTop20ByUserUuidOrderByCreatedAtDesc(user.getUuid())
-            .stream()
-            .map(n -> new NotificationDto(
-                n.getId(),
-                n.getType() != null ? n.getType().name() : null,
-                n.getTeamUuid(),
-                n.getProjectUuid(),
-                n.getTaskUuid(),
-                n.getTaskTitle(),
-                n.getMessage(),
-                n.isRead(),
-                n.getCreatedAt()
-            ))
-            .collect(Collectors.toList());
+        long unread = notificationQueryService.countUnreadByUserUuid(user.getUuid());
+        List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(user.getUuid());
         resp.setNotificationsUnread(unread);
         resp.setNotificationsRecent(recent);
         return resp;
@@ -125,20 +105,17 @@ public class AuthService {
             throw new IllegalArgumentException("Dados do usuário inválidos para registro");
         }
 
-        // Normalize email (optional but recommended)
         newUser.setEmail(newUser.getEmail().trim());
 
         if (userRepository.existsByEmailIgnoreCase(newUser.getEmail())) {
             throw new EmailAlreadyExistsException("Este e-mail já está em uso.");
         }
 
-        // Ensure UUID and encode password
         if (newUser.getUuid() == null || newUser.getUuid().isBlank()) {
             newUser.setUuid(UUID.randomUUID().toString());
         }
         newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
-        // Ensure legacy compatibility fields are initialized
         if (newUser.getEquipeIds() == null) {
             newUser.setEquipeIds(Collections.emptyList());
         }
@@ -148,7 +125,6 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        // Build JWT for the new user
         UserDetails userDetails = org.springframework.security.core.userdetails.User
             .withUsername(savedUser.getEmail())
             .password(savedUser.getPassword())
@@ -165,27 +141,12 @@ public class AuthService {
             "/api/tasks"
         );
 
-        // Build response including notifications (empty initial)
         AuthResponse resp = new AuthResponse();
         resp.setToken(token);
         resp.setRoutes(routes);
         resp.setUser(userInfo);
-        long unread = notificationRepository.countByUserUuidAndReadFalse(savedUser.getUuid());
-        List<NotificationDto> recent = notificationRepository
-            .findTop20ByUserUuidOrderByCreatedAtDesc(savedUser.getUuid())
-            .stream()
-            .map(n -> new NotificationDto(
-                n.getId(),
-                n.getType() != null ? n.getType().name() : null,
-                n.getTeamUuid(),
-                n.getProjectUuid(),
-                n.getTaskUuid(),
-                n.getTaskTitle(),
-                n.getMessage(),
-                n.isRead(),
-                n.getCreatedAt()
-            ))
-            .collect(Collectors.toList());
+        long unread = notificationQueryService.countUnreadByUserUuid(savedUser.getUuid());
+        List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(savedUser.getUuid());
         resp.setNotificationsUnread(unread);
         resp.setNotificationsRecent(recent);
         return resp;

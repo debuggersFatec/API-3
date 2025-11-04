@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.task;
 
 import java.util.ArrayList;
 import java.util.UUID;
@@ -19,6 +19,7 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class CreateTaskService {
@@ -30,7 +31,6 @@ public class CreateTaskService {
 
     @Transactional
     public Task execute(CreateTaskRequest request) {
-        // Carregar o projeto alvo e derivar a equipe a partir dele
         Projects project = projectsRepository.findById(request.getProject_uuid())
             .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + request.getProject_uuid() + " não encontrado."));
 
@@ -44,7 +44,6 @@ public class CreateTaskService {
         newTask.setDue_date(request.getDue_date());
         newTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : Task.Status.NOT_STARTED);
         newTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : Task.Priority.LOW);
-        // Atribuir vínculos corretos
         newTask.setEquip_uuid(project.getTeamUuid());
         newTask.setProjectUuid(request.getProject_uuid());
         newTask.setRequiredFile(request.getRequiredFile());
@@ -60,17 +59,14 @@ public class CreateTaskService {
         validateResponsible(newTask, team);
         Task savedTask = taskRepository.save(newTask);
 
-        // Adicionar referência da tarefa ao projeto
         if (project.getTasks() == null) project.setTasks(new java.util.ArrayList<>());
         project.getTasks().add(savedTask.toProjectRef());
         projectsRepository.save(project);
 
-        // No longer embed TaskInfo in Equipe; Teams/Projects will maintain references via lists if needed in future
         if (savedTask.getResponsible() != null && savedTask.getResponsible().uuid() != null) {
             addTaskToUser(savedTask, savedTask.getResponsible().uuid());
         }
 
-    // Notificação para todos os membros do projeto (exclui o ator)
         notificationService.notifyTaskCreated(savedTask);
 
         return savedTask;
@@ -82,7 +78,6 @@ public class CreateTaskService {
             userRepository.findById(responsibleUuid)
                     .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));
 
-            // Enforce project membership (projects own tasks)
             if (task.getProjectUuid() == null) {
                 throw new InvalidResponsibleException("Tarefa não está vinculada a um projeto válido.");
             }
@@ -96,7 +91,6 @@ public class CreateTaskService {
                 throw new InvalidResponsibleException("O usuário responsável não é membro do projeto.");
             }
 
-            // Optional: still ensure team membership consistency
             boolean isTeamMember = team.getMembers() != null && team.getMembers().stream()
                 .filter(java.util.Objects::nonNull)
                 .anyMatch(m -> responsibleUuid.equals(m.getUuid()));
@@ -109,7 +103,6 @@ public class CreateTaskService {
     private void addTaskToUser(Task task, String userUuid) {
         userRepository.findById(userUuid).ifPresent(user -> {
             if (user.getTasks() == null) user.setTasks(new ArrayList<>());
-            // Persist as Task.TaskUser in the User entity
             Task.TaskUser taskUser = task.toUserRef();
             user.getTasks().add(taskUser);
             userRepository.save(user);

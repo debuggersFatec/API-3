@@ -1,36 +1,44 @@
 // src/main/java/com/api_3/api_3/controller/TaskController.java
 package com.api_3.api_3.controller;
 
-import com.api_3.api_3.dto.request.CreateTaskRequest;
-import com.api_3.api_3.dto.request.UpdateTaskRequest;
-import com.api_3.api_3.dto.response.TaskResponse;
-// Importar novas exceções
-import com.api_3.api_3.exception.ProjectNotFoundException;
-import com.api_3.api_3.exception.TaskNotFoundException;
-import com.api_3.api_3.exception.TeamNotFoundException; // Já deve existir
-import com.api_3.api_3.exception.UserNotFoundException;
-import com.api_3.api_3.mapper.TaskMapper;
-import com.api_3.api_3.model.entity.Projects; // Importar Projects
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.repository.TeamsRepository;
-import com.api_3.api_3.repository.ProjectsRepository;
-import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.model.entity.Teams;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.service.CreateTaskService;
-import com.api_3.api_3.service.DeleteTaskService;
-import com.api_3.api_3.service.GetTaskService;
-import com.api_3.api_3.service.UpdateTaskService;
-import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.Authentication; // Já deve existir
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping; // Importar Projects
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import com.api_3.api_3.dto.request.CreateTaskRequest;
+import com.api_3.api_3.dto.request.UpdateTaskRequest;
+import com.api_3.api_3.dto.response.TaskResponse;
+import com.api_3.api_3.exception.ProjectNotFoundException;
+import com.api_3.api_3.exception.TaskNotFoundException;
+import com.api_3.api_3.exception.TeamNotFoundException;
+import com.api_3.api_3.exception.UserNotFoundException;
+import com.api_3.api_3.mapper.TaskMapper;
+import com.api_3.api_3.model.entity.Projects;
+import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.model.entity.Teams;
+import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.ProjectsRepository;
+import com.api_3.api_3.repository.TeamsRepository;
+import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.task.CreateTaskService;
+import com.api_3.api_3.service.task.DeleteTaskService;
+import com.api_3.api_3.service.task.GetTaskService;
+import com.api_3.api_3.service.task.UpdateTaskService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/tasks")

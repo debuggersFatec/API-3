@@ -21,8 +21,9 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.NotificationRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
-import com.api_3.api_3.service.GetUserService;
-import com.api_3.api_3.service.UpdateUserService;
+import com.api_3.api_3.service.notification.NotificationQueryService;
+import com.api_3.api_3.service.user.GetUserService;
+import com.api_3.api_3.service.user.UpdateUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -47,6 +48,8 @@ public class UserController {
 
     @Autowired
     private NotificationRepository notificationRepository;
+    @Autowired
+    private NotificationQueryService notificationQueryService;
     @Autowired
     private UserRepository userRepository;
 
@@ -77,22 +80,8 @@ public class UserController {
         resp.setUser(userInfo);
         com.api_3.api_3.model.entity.User u = userRepository.findByEmailIgnoreCase(userDetails.getUsername()).orElse(null);
         if (u != null) {
-            long unread = notificationRepository.countByUserUuidAndReadFalse(u.getUuid());
-            java.util.List<NotificationDto> recent = notificationRepository
-                .findTop20ByUserUuidOrderByCreatedAtDesc(u.getUuid())
-                .stream()
-                .map(n -> new NotificationDto(
-                    n.getId(),
-                    n.getType() != null ? n.getType().name() : null,
-                    n.getTeamUuid(),
-                    n.getProjectUuid(),
-                    n.getTaskUuid(),
-                    n.getTaskTitle(),
-                    n.getMessage(),
-                    n.isRead(),
-                    n.getCreatedAt()
-                ))
-                .collect(java.util.stream.Collectors.toList());
+            long unread = notificationQueryService.countUnreadByUserUuid(u.getUuid());
+            java.util.List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(u.getUuid());
             resp.setNotificationsUnread(unread);
             resp.setNotificationsRecent(recent);
         }

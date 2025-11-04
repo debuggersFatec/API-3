@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.task;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -15,6 +15,7 @@ import com.api_3.api_3.model.entity.TaskComment;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository; 
+import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class CommentService {
@@ -40,7 +41,6 @@ public class CommentService {
     task.getComments().add(newComment);
     taskRepository.save(task);
 
-    // Notificações conforme regra: responsável apenas, senão todos do projeto
     notificationService.notifyTaskComment(task, authorUuid);
 
         return newComment;
@@ -60,7 +60,6 @@ public class CommentService {
                 .findFirst()
                 .orElseThrow(() -> new CommentNotFoundException("Comentário não encontrado com ID: " + commentId + " na tarefa " + taskId));
 
-        // Verifica a autoria
         if (!commentToUpdate.getUser().getUuid().equals(requestingUserUuid)) {
             throw new SecurityException("Utilizador não autorizado a editar este comentário.");
         }
@@ -85,7 +84,6 @@ public class CommentService {
             .findFirst()
             .orElseThrow(() -> new CommentNotFoundException("Comentário não encontrado com ID: " + commentId + " na tarefa " + taskId));
 
-        // Verifica a autoria
         if (!commentToDelete.getUser().getUuid().equals(requestingUserUuid)) {
             throw new SecurityException("Utilizador não autorizado a excluir este comentário.");
         }

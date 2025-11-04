@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.project;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +21,7 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class ProjectServiceImpl implements ProjectService {
@@ -32,7 +33,7 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired private NotificationService notificationService;
     @Override
     public List<ProjectResponse> listProjectsByTeam(String teamUuid, String userEmail) {
-        assertMemberOfTeam(teamUuid, userEmail); // Autorização
+        assertMemberOfTeam(teamUuid, userEmail); 
         List<Projects> projects = projectsRepository.findByTeamUuid(teamUuid);
         return projectMapper.toProjectResponseList(projects); 
     }
@@ -56,9 +57,8 @@ public class ProjectServiceImpl implements ProjectService {
         p.setUuid(UUID.randomUUID().toString());
         p.setName(request.getName());
         p.setActive(true);
-        p.setTeamUuid(teamUuid); // Vincula o projeto à equipe
+        p.setTeamUuid(teamUuid);
 
-        //  Adiciona APENAS o criador como membro inicial
         if (p.getMembers() == null) {
             p.setMembers(new java.util.ArrayList<>());
         }
@@ -66,7 +66,6 @@ public class ProjectServiceImpl implements ProjectService {
 
         Projects savedProject = projectsRepository.save(p);
 
-        //Adiciona a referência do novo projeto à lista de projetos da equipe
         if (team.getProjects() == null) {
             team.setProjects(new java.util.ArrayList<>());
         }
@@ -138,7 +137,6 @@ public class ProjectServiceImpl implements ProjectService {
             p.getMembers().add(userToAdd.toRef());
             projectsRepository.save(p);
 
-            // Notificar membros do projeto (exclui ator e o próprio que entrou)
             notificationService.notifyProjectMemberJoined(projectUuid, userUuidToAdd);
         }
 
@@ -191,7 +189,6 @@ public class ProjectServiceImpl implements ProjectService {
         return projectMapper.toProjectResponse(savedProject);
     }
 
-    // Sincroniza a referência do projeto (nome, ativo) na lista de projetos do Time
     private void syncProjectRefOnTeam(Projects project) {
         Teams team = teamsRepository.findById(project.getTeamUuid()).orElse(null);
         if (team != null && team.getProjects() != null) {

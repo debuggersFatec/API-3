@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.task;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +10,7 @@ import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class DeleteTaskService {
@@ -32,7 +33,6 @@ public class DeleteTaskService {
         task.setStatus(Task.Status.DELETED);
         Task saved = taskRepository.save(task);
 
-        // Notificação de exclusão com escopo conforme regras
         notificationService.notifyTaskDeletedScoped(saved);
         return saved;
     }
@@ -45,11 +45,9 @@ public class DeleteTaskService {
             if (project.getTasks() == null) project.setTasks(new java.util.ArrayList<>());
             if (project.getTrashcan() == null) project.setTrashcan(new java.util.ArrayList<>());
 
-            // remove from active tasks
             project.getTasks().removeIf(ref -> ref != null && safeEq(ref.uuid(), task.getUuid()));
 
-            // add to trashcan
-            Projects updated = project; // just alias for readability
+            Projects updated = project;
             updated.getTrashcan().add(task.toProjectRef());
 
             projectsRepository.save(updated);

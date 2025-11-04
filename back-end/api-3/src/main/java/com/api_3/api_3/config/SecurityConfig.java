@@ -43,7 +43,6 @@ public class SecurityConfig {
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/tasks/count-by-status").permitAll()
-                // Allow Swagger/OpenAPI UI and docs without authentication
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()
             )
