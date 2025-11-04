@@ -2,6 +2,7 @@ package com.api_3.api_3.service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
+import com.api_3.api_3.dto.response.NotificationDto;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
@@ -27,6 +29,7 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.repository.NotificationRepository;
 import com.api_3.api_3.security.JwtUtil;
 
 @Service
@@ -54,6 +57,8 @@ public class AuthService {
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     public AuthResponse login(AuthRequest authRequest) {
         // Authenticate credentials
@@ -89,7 +94,30 @@ public class AuthService {
             "/api/tasks"
         );
 
-        return new AuthResponse(token, routes, userInfo);
+        // Build response including notifications
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
+        long unread = notificationRepository.countByUserUuidAndReadFalse(user.getUuid());
+        List<NotificationDto> recent = notificationRepository
+            .findTop20ByUserUuidOrderByCreatedAtDesc(user.getUuid())
+            .stream()
+            .map(n -> new NotificationDto(
+                n.getId(),
+                n.getType() != null ? n.getType().name() : null,
+                n.getTeamUuid(),
+                n.getProjectUuid(),
+                n.getTaskUuid(),
+                n.getTaskTitle(),
+                n.getMessage(),
+                n.isRead(),
+                n.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+        resp.setNotificationsUnread(unread);
+        resp.setNotificationsRecent(recent);
+        return resp;
     }
 
     public AuthResponse register(User newUser) {
@@ -137,6 +165,29 @@ public class AuthService {
             "/api/tasks"
         );
 
-        return new AuthResponse(token, routes, userInfo);
+        // Build response including notifications (empty initial)
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
+        long unread = notificationRepository.countByUserUuidAndReadFalse(savedUser.getUuid());
+        List<NotificationDto> recent = notificationRepository
+            .findTop20ByUserUuidOrderByCreatedAtDesc(savedUser.getUuid())
+            .stream()
+            .map(n -> new NotificationDto(
+                n.getId(),
+                n.getType() != null ? n.getType().name() : null,
+                n.getTeamUuid(),
+                n.getProjectUuid(),
+                n.getTaskUuid(),
+                n.getTaskTitle(),
+                n.getMessage(),
+                n.isRead(),
+                n.getCreatedAt()
+            ))
+            .collect(Collectors.toList());
+        resp.setNotificationsUnread(unread);
+        resp.setNotificationsRecent(recent);
+        return resp;
     }
 }

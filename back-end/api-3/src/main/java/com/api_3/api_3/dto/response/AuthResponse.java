@@ -14,6 +14,8 @@ public class AuthResponse {
     private String token;
     private Routes routes;
     private UserInfo user;
+    private Long notificationsUnread;
+    private List<NotificationDto> notificationsRecent;
     
     @Data
     @AllArgsConstructor
