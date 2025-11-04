@@ -27,7 +27,7 @@ public class User {
  
     private List<TeamRef> teams = new ArrayList<>(); 
     private List<TaskUser> tasks = new ArrayList<>();
-    private List<Object> notificacao = new ArrayList<>();
+    private List<Object> notification = new ArrayList<>();
  
     public User(String name, String email , String password , String img){
         this.name = name;
