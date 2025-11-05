@@ -59,8 +59,7 @@ public class Task {
         Status status,
         Priority priority,
         String teamUuid,
-        String projectUuid,
-        User.UserRef responsible
+        String projectUuid
     ) {
         // Compatibility getters for legacy code
         public String getUuid() { return uuid; }
@@ -70,7 +69,6 @@ public class Task {
         public Priority getPriority() { return priority; }
         public String getTeamUuid() { return teamUuid; }
         public String getProjectUuid() { return projectUuid; }
-        public User.UserRef getResponsible() { return responsible; }
     }
 
     public record TaskProject(
@@ -95,7 +93,7 @@ public class Task {
     }
     
     public TaskUser toUserRef() {
-        return new TaskUser(this.uuid, this.title, this.dueDate, this.status, this.priority, this.teamUuid, this.projectUuid, this.responsible);
+        return new TaskUser(this.uuid, this.title, this.dueDate, this.status, this.priority, this.teamUuid, this.projectUuid);
     }
 
     public TaskProject toProjectRef() {

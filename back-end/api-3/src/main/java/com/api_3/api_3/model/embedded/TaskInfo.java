@@ -12,5 +12,4 @@ public class TaskInfo {
     private String status;
     private String prioridade;
     private String equipe_uuid;
-    private ResponsavelTask responsavel;
 }
