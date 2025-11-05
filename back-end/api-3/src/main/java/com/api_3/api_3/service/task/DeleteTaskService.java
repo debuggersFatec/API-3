@@ -25,10 +25,10 @@ public class DeleteTaskService {
         Task task = taskRepository.findById(uuid)
             .orElseThrow(() -> new TaskNotFoundException("Falha ao apagar a tarefa com o ID: " + uuid));
 
-        moveTaskToProjectTrashcan(task);
         if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
             removeTaskFromUser(uuid, task.getResponsible().uuid());
         }
+        moveTaskToProjectTrashcan(task);
 
         task.setStatus(Task.Status.DELETED);
         Task saved = taskRepository.save(task);
@@ -46,6 +46,9 @@ public class DeleteTaskService {
             if (project.getTrashcan() == null) project.setTrashcan(new java.util.ArrayList<>());
 
             project.getTasks().removeIf(ref -> ref != null && safeEq(ref.uuid(), task.getUuid()));
+
+            task.setResponsible(null);
+            task.setStatus(Task.Status.DELETED);
 
             Projects updated = project;
             updated.getTrashcan().add(task.toProjectRef());
