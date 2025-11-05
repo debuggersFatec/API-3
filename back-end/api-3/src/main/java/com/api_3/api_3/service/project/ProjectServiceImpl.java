@@ -97,14 +97,6 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectResponse archiveProject(String projectUuid, String userEmail) {
-        assertMemberOfProject(projectUuid, userEmail); 
-        Projects p = findProjectByIdOrThrow(projectUuid);
-        return updateProjectStatus(p, false); 
-    }
-
-    @Override
-    @Transactional
     public ProjectResponse activateProject(String projectUuid, String userEmail) {
         assertMemberOfProject(projectUuid, userEmail); 
         Projects p = findProjectByIdOrThrow(projectUuid);

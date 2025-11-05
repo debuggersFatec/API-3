@@ -24,6 +24,7 @@ import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.project.ArchiveProjectService;
 import com.api_3.api_3.service.project.LeaveProjectService;
 import com.api_3.api_3.service.project.ProjectService;
 
@@ -38,6 +39,9 @@ public class ProjectsController {
 
     @Autowired
     private LeaveProjectService leaveProjectService;
+
+    @Autowired
+    private ArchiveProjectService archiveProjectService;
 
     @Autowired
     private UserRepository userRepository;
@@ -107,7 +111,8 @@ public class ProjectsController {
     public ResponseEntity<ProjectResponse> archive(@PathVariable String projectUuid, Authentication authentication) {
         String email = currentUserEmail(authentication);
         try {
-            ProjectResponse project = projectService.archiveProject(projectUuid, email);
+            archiveProjectService.execute(projectUuid);
+            ProjectResponse project = projectService.getProjectDetails(projectUuid, email);
             return ResponseEntity.ok(project);
         } catch (ProjectNotFoundException | TeamNotFoundException | UserNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

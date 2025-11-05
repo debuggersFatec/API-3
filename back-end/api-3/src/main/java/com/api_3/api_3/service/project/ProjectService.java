@@ -16,8 +16,6 @@ public interface ProjectService {
 
     ProjectResponse updateProject(String projectUuid, UpdateProjectRequest request, String userEmail);
 
-    ProjectResponse archiveProject(String projectUuid, String userEmail);
-
     ProjectResponse activateProject(String projectUuid, String userEmail);
 
     ProjectResponse addMemberToProject(String projectUuid, String userUuidToAdd, String userEmail);
