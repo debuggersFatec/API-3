@@ -30,11 +30,11 @@ public class ArchiveProjectService {
 
     @Transactional
     public Projects execute(String projectUuid) {
-        var project = projectsRepository.findById(projectUuid)
+        Projects project = projectsRepository.findById(projectUuid)
                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado com o UUID: " + projectUuid));
         var teamUuid = project.getTeamUuid();
 
-        project.setActive(!project.isActive());
+        project.setActive(false);
         project.getTasks().forEach(taskRef -> {
             Task.TaskProject taskProject = taskRef;
             if (taskProject.getStatus() != Task.Status.COMPLETED) {
@@ -92,6 +92,25 @@ public class ArchiveProjectService {
                 ));
                 teamsRepository.save(team);
             }
+        });
+
+        project.getMembers().forEach(memberRef -> {
+            User user = userRepository.findById(memberRef.getUuid())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado com o UUID: " + memberRef.getUuid()));
+            user.getTeams().forEach(teamRef -> {
+                for (int i = 0; i < teamRef.getProjects().size(); i++) {
+                    Projects.ProjectRef projectRef = teamRef.getProjects().get(i);
+                    if (projectRef.getUuid().equals(projectUuid)) {
+                        Projects updatedProjectRef = new Projects();
+                        updatedProjectRef.setUuid(projectRef.getUuid());
+                        updatedProjectRef.setName(project.getName());
+                        updatedProjectRef.setActive(false);
+                        teamRef.getProjects().set(i, updatedProjectRef.toRef());
+                        break;
+                    }
+                }
+            });
+            userRepository.save(user);
         });
 
         projectsRepository.save(project);

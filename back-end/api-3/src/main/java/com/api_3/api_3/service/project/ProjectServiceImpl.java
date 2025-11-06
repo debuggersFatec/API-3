@@ -71,6 +71,13 @@ public class ProjectServiceImpl implements ProjectService {
         }
         team.getProjects().add(savedProject.toRef());
         teamsRepository.save(team);
+        creator.getTeams().forEach(teamRef -> {
+            if (teamRef.getUuid().equals(teamUuid)) {
+                teamRef.getProjects().add(savedProject.toRef());
+            }
+        });
+        userRepository.save(creator);
+                
 
         return projectMapper.toProjectResponse(savedProject);
     }
@@ -98,7 +105,25 @@ public class ProjectServiceImpl implements ProjectService {
     @Override
     @Transactional
     public ProjectResponse activateProject(String projectUuid, String userEmail) {
-        assertMemberOfProject(projectUuid, userEmail); 
+        assertMemberOfProject(projectUuid, userEmail);
+        Projects project = findProjectByIdOrThrow(projectUuid);
+        project.getMembers().forEach(memberRef -> {
+            User user = findUserByIdOrThrow(memberRef.getUuid());
+            user.getTeams().forEach(teamRef -> {
+                for (int i = 0; i < teamRef.getProjects().size(); i++) {
+                    Projects.ProjectRef projectRef = teamRef.getProjects().get(i);
+                    if (projectRef.getUuid().equals(projectUuid)) {
+                        Projects updatedProjectRef = new Projects();
+                        updatedProjectRef.setUuid(projectRef.getUuid());
+                        updatedProjectRef.setName(project.getName());
+                        updatedProjectRef.setActive(true);
+                        teamRef.getProjects().set(i, updatedProjectRef.toRef());
+                        break;
+                    }
+                }
+            });
+            userRepository.save(user);
+        });
         Projects p = findProjectByIdOrThrow(projectUuid);
         return updateProjectStatus(p, true); 
     }
@@ -128,6 +153,20 @@ public class ProjectServiceImpl implements ProjectService {
             }
             p.getMembers().add(userToAdd.toRef());
             projectsRepository.save(p);
+            userToAdd.getTeams().forEach(teamRef -> {
+                if (teamRef.getUuid().equals(team.getUuid())) {
+                    teamRef.getProjects().forEach(projectRef -> {
+                        if (!projectRef.getUuid().equals(projectUuid)) {
+                            Projects userProjects = new Projects();
+                            userProjects.setUuid(projectUuid);
+                            userProjects.setName(p.getName());
+                            userProjects.setActive(p.isActive());
+                            teamRef.getProjects().add(userProjects.toRef());
+                        }
+                    });
+                }
+            });
+            userRepository.save(userToAdd);
 
             notificationService.notifyProjectMemberJoined(projectUuid, userUuidToAdd);
         }
