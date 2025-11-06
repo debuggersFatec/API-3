@@ -1,5 +1,6 @@
 package com.api_3.api_3.dto.response;
 
+import java.util.Date;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -26,6 +27,28 @@ public class AuthResponse {
         private List<TeamInfo> teams;
         private List<ProjectInfo> projects;
         private List<TaskInfo> tasks;
+        // Notifications moved inside user as requested
+        private Long notificationsUnread;
+        private List<NotificationInfo> notificationsRecent;
+
+        // Backward-compatible constructor used by existing mappers
+        public UserInfo(String uuid,
+                         String name,
+                         String email,
+                         String img,
+                         List<TeamInfo> teams,
+                         List<ProjectInfo> projects,
+                         List<TaskInfo> tasks) {
+            this.uuid = uuid;
+            this.name = name;
+            this.email = email;
+            this.img = img;
+            this.teams = teams;
+            this.projects = projects;
+            this.tasks = tasks;
+            this.notificationsUnread = 0L;
+            this.notificationsRecent = java.util.List.of();
+        }
     }
     
     @Data
@@ -67,5 +90,21 @@ public class AuthResponse {
         private String projects;  // e.g., /api/projects
         private String members;   // e.g., /api/teams/{teamUuid}/members
         private String tasks;     // e.g., /api/tasks
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class NotificationInfo {
+        private String id;
+        private String type;
+        private String message;
+        private String taskUuid;
+        private String taskTitle;
+        private String projectUuid;
+        private String teamUuid;
+        private String actorUuid;
+        private Date createdAt;
+        private boolean read;
     }
 }

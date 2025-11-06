@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
 import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
@@ -67,6 +67,76 @@ export const Login = () => {
         setErrorMessage("Credenciais inválidas.");
       });
   };
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) {
+      setErrorMessage("VITE_GOOGLE_CLIENT_ID não configurado no frontend.");
+      return;
+    }
+    if (!window.google?.accounts?.id) {
+      // aguarda script carregar
+      const t = setTimeout(() => setErrorMessage("Google Identity Services não carregou."), 1000);
+      return () => clearTimeout(t);
+    }
+
+    try {
+      if (window.google.accounts.id.setLogLevel) {
+        window.google.accounts.id.setLogLevel('debug' as any);
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: ({ credential }: { credential: string }) => {
+          if (!credential) {
+            setErrorMessage("Credencial do Google ausente.");
+            return;
+          }
+          authService
+            .googleLogin({ idToken: credential })
+            .then((response) => {
+              setToken(response.data.token);
+              setUser(response.data.user);
+              navigate(decodeURIComponent(redirectPath || "/"));
+            })
+            .catch((err) => {
+              console.error("Erro no login Google:", err);
+              const msg = err?.response?.data?.message || "Falha no login com Google.";
+              setErrorMessage(msg);
+            });
+        },
+        ux_mode: "popup",
+      });
+
+      const el = document.getElementById('gsi-button-container');
+      if (el) {
+        window.google.accounts.id.renderButton(el, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          text: 'signin_with',
+          shape: 'rectangular',
+        } as any);
+      }
+
+      // Se desejar ainda abrir One Tap, descomente abaixo
+      // window.google.accounts.id.prompt((notification: any) => {
+      //   try {
+      //     if (notification?.isNotDisplayed?.()) {
+      //       const reason = notification.getNotDisplayedReason?.();
+      //       if (reason) setErrorMessage(`Google Sign-In não exibido: ${reason}`);
+      //     }
+      //     if (notification?.isSkippedMoment?.()) {
+      //       const reason = notification.getSkippedReason?.();
+      //       if (reason) setErrorMessage(`Google Sign-In ignorado: ${reason}`);
+      //     }
+      //   } catch {}
+      // });
+    } catch (e) {
+      console.error(e);
+      setErrorMessage("Falha ao iniciar Google Identity Services.");
+    }
+  }, [navigate, redirectPath, setToken, setUser]);
 
   return (
     <Flex
@@ -192,25 +262,8 @@ export const Login = () => {
             <Box flex={1} height="1px" bg="gray.200" />
           </Box>
 
-          <Button
-            w="full"
-            bg="white"
-            color="gray.800"
-            borderRadius="8px"
-            borderWidth="1px"
-            borderColor="gray.200"
-            _hover={{ bg: "#f6f6f6" }}
-            fontFamily="Inter, sans-serif"
-            fontWeight="400"
-            fontStyle="normal"
-            fontSize="14px"
-            lineHeight="100%"
-            letterSpacing="0"
-            boxShadow="0 6px 18px rgba(13,26,54,0.06)"
-          >
-            <Image src={googleSrc} alt="Google" boxSize="18px" mr={2} />
-            Continue com Google
-          </Button>
+          {/* Único botão de login Google (oficial), renderizado pelo GIS */}
+          <Box id="gsi-button-container" mt={3} display="flex" justifyContent="center" />
         </Box>
       </Flex>
 

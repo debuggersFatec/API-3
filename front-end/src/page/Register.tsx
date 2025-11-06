@@ -1,8 +1,7 @@
 import { Box, Button, Flex, Input, Stack, Text, Image, Link } from "@chakra-ui/react";
 import { Alert, AlertIcon } from "@chakra-ui/alert";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import logoSrc from "../assets/logotipo.svg";
-import googleSrc from "../assets/google.svg";
 import tileSrc from "../assets/login-lateral.svg";
 
 import { authService } from "@/services/authService";
@@ -62,6 +61,74 @@ export default function Register() {
   useState(() => {
     if (initialEmail) setEmail(initialEmail);
   });
+
+  // Google Identity Services - Registrar/Entrar com Google (oficial)
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+    if (!clientId) {
+      setError("VITE_GOOGLE_CLIENT_ID não configurado no frontend.");
+      return;
+    }
+    if (!window.google?.accounts?.id) {
+      const t = setTimeout(() => setError("Google Identity Services não carregou."), 1000);
+      return () => clearTimeout(t);
+    }
+
+    try {
+      if (window.google.accounts.id.setLogLevel) {
+        window.google.accounts.id.setLogLevel('debug' as any);
+      }
+
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: ({ credential }: { credential: string }) => {
+          if (!credential) {
+            setError("Credencial do Google ausente.");
+            return;
+          }
+          authService
+            .googleLogin({ idToken: credential })
+            .then((response) => {
+              setToken(response.data.token);
+              setUser(response.data.user);
+
+              // Navegação pós-auth: replica a mesma lógica do submit
+              if (redirectPath && redirectPath !== "/") {
+                navigate(decodeURIComponent(redirectPath));
+                return;
+              }
+              const pending = localStorage.getItem('pendingInviteToken');
+              if (pending) {
+                localStorage.removeItem('pendingInviteToken');
+                navigate(`/join-team?token=${encodeURIComponent(pending)}`);
+                return;
+              }
+              navigate(decodeURIComponent(redirectPath || "/"));
+            })
+            .catch((err) => {
+              console.error("Erro no registro/login com Google:", err);
+              const msg = err?.response?.data?.message || "Falha ao usar Google.";
+              setError(msg);
+            });
+        },
+        ux_mode: "popup",
+      });
+
+      const el = document.getElementById('gsi-register-button');
+      if (el) {
+        window.google.accounts.id.renderButton(el, {
+          theme: 'outline',
+          size: 'large',
+          type: 'standard',
+          text: 'signup_with',
+          shape: 'rectangular',
+        } as any);
+      }
+    } catch (e) {
+      console.error(e);
+      setError("Falha ao iniciar Google Identity Services.");
+    }
+  }, [navigate, redirectPath, setToken, setUser]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +299,8 @@ export default function Register() {
             <Box flex={1} height="1px" bg="gray.200" />
           </Box>
 
-          <Button w="full" bg="white" color="gray.800" borderRadius="8px" borderWidth="1px" borderColor="gray.200" _hover={{ bg: '#f6f6f6' }} fontFamily="Inter, sans-serif" fontWeight="400" fontStyle="normal" fontSize="14px" lineHeight="100%" letterSpacing="0" boxShadow="0 6px 18px rgba(13,26,54,0.06)"><Image src={googleSrc} alt="Google" boxSize="18px" mr={2} />Continue com Google</Button>
+          {/* Botão oficial do Google renderizado via GIS */}
+          <Box id="gsi-register-button" mt={3} display="flex" justifyContent="center" />
         </Box>
       </Flex>
 

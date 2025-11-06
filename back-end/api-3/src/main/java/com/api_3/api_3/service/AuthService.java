@@ -55,6 +55,10 @@ public class AuthService {
     @Autowired
     private UserMapper userMapper;
 
+
+    @Autowired
+    private AuthResponseBuilder authResponseBuilder;
+
     public AuthResponse login(AuthRequest authRequest) {
         // Authenticate credentials
         Authentication authentication;
@@ -82,14 +86,7 @@ public class AuthService {
         }
 
         AuthResponse.UserInfo userInfo = userMapper.toUserInfo(user, teams, tasks);
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-
-        return new AuthResponse(token, routes, userInfo);
+        return authResponseBuilder.build(token, userInfo, user.getUuid());
     }
 
     public AuthResponse register(User newUser) {
@@ -130,13 +127,7 @@ public class AuthService {
 
         List<Teams> teams = teamsRepository.findAllById(savedUser.getEquipeIds());
         AuthResponse.UserInfo userInfo = userMapper.toUserInfo(savedUser, teams, Collections.emptyList());
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-
-        return new AuthResponse(token, routes, userInfo);
+        // Registro: ainda assim usamos o builder (vai retornar 0/unread vazio)
+        return authResponseBuilder.build(token, userInfo, savedUser.getUuid());
     }
 }

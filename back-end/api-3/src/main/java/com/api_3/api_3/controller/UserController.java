@@ -18,6 +18,7 @@ import com.api_3.api_3.dto.response.UserResponse;
 import com.api_3.api_3.mapper.UserMapper;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.security.JwtUtil;
+import com.api_3.api_3.service.AuthResponseBuilder;
 import com.api_3.api_3.service.GetUserService;
 import com.api_3.api_3.service.UpdateUserService;
 
@@ -42,6 +43,9 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private AuthResponseBuilder authResponseBuilder;
+
     @GetMapping("/debug/user-teams")
     public ResponseEntity<List<UserResponse>> debugUserTeams() {
         List<User> users = getUserService.findAllUsersForDebug();
@@ -53,15 +57,10 @@ public class UserController {
     public ResponseEntity<AuthResponse> getCurrentUser(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         AuthResponse.UserInfo userInfo = getUserService.findCurrentUserProfile(userDetails.getUsername());
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-        // Gerar token também para /me a pedido do cliente
+
         String token = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(token, routes, userInfo));
+        
+        return ResponseEntity.ok(authResponseBuilder.build(token, userInfo, userInfo.getUuid()));
     }
 
     // Atualiza o usuário autenticado (nome e imagem)
