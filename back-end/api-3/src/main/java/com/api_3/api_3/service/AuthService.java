@@ -132,12 +132,12 @@ public class AuthService {
 
         return new AuthResponse(token, routes, userInfo);
     }
-    public void atualizarSenha(String email, String novaSenha) {
+    public void updatePassword(String email, String newPassword) {
         // Usamos findByEmailIgnoreCase para consistência com o resto do service
         User user = userRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado para o e-mail: " + email));
         // Criptografa a nova senha
-        user.setPassword(passwordEncoder.encode(novaSenha));
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
 }

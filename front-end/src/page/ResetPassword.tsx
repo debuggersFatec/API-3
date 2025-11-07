@@ -24,6 +24,7 @@ export const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(true); 
   const [isTokenValid, setIsTokenValid] = useState(false);
+  const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
@@ -63,10 +64,11 @@ export const ResetPassword = () => {
       setErrorMessage("As senhas não conferem.");
       return;
     }
-    // Adicionar validação de força da senha (opcional, mas recomendado)
-    if (password.length < 8) {
-         setErrorMessage("A senha deve ter no mínimo 8 caracteres.");
-         return;
+    if (!strongPasswordRegex.test(password)) {
+      setErrorMessage(
+        "A senha deve ter no mínimo 8 caracteres, incluindo letra maiúscula, minúscula, número e símbolo."
+      );
+      return;
     }
 
     if (!token) {
@@ -77,13 +79,13 @@ export const ResetPassword = () => {
     setLoading(true);
 
     authService
-      .resetPassword(token, { novaSenha: password })
+      .resetPassword(token, { newPassword: password })
       .then((response) => {
         setSuccessMessage(response.data.message || "Senha alterada com sucesso!");
         // Redireciona para o login após 3 segundos
         setTimeout(() => {
             navigate("/login");
-        }, 3000);
+        }, 2000);
       })
       .catch((error) => {
         setErrorMessage(error.response?.data?.message || "Erro ao resetar a senha.");

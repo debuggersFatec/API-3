@@ -3,7 +3,7 @@ import { axiosInstance } from "./axiosInstance";
 type LoginPayload = { email: string; password: string };
 type RegisterPayload = { name: string; email: string; password: string };
 type ForgotPasswordPayload = { email: string };
-type ResetPasswordPayload = { novaSenha: string };
+type ResetPasswordPayload = { newPassword: string };
 
 
 export const authService = {
@@ -12,11 +12,11 @@ export const authService = {
   register: (payload: RegisterPayload) =>
     axiosInstance.post("/auth/register", payload),
   forgotPassword: (payload: ForgotPasswordPayload) =>
-    axiosInstance.post("/auth/recuperar-senha", payload),
+    axiosInstance.post("/auth/recover-password", payload),
   validateResetToken: (token: string) =>
-    axiosInstance.get(`/auth/resetar-senha/validar/${token}`),
+    axiosInstance.get(`/auth/reset-password/validate/${token}`),
   resetPassword: (token: string, payload: ResetPasswordPayload) =>
-    axiosInstance.post(`/auth/resetar-senha/${token}`, payload),
+    axiosInstance.post(`/auth/reset-password/${token}`, payload),
   // ======================================
 };
 

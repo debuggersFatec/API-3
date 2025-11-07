@@ -55,11 +55,11 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/recuperar-senha")
-    public ResponseEntity<?> recuperarSenha(
+    @PostMapping("/recover-password")
+    public ResponseEntity<?> recoverPassword(
             @Valid @RequestBody PasswordRequestEmailDto request) {
         try {
-            passwordResetService.recuperarSenha(request.email());
+            passwordResetService.recoverPassword(request.email());
             // Sempre retorna OK para não vazar informação se o e-mail existe ou não
             return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado, um link de redefinição será enviado."));
         } catch (Exception e) {
@@ -68,12 +68,12 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/resetar-senha/{token}")
-    public ResponseEntity<?> resetarSenha(
+    @PostMapping("/reset-password/{token}")
+    public ResponseEntity<?> resetPassword(
             @PathVariable String token,
             @Valid @RequestBody PasswordResetRequest request) {
         try {
-            passwordResetService.resetarSenha(request.novaSenha(), token);
+            passwordResetService.resetPassword(request.newPassword(), token);
             return ResponseEntity.ok(Map.of("message", "Senha alterada com sucesso."));
         } catch (IllegalArgumentException e) {
             // Este erro (token inválido/expirado) pode ser mostrado ao usuário
@@ -85,10 +85,10 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/resetar-senha/validar/{token}")
-    public ResponseEntity<?> validarToken(@PathVariable String token) {
+    @GetMapping("/reset-password/validate/{token}")
+    public ResponseEntity<?> validateToken(@PathVariable String token) {
         try {
-            String email = passwordResetService.validarToken(token);
+            String email = passwordResetService.validateToken(token);
             return ResponseEntity.ok(Map.of("message", "Token válido.", "email", email.replaceAll("(?<=.{2}).(?=.*@)", "*")));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

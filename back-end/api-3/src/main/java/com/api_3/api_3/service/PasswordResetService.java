@@ -34,7 +34,7 @@ public class PasswordResetService {
     @Autowired
     private UserRepository userRepository;
 
-    public String recuperarSenha(String email) {
+    public String recoverPassword(String email) {
 
         String token = UUID.randomUUID().toString().replace("-", "");
 
@@ -70,12 +70,12 @@ public class PasswordResetService {
         return resetUrl;
     }
 
-    public void resetarSenha(String novaSenha, String token) {
+    public void resetPassword(String newPassword, String token) {
         String redisKey = PREFIX + token;
         String attemptsKey = ATTEMPT_PREFIX + token;
 
         // Valida o token (busca o e-mail no Redis)
-        String email = validarToken(token);
+        String email = validateToken(token);
 
         //Controla tentativas para evitar força bruta no mesmo token
         Long attempts = redisTemplate.opsForValue().increment(attemptsKey);
@@ -92,7 +92,7 @@ public class PasswordResetService {
         }
 
         // Se tudo estiver OK, chama o AuthService para atualizar a senha no MongoDB
-        authService.atualizarSenha(email, novaSenha);
+        authService.updatePassword(email, newPassword);
 
         // Remove o token do Redis para que não possa ser usado novamente
         redisTemplate.delete(redisKey);
@@ -101,7 +101,7 @@ public class PasswordResetService {
         System.out.println("Senha redefinida com sucesso para: " + email);
     }
 
-    public String validarToken(String token) {
+    public String validateToken(String token) {
         String redisKey = PREFIX + token;
         String email = redisTemplate.opsForValue().get(redisKey);
         if (email == null) {
