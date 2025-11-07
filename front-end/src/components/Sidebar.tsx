@@ -156,7 +156,7 @@ export const Sidebar = () => {
         {user?.teams &&
           user?.teams.map((team) => (
             <Tabs.Content key={team.uuid} value={team.uuid}>
-              <EquipeDashboard team={team} isActive={activeTab === team.uuid} />
+              <EquipeDashboard team={team} isActive={activeTab === team.uuid} setActiveTab={setActiveTab}/>
             </Tabs.Content>
           ))}
       </Tabs.Root>

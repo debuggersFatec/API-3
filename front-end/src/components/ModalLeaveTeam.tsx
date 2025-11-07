@@ -5,8 +5,11 @@ import { toast } from "@/utils/toast";
 import { Dialog, Button, Flex } from "@chakra-ui/react";
 import { useState } from "react";
 import { IoMdExit } from "react-icons/io";
+interface ModalLeaveTeamProps {
+  setActiveTab: (tab: string) => void;
+}
 
-export const ModalLeaveTeam = () => {
+export const ModalLeaveTeam = ({ setActiveTab }: ModalLeaveTeamProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { refreshUser } = useAuth();
   const { refreshTeam, teamData } = useTeam();
@@ -19,6 +22,7 @@ export const ModalLeaveTeam = () => {
       refreshUser();
       refreshTeam();
       setIsDialogOpen(false);
+      setActiveTab("minhasTasks");
     } catch (error) {
       toast(
         "error",

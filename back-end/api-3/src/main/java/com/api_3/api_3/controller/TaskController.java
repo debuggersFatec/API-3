@@ -68,15 +68,22 @@ public class TaskController {
     }
 
     // Método antigo - manter se ainda precisar para createTask
-    private void assertTeamMember(String teamUuid, String email) {
+    private void assertTeamAndProjectMember(String teamUuid, String projectUuid, String email) {
         Teams team = teamsRepository.findById(teamUuid)
                 .orElseThrow(() -> new TeamNotFoundException("Team não encontrado com o ID: " + teamUuid));
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("Utilizador não encontrado com o email: " + email));
+        Projects project = projectsRepository.findById(projectUuid)
+                .orElseThrow(() -> new ProjectNotFoundException("Projeto não encontrado com o ID: " + projectUuid));
         boolean isMember = team.getMembers() != null && team.getMembers().stream()
+                .anyMatch(m -> m != null && m.getUuid().equals(user.getUuid()));
+        boolean isProjectMember = project.getMembers() != null && project.getMembers().stream()
                 .anyMatch(m -> m != null && m.getUuid().equals(user.getUuid()));
         if (!isMember) {
             throw new SecurityException("Acesso negado à equipe '" + team.getName() + "'.");
+        }
+        if (!isProjectMember) {
+            throw new SecurityException("Acesso negado ao projeto '" + project.getName() + "'.");
         }
     }
 
@@ -112,8 +119,8 @@ public class TaskController {
             Projects project = projectsRepository.findById(request.getProject_uuid())
                     .orElseThrow(() -> new ProjectNotFoundException("Projeto não encontrado com o ID: " + request.getProject_uuid()));
 
-            // Usar assertTeamMember aqui ainda faz sentido para criação
-            assertTeamMember(project.getTeamUuid(), userDetails.getUsername());
+            // Usar assertTeamAndProjectMember aqui ainda faz sentido para criação
+            assertTeamAndProjectMember(project.getTeamUuid(), project.getUuid(), userDetails.getUsername());
 
             Task savedTask = createTaskService.execute(request);
             return ResponseEntity.status(HttpStatus.CREATED).body(taskMapper.toTaskResponse(savedTask));

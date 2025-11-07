@@ -7,7 +7,11 @@ import { Dialog, Button, Flex } from "@chakra-ui/react";
 import { useState } from "react";
 import { IoMdExit } from "react-icons/io";
 
-export const ModalLeaveProject = () => {
+interface ModalLeaveProjectProps {
+  setActiveTab: (tab: string) => void;
+}
+
+export const ModalLeaveProject = ({ setActiveTab }: ModalLeaveProjectProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const { refreshUser } = useAuth();
   const { refreshTeam } = useTeam();
@@ -20,6 +24,7 @@ export const ModalLeaveProject = () => {
       toast("success", `Você saiu da projeto ${project.name}.`);
       refreshUser();
       refreshTeam();
+      setActiveTab("minhasTasks");
       setIsDialogOpen(false);
     } catch (error) {
       toast(

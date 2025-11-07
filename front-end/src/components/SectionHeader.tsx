@@ -8,11 +8,13 @@ interface SectionHeaderProps {
   title: string;
   isTeamSection?: boolean;
   project?: Project;
+  setActiveTab: (tab: string) => void;
 }
 
 export const SectionHeader = ({
   title,
   isTeamSection,
+  setActiveTab,
 }: SectionHeaderProps) => {
   const { teamData } = useTeam(); // Use useTeam para obter teamUuid para invite
 
@@ -24,7 +26,7 @@ export const SectionHeader = ({
             {title}
           </Text>
           {isTeamSection && (
-            <ModalLeaveTeam/>
+            <ModalLeaveTeam setActiveTab={setActiveTab} />
           )}
         </Flex>
 

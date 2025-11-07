@@ -8,9 +8,11 @@ import { ProjectsDisplay } from "./ProjectsDisplay";
 
 export const EquipeDashboard = ({
   team,
+  setActiveTab,
 }: {
   team: TeamRef;
   isActive: boolean;
+  setActiveTab: (tab: string) => void;
 }) => {
   const { teamData } = useTeam();
   const { project } = useProject();
@@ -25,11 +27,14 @@ export const EquipeDashboard = ({
           title={team.name}
           isTeamSection={true}
           project={project}
+          setActiveTab={setActiveTab}
         />
         {project === undefined && teamData ? (
           <ProjectsDisplay projects={teamData.projects || []} />
         ) : (
-          <EquipeTabs />
+          <EquipeTabs 
+            setActiveTab={setActiveTab}
+          />
         )}
       </Box>
     </>

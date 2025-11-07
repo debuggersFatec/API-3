@@ -9,7 +9,11 @@ import { ModalNewTask } from "./ModalNewTask";
 import { SelectAddMemberProject } from "./SelectAddMemberProject";
 import { ModalLeaveProject } from "./ModalLeaveProject";
 
-export const EquipeTabs = () => {
+interface EquipeTabsProps {
+  setActiveTab: (tab: string) => void;
+}
+
+export const EquipeTabs = ({ setActiveTab }: EquipeTabsProps) => {
   const { project } = useProject();
 
   return (
@@ -23,7 +27,7 @@ export const EquipeTabs = () => {
         <Text textStyle={"xl"} fontWeight="bold" mb={"20px"}>
           {project?.name}
         </Text>
-       <ModalLeaveProject />
+       <ModalLeaveProject setActiveTab={setActiveTab} />
       </Flex>
 
       {project && (
