@@ -51,6 +51,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
   const bg = useColorModeValue("white", "gray.700");
   const muted = useColorModeValue("gray.600", "gray.300");
   const border = useColorModeValue("gray.200", "gray.600");
+  const unreadBg = useColorModeValue("blue.50", "gray.500");
 
   const handleMarkRead = () => {
     notificationServices.markAsRead(notification.uuid);
@@ -92,7 +93,7 @@ export const NotificationItem = ({ notification }: NotificationItemProps) => {
       <Flex
         p={3}
         borderRadius="md"
-        bg={notification.read ? bg : "blue.50"}
+        bg={notification.read ? bg : unreadBg}
         borderWidth={1}
         borderColor={border}
         boxShadow="sm"
