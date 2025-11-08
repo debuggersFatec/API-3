@@ -5,6 +5,12 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { ColorModeProvider } from "./components/ui/color-mode";
 import { AuthProvider } from "./context/auth/AuthContext";
+import { useAutoRefreshUser } from "./hooks/useAutoRefreshUser";
+
+export const AutoRefreshUser = () => {
+  useAutoRefreshUser();
+  return null;
+};
 import { Toaster } from "@/components/ui/toaster";
 
 createRoot(document.getElementById("root")!).render(
@@ -13,6 +19,7 @@ createRoot(document.getElementById("root")!).render(
       <Provider>
         <ColorModeProvider>
           <BrowserRouter>
+            <AutoRefreshUser />
             <App />
             <Toaster />
           </BrowserRouter>
