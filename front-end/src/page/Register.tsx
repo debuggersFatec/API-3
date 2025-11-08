@@ -8,6 +8,7 @@ import tileSrc from "../assets/login-lateral.svg";
 import { authService } from "@/services/authService";
 import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import { useAuth } from "@/context/auth/useAuth";
+import { normalizeUser } from "@/context/auth/authUtils";
 
 const PasswordStrengthMeter = ({ value }: { value: number }) => {
   const color = value < 3 ? "red.500" : value < 5 ? "yellow.500" : "green.500";
@@ -96,8 +97,8 @@ export default function Register() {
       authService
         .register({ email, password, name })
         .then((response) => {
-          setToken(response.data.token);
-          setUser(response.data.user);
+            setToken(response.data.token);
+            setUser(normalizeUser(response.data));
           // If there is an explicit redirect, use it. Otherwise use any pending invite token.
           if (redirectPath && redirectPath !== "/") {
             navigate(decodeURIComponent(redirectPath));

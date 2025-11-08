@@ -17,6 +17,7 @@ import tileSrc from "../assets/login-lateral.svg";
 import { authService } from "@/services/authService";
 import { useAuth } from "@/context/auth/useAuth";
 import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { normalizeUser } from "@/context/auth/authUtils";
 
 export const Login = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -43,7 +44,8 @@ export const Login = () => {
       .login({ email, password })
       .then((response) => {
         setToken(response.data.token);
-        setUser(response.data.user);
+        // garantir que notificationsRecent e formatos variados sejam normalizados
+        setUser(normalizeUser(response.data));
         // If there is an explicit redirect, use it. Otherwise, prefer a pending invite token
         // saved in localStorage (fallback from JoinTeamPage).
         if (redirectPath && redirectPath !== "/") {
