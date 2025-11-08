@@ -7,6 +7,7 @@ import {
   Textarea,
   Button,
   Switch,
+  Portal,
 } from "@chakra-ui/react";
 import {
   DialogRoot,
@@ -192,275 +193,284 @@ export const ModalEditTask = ({
   ];
   console.log(members);
   return (
-    <DialogRoot open={open} onOpenChange={onClose}>
-      <DialogBackdrop />
-      <DialogPositioner>
-        <DialogContent maxW={"800px"} w={"90%"}>
-          <form onSubmit={handleSubmit}>
-            <DialogHeader>
-              <DialogTitle w={"100%"}>
-                <Flex align="center" justify="space-between" gap={2}>
-                  <Field.Root w="100%" required>
-                    <Input
-                      name="title"
-                      value={formData!.title}
-                      onChange={handleInputChange}
-                      placeholder={"Dê um título para sua tarefa"}
-                      variant={"flushed"}
-                    />
-                  </Field.Root>
+    <Portal>
+      <DialogRoot open={open} onOpenChange={onClose}>
+        <DialogBackdrop />
+        <DialogPositioner>
+          <DialogContent maxW={"800px"} w={"90%"}>
+            <form onSubmit={handleSubmit}>
+              <DialogHeader>
+                <DialogTitle w={"100%"}>
+                  <Flex align="center" justify="space-between" gap={2}>
+                    <Field.Root w="100%" required>
+                      <Input
+                        name="title"
+                        value={formData!.title}
+                        onChange={handleInputChange}
+                        placeholder={"Dê um título para sua tarefa"}
+                        variant={"flushed"}
+                      />
+                    </Field.Root>
 
-                  <DialogCloseTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      onClick={onClose}
-                      aria-label="Fechar modal"
-                    >
-                      X
-                    </Button>
-                  </DialogCloseTrigger>
-                </Flex>
-              </DialogTitle>
-            </DialogHeader>
-
-            <DialogBody>
-              <Flex justifyContent={"space-between"} gap={"12px"}>
-                <Box w={"100%"}>
-                  <Field.Root h={"25%"}>
-                    <Textarea
-                      name="description"
-                      placeholder="Descrição"
-                      h={"100%"}
-                      onChange={handleInputChange}
-                      value={formData!.description}
-                    />
-                  </Field.Root>
-                  <CommentsArea
-                    taskUuid={task.uuid}
-                    comments={formData.comments}
-                    onCommentChange={reloadTask}
-                  />
-                </Box>
-
-                <Box w={"100%"}>
-                  <Field.Root>
-                    <Box position="relative" w="100%" mb={"24px"}>
+                    <DialogCloseTrigger asChild>
                       <Button
                         type="button"
-                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                        variant="outline"
-                        w="full"
-                        justifyContent="space-between"
+                        variant="ghost"
+                        onClick={onClose}
+                        aria-label="Fechar modal"
                       >
-                        {formData!.responsible?.name ? (
-                          <Flex
-                            p={2}
-                            align="center"
-                            cursor="pointer"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            <AvatarUser
-                              user={formData!.responsible}
-                              size="2xs"
-                            />
-                            <Text ml={2}>{formData!.responsible!.name}</Text>
-                          </Flex>
-                        ) : (
-                          "Selecione um responsável"
-                        )}
+                        X
                       </Button>
-                      {isDropdownOpen && (
-                        <Box
-                          ref={dropdownRef}
-                          position="absolute"
-                          w="full"
-                          mt={2}
-                          bg="white"
-                          border="1px"
-                          borderColor="gray.200"
-                          borderRadius="md"
-                          zIndex="10"
-                          boxShadow="md"
-                        >
-                          {members && members.length > 0 ? (
-                            members.map((member) => (
-                              <Flex
-                                key={member.uuid}
-                                p={2}
-                                align="center"
-                                cursor="pointer"
-                                _hover={{ bg: "gray.100" }}
-                                onClick={() => handleSelectMember(member)}
-                              >
-                                <AvatarUser user={member} size="2xs" />
-                                <Text ml={2}>{member.name}</Text>
-                              </Flex>
-                            ))
-                          ) : (
-                            <Box p={3} color="gray.600">
-                              Nenhum membro disponível
-                            </Box>
-                          )}
-                          <Flex
-                            key="unassigned"
-                            p={2}
-                            align="center"
-                            cursor="pointer"
-                            _hover={{ bg: "gray.100" }}
-                            onClick={() => handleUnassign()}
-                          >
-                            <Text ml={2} fontWeight={500} color="gray.700">
-                              Sem responsável
-                            </Text>
-                          </Flex>
-                        </Box>
-                      )}
-                    </Box>
-                  </Field.Root>
+                    </DialogCloseTrigger>
+                  </Flex>
+                </DialogTitle>
+              </DialogHeader>
 
-                  <Switch.Root
-                    checked={isRequiredFile}
-                    onCheckedChange={(e) => handleRequiredFileChange(e.checked)}
-                  >
-                    <Switch.HiddenInput />
-                    <Switch.Control>
-                      <Switch.Thumb />
-                    </Switch.Control>
-                    <Switch.Label>
-                      É necessário um arquivo de entrega?
-                    </Switch.Label>
-                  </Switch.Root>
+              <DialogBody>
+                <Flex justifyContent={"space-between"} gap={"12px"}>
+                  <Box w={"100%"}>
+                    <Field.Root h={"25%"}>
+                      <Textarea
+                        name="description"
+                        placeholder="Descrição"
+                        h={"100%"}
+                        onChange={handleInputChange}
+                        value={formData!.description}
+                      />
+                    </Field.Root>
+                    <CommentsArea
+                      taskUuid={task.uuid}
+                      comments={formData.comments}
+                      onCommentChange={reloadTask}
+                    />
+                  </Box>
 
-                  <Field.Root>
-                    <Box position="relative" w="100%" mb={"8px"}>
-                      <Button
-                        type="button"
-                        onClick={() =>
-                          setIsDropdownOpenPriority(!isDropdownOpenPriority)
-                        }
-                        variant="outline"
-                        w="full"
-                        justifyContent="space-between"
-                      >
-                        {formData!.priority ? (
-                          <Flex
-                            w={"100%"}
-                            p={2}
-                            align="center"
-                            cursor="pointer"
-                            _hover={{ bg: "gray.100" }}
-                          >
-                            <Text ml={2}>{formData!.priority}</Text>
-                          </Flex>
-                        ) : (
-                          "Defina uma prioridade"
-                        )}
-                      </Button>
-                      {isDropdownOpenPriority && (
-                        <Box
-                          ref={dropdownRef}
-                          position="absolute"
+                  <Box w={"100%"}>
+                    <Field.Root>
+                      <Box position="relative" w="100%" mb={"24px"}>
+                        <Button
+                          type="button"
+                          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                          variant="outline"
                           w="full"
-                          mt={2}
-                          bg="white"
-                          border="1px"
-                          borderColor="gray.200"
-                          borderRadius="md"
-                          zIndex="10"
-                          boxShadow="md"
+                          justifyContent="space-between"
                         >
-                          {prioritys.map((priority) => (
+                          {formData!.responsible?.name ? (
                             <Flex
-                              key={priority.label}
                               p={2}
                               align="center"
                               cursor="pointer"
                               _hover={{ bg: "gray.100" }}
-                              onClick={() =>
-                                handleSelectPriority(priority.value)
-                              }
                             >
-                              <Text ml={2}>{priority.label}</Text>
+                              <AvatarUser
+                                user={formData!.responsible}
+                                size="2xs"
+                              />
+                              <Text ml={2}>{formData!.responsible!.name}</Text>
                             </Flex>
-                          ))}
-                        </Box>
-                      )}
-                    </Box>
-                  </Field.Root>
+                          ) : (
+                            "Selecione um responsável"
+                          )}
+                        </Button>
+                        {isDropdownOpen && (
+                          <Box
+                            ref={dropdownRef}
+                            position="absolute"
+                            w="full"
+                            mt={2}
+                            bg="white"
+                            border="1px"
+                            borderColor="gray.200"
+                            borderRadius="md"
+                            zIndex="10"
+                            boxShadow="md"
+                          >
+                            {members && members.length > 0 ? (
+                              members.map((member) => (
+                                <Flex
+                                  key={member.uuid}
+                                  p={2}
+                                  align="center"
+                                  cursor="pointer"
+                                  _hover={{ bg: "gray.100" }}
+                                  onClick={() => handleSelectMember(member)}
+                                >
+                                  <AvatarUser user={member} size="2xs" />
+                                  <Text ml={2}>{member.name}</Text>
+                                </Flex>
+                              ))
+                            ) : (
+                              <Box p={3} color="gray.600">
+                                Nenhum membro disponível
+                              </Box>
+                            )}
+                            <Flex
+                              key="unassigned"
+                              p={2}
+                              align="center"
+                              cursor="pointer"
+                              _hover={{ bg: "gray.100" }}
+                              onClick={() => handleUnassign()}
+                            >
+                              <Text ml={2} fontWeight={500} color="gray.700">
+                                Sem responsável
+                              </Text>
+                            </Flex>
+                          </Box>
+                        )}
+                      </Box>
+                    </Field.Root>
 
-                  <Field.Root w={"100%"}>
-                    <Box w={"100%"} position="relative" mb={"8px"}>
-                      <ChakraDatePicker
-                        selected={formData!.due_date || null}
-                        onChange={handleDateChange}
-                      />
-                    </Box>
-                  </Field.Root>
-
-                  <Field.Root>
-                    <Box
-                      border="2px dashed"
-                      borderColor="gray.300"
-                      borderRadius="md"
-                      p={6}
-                      w={"100%"}
-                      mb={"8px"}
-                      textAlign="center"
-                      cursor="pointer"
-                      onClick={() => fileInputRef.current?.click()}
-                      _hover={{ borderColor: "blue.500" }}
+                    <Switch.Root
+                      checked={isRequiredFile}
+                      onCheckedChange={(e) =>
+                        handleRequiredFileChange(e.checked)
+                      }
                     >
-                      <Icon as={MdOutlineMail} w={12} h={12} color="gray.400" />
-                      <Text mt={2} color="gray.500">
-                        Anexar arquivo
-                      </Text>
-                      {/* {formData.arquivo && (
+                      <Switch.HiddenInput />
+                      <Switch.Control>
+                        <Switch.Thumb />
+                      </Switch.Control>
+                      <Switch.Label>
+                        É necessário um arquivo de entrega?
+                      </Switch.Label>
+                    </Switch.Root>
+
+                    <Field.Root>
+                      <Box position="relative" w="100%" mb={"8px"}>
+                        <Button
+                          type="button"
+                          onClick={() =>
+                            setIsDropdownOpenPriority(!isDropdownOpenPriority)
+                          }
+                          variant="outline"
+                          w="full"
+                          justifyContent="space-between"
+                        >
+                          {formData!.priority ? (
+                            <Flex
+                              w={"100%"}
+                              p={2}
+                              align="center"
+                              cursor="pointer"
+                              _hover={{ bg: "gray.100" }}
+                            >
+                              <Text ml={2}>{formData!.priority}</Text>
+                            </Flex>
+                          ) : (
+                            "Defina uma prioridade"
+                          )}
+                        </Button>
+                        {isDropdownOpenPriority && (
+                          <Box
+                            ref={dropdownRef}
+                            position="absolute"
+                            w="full"
+                            mt={2}
+                            bg="white"
+                            border="1px"
+                            borderColor="gray.200"
+                            borderRadius="md"
+                            zIndex="10"
+                            boxShadow="md"
+                          >
+                            {prioritys.map((priority) => (
+                              <Flex
+                                key={priority.label}
+                                p={2}
+                                align="center"
+                                cursor="pointer"
+                                _hover={{ bg: "gray.100" }}
+                                onClick={() =>
+                                  handleSelectPriority(priority.value)
+                                }
+                              >
+                                <Text ml={2}>{priority.label}</Text>
+                              </Flex>
+                            ))}
+                          </Box>
+                        )}
+                      </Box>
+                    </Field.Root>
+
+                    <Field.Root w={"100%"}>
+                      <Box w={"100%"} position="relative" mb={"8px"}>
+                        <ChakraDatePicker
+                          selected={formData!.due_date || null}
+                          onChange={handleDateChange}
+                        />
+                      </Box>
+                    </Field.Root>
+
+                    <Field.Root>
+                      <Box
+                        border="2px dashed"
+                        borderColor="gray.300"
+                        borderRadius="md"
+                        p={6}
+                        w={"100%"}
+                        mb={"8px"}
+                        textAlign="center"
+                        cursor="pointer"
+                        onClick={() => fileInputRef.current?.click()}
+                        _hover={{ borderColor: "blue.500" }}
+                      >
+                        <Icon
+                          as={MdOutlineMail}
+                          w={12}
+                          h={12}
+                          color="gray.400"
+                        />
+                        <Text mt={2} color="gray.500">
+                          Anexar arquivo
+                        </Text>
+                        {/* {formData.arquivo && (
                         <Text mt={2} fontWeight="bold">
                           Arquivo selecionado: {formData.arquivo.name}
                         </Text>
                       )} */}
-                    </Box>
-                    <Input
-                      type="file"
-                      name="arquivo"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      position="absolute"
-                      zIndex={-1}
-                      opacity={0}
-                      h="0"
-                      w="0"
-                      pointerEvents="none"
-                    />
-                  </Field.Root>
+                      </Box>
+                      <Input
+                        type="file"
+                        name="arquivo"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        position="absolute"
+                        zIndex={-1}
+                        opacity={0}
+                        h="0"
+                        w="0"
+                        pointerEvents="none"
+                      />
+                    </Field.Root>
 
-                  <Flex gap={2} maxW={"100%"}>
-                    {/* Reusable destructive button opens confirmation dialog */}
-                    <DestructiveButton
-                      icon={MdDelete}
-                      onConfirm={async () => {
-                        if (!formData) return;
-                        await deleteTask(formData.uuid, {
-                          onSuccess: () => onClose && onClose(),
-                        });
-                      }}
-                      flex={1}
-                      px={2}
-                    >
-                      Excluir
-                    </DestructiveButton>
+                    <Flex gap={2} maxW={"100%"}>
+                      {/* Reusable destructive button opens confirmation dialog */}
+                      <DestructiveButton
+                        icon={MdDelete}
+                        onConfirm={async () => {
+                          if (!formData) return;
+                          await deleteTask(formData.uuid, {
+                            onSuccess: () => onClose && onClose(),
+                          });
+                        }}
+                        flex={1}
+                        px={2}
+                      >
+                        Excluir
+                      </DestructiveButton>
 
-                    <Button flex={1} type="submit" colorScheme={"blue"}>
-                      Salvar alterações
-                    </Button>
-                  </Flex>
-                </Box>
-              </Flex>
-            </DialogBody>
-          </form>
-        </DialogContent>
-      </DialogPositioner>
-    </DialogRoot>
+                      <Button flex={1} type="submit" colorScheme={"blue"}>
+                        Salvar alterações
+                      </Button>
+                    </Flex>
+                  </Box>
+                </Flex>
+              </DialogBody>
+            </form>
+          </DialogContent>
+        </DialogPositioner>
+      </DialogRoot>
+    </Portal>
   );
 };
