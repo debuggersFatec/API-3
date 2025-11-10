@@ -4,6 +4,8 @@ import { Login } from "./page/Login";
 import Register from "./page/Register";
 import { RequireAuth } from "./components/RequireAuth";
 import { JoinTeamPage } from "./page/JoinTeamPage";
+import ForgotPassword from "./page/ForgotPassword";
+import ResetPassword from "./page/ResetPassword";
 
 export const App = () => {
   const location = useLocation();
@@ -20,7 +22,11 @@ export const App = () => {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-  <Route path="join-team" element={<JoinTeamPage />} />
+      <Route path="join-team" element={<JoinTeamPage />} />
+
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
+      
     </Routes>
   );
 };

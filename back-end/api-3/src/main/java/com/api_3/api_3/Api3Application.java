@@ -46,6 +46,34 @@ public class Api3Application {
 			System.setProperty("JWT_SECRET", jwtSecret);
 		}
 
+        String redisUrl = System.getenv("REDIS_URL");
+		if (redisUrl == null) redisUrl = dotenv.get("REDIS_URL");
+		if ((redisUrl == null || redisUrl.isBlank())) {
+			Dotenv parentEnv = Dotenv.configure()
+				.directory("../")
+				.ignoreIfMalformed()
+				.ignoreIfMissing()
+				.load();
+			redisUrl = parentEnv.get("REDIS_URL");
+		}
+		if (redisUrl != null && !redisUrl.isBlank()) {
+			System.setProperty("REDIS_URL", redisUrl);
+		}
+
+        String emailPass = System.getenv("SENHA_APP_EMAIL");
+		if (emailPass == null) emailPass = dotenv.get("SENHA_APP_EMAIL");
+		if ((emailPass == null || emailPass.isBlank())) {
+			Dotenv parentEnv = Dotenv.configure()
+				.directory("../")
+				.ignoreIfMalformed()
+				.ignoreIfMissing()
+				.load();
+			emailPass = parentEnv.get("SENHA_APP_EMAIL");
+		}
+		if (emailPass != null && !emailPass.isBlank()) {
+			System.setProperty("SENHA_APP_EMAIL", emailPass);
+		}
+
 		SpringApplication.run(Api3Application.class, args);
 	}
 
