@@ -167,7 +167,7 @@ export const Login = () => {
               />
 
               <Flex justify="flex-end">
-                <RouterLink to="/forgot-password">
+                <RouterLink to="/forgot-password"> 
                   <Text as="span" fontSize="sm" color="blue.500">Esqueceu a senha?</Text>
                 </RouterLink>
               </Flex>

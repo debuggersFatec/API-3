@@ -29,7 +29,7 @@ import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
-import com.api_3.api_3.service.notification.NotificationQueryService;
+// import com.api_3.api_3.service.notification.NotificationQueryService;
 
 @Service
 public class AuthService {
@@ -56,8 +56,8 @@ public class AuthService {
 
     @Autowired
     private UserMapper userMapper;
-    @Autowired
-    private NotificationQueryService notificationQueryService;
+    // Notifications service is not available in this branch; default values will be returned in the response for now.
+    // private NotificationQueryService notificationQueryService;
 
     public AuthResponse login(AuthRequest authRequest) {
         Authentication authentication;
@@ -69,6 +69,7 @@ public class AuthService {
             throw new InvalidCredentialsException("Credenciais inválidas!");
         }
 
+    // JWT
         UserDetails principal = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(principal);
 
@@ -93,10 +94,9 @@ public class AuthService {
         resp.setToken(token);
         resp.setRoutes(routes);
         resp.setUser(userInfo);
-        long unread = notificationQueryService.countUnreadByUserUuid(user.getUuid());
-        List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(user.getUuid());
-        resp.setNotificationsUnread(unread);
-        resp.setNotificationsRecent(recent);
+        // Notifications are not wired yet in this branch; return sensible defaults
+        resp.setNotificationsUnread(0L);
+        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
         return resp;
     }
 
@@ -110,7 +110,6 @@ public class AuthService {
         if (userRepository.existsByEmailIgnoreCase(newUser.getEmail())) {
             throw new EmailAlreadyExistsException("Este e-mail já está em uso.");
         }
-
         if (newUser.getUuid() == null || newUser.getUuid().isBlank()) {
             newUser.setUuid(UUID.randomUUID().toString());
         }
@@ -125,6 +124,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
+    // JWT generation
         UserDetails userDetails = org.springframework.security.core.userdetails.User
             .withUsername(savedUser.getEmail())
             .password(savedUser.getPassword())
@@ -145,10 +145,18 @@ public class AuthService {
         resp.setToken(token);
         resp.setRoutes(routes);
         resp.setUser(userInfo);
-        long unread = notificationQueryService.countUnreadByUserUuid(savedUser.getUuid());
-        List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(savedUser.getUuid());
-        resp.setNotificationsUnread(unread);
-        resp.setNotificationsRecent(recent);
+        // Notifications are not wired yet in this branch; return sensible defaults
+        resp.setNotificationsUnread(0L);
+        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
         return resp;
+    }
+
+    public void updatePassword(String email, String newPassword) {
+        // Usamos findByEmailIgnoreCase para consistência com o resto do service
+        User user = userRepository.findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado para o e-mail: " + email));
+        // Criptografa a nova senha
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }
