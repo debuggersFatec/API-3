@@ -24,8 +24,8 @@ import com.api_3.api_3.exception.TeamNotFoundException;
 import com.api_3.api_3.exception.UserNotFoundException;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.service.LeaveProjectService;
-import com.api_3.api_3.service.ProjectService;
+import com.api_3.api_3.service.project.LeaveProjectService;
+import com.api_3.api_3.service.project.ProjectService;
 
 import jakarta.validation.Valid;
 

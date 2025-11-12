@@ -9,3 +9,23 @@ export const formatDateShort = (d?: string | Date) => {
 };
 
 export default formatDateShort;
+
+export const formatRelativeForNotification = (d?: string | Date) => {
+  if (!d) return "";
+  const now = new Date();
+  const date = typeof d === "string" ? new Date(d) : d;
+  if (Number.isNaN(date.getTime())) return "";
+
+  const diffMs = now.getTime() - date.getTime();
+  if (diffMs < 0) return formatDateShort(date); // future dates -> short
+
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  if (diffMinutes < 60) return `${diffMinutes} min`;
+
+  const diffHours = Math.floor(diffMinutes / 60);
+  if (diffHours < 24) return `${diffHours} h`;
+
+  if (diffHours < 48) return "ontem";
+
+  return formatDateShort(date);
+};

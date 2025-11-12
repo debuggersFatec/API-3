@@ -15,5 +15,8 @@ public interface NotificationRepository extends MongoRepository<Notification, St
     List<Notification> findByUserUuidOrderByCreatedAtDesc(String userUuid);
     List<Notification> findByUserUuidAndReadFalseOrderByCreatedAtDesc(String userUuid);
 
+    long countByUserUuidAndReadFalse(String userUuid);
+    List<Notification> findTop20ByUserUuidOrderByCreatedAtDesc(String userUuid);
+
     Optional<Notification> findFirstByTypeAndTaskUuidAndCreatedAtAfter(Type type, String taskUuid, Date after);
 }

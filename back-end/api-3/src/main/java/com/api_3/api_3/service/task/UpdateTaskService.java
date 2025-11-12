@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.task;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -21,6 +21,7 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class UpdateTaskService {
@@ -39,7 +40,6 @@ public class UpdateTaskService {
         String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
         String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
 
-    // Capturar valores antigos antes de sobrescrever
     String oldTitle = existingTask.getTitle();
     java.util.Date oldDue = existingTask.getDue_date();
 
@@ -51,7 +51,6 @@ public class UpdateTaskService {
         if (request.getIsRequiredFile() != null) {
             existingTask.setIsRequiredFile(request.getIsRequiredFile());
         }
-        // Atualiza o responsável
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             User.UserRef newResponsibleRef = new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img());
@@ -69,7 +68,6 @@ public class UpdateTaskService {
             projectsRepository.findById(savedTask.getProjectUuid()).ifPresent(project -> {
                 boolean changed = false;
                 if (project.getTasks() != null) {
-                    // Tenta encontrar a referência antiga para remover
                     Optional<Task.TaskProject> oldRefOpt = project.getTasks().stream()
                         .filter(tp -> tp != null && tp.uuid().equals(savedTask.getUuid()))
                         .findFirst();
@@ -92,7 +90,7 @@ public class UpdateTaskService {
                 }
 
                 if (changed) {
-                    projectsRepository.save(project); // Salva o projeto SOMENTE se houve mudança
+                    projectsRepository.save(project);
                 }
             });
         }
@@ -100,23 +98,18 @@ public class UpdateTaskService {
 
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
 
-        // Notificações de atribuição conforme regras
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
             if (oldResponsibleUuid == null && newResponsibleUuid != null) {
-                // Primeira atribuição: broadcast de atualização para todos (exclui ator)
                 notificationService.notifyTaskUpdatedBroadcast(savedTask);
             } else if (oldResponsibleUuid != null && newResponsibleUuid == null) {
-                // Desatribuição: notificar membros do projeto e o antigo responsável
                 notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
-                notificationService.notifyTaskUpdatedScoped(savedTask); // sem responsável -> notifica todos
+                notificationService.notifyTaskUpdatedScoped(savedTask);
             } else {
-                // Reatribuição: notificar novo e antigo responsável
                 notificationService.notifyTaskUnassigned(savedTask, oldResponsibleUuid);
                 notificationService.notifyTaskAssigned(savedTask, newResponsibleUuid);
             }
         }
 
-        // Notificação de atualização (nome/data):
     boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
     boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
         if (changedTitle || changedDue) {
@@ -142,7 +135,7 @@ public class UpdateTaskService {
                 .orElseThrow(() -> new ProjectNotFoundException("Projeto com ID " + task.getProjectUuid() + " não encontrado."));
 
             boolean isProjectMember = project.getMembers() != null && project.getMembers().stream()
-                .anyMatch(m -> m != null && responsibleUuid.equals(m.getUuid())); // Adicionado null check para m
+                .anyMatch(m -> m != null && responsibleUuid.equals(m.getUuid()));
             if (!isProjectMember) {
                 throw new InvalidResponsibleException("O usuário responsável com ID " + responsibleUuid + " não é membro do projeto '" + project.getName() + "'.");
             }

@@ -30,9 +30,9 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
-import com.api_3.api_3.service.LeaveTeamService;
 import com.api_3.api_3.service.NotificationService;
-import com.api_3.api_3.service.TaskMaintenanceService;
+import com.api_3.api_3.service.task.TaskMaintenanceService;
+import com.api_3.api_3.service.team.LeaveTeamService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;

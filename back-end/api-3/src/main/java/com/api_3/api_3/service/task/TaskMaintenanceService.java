@@ -1,14 +1,15 @@
-package com.api_3.api_3.service;
-
-import com.api_3.api_3.model.entity.Task;
-import com.api_3.api_3.repository.TaskRepository;
-import com.api_3.api_3.repository.UserRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+package com.api_3.api_3.service.task;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.api_3.api_3.model.entity.Task;
+import com.api_3.api_3.repository.TaskRepository;
+import com.api_3.api_3.repository.UserRepository;
 
 @Service
 public class TaskMaintenanceService {
@@ -35,11 +36,9 @@ public class TaskMaintenanceService {
     private void unassign(List<Task> tasks, String userUuid) {
         if (tasks == null || tasks.isEmpty()) return;
 
-        // set responsible = null on each task
         tasks.forEach(t -> t.setResponsible(null));
         taskRepository.saveAll(tasks);
 
-        // remove TaskUser refs from the user
         Set<String> taskIds = tasks.stream().map(Task::getUuid).collect(Collectors.toSet());
         userRepository.findById(userUuid).ifPresent(u -> {
             if (u.getTasks() != null) {

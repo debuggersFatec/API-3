@@ -1,4 +1,4 @@
-package com.api_3.api_3.service;
+package com.api_3.api_3.service.auth;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
+import com.api_3.api_3.dto.response.NotificationDto;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
@@ -28,6 +29,7 @@ import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
+// import com.api_3.api_3.service.notification.NotificationQueryService;
 
 @Service
 public class AuthService {
@@ -54,6 +56,8 @@ public class AuthService {
 
     @Autowired
     private UserMapper userMapper;
+    // Notifications service is not available in this branch; default values will be returned in the response for now.
+    // private NotificationQueryService notificationQueryService;
 
     public AuthResponse login(AuthRequest authRequest) {
         Authentication authentication;
@@ -65,7 +69,7 @@ public class AuthService {
             throw new InvalidCredentialsException("Credenciais inválidas!");
         }
 
-        // JWT
+    // JWT
         UserDetails principal = (UserDetails) authentication.getPrincipal();
         String token = jwtUtil.generateToken(principal);
 
@@ -86,7 +90,14 @@ public class AuthService {
             "/api/tasks"
         );
 
-        return new AuthResponse(token, routes, userInfo);
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
+        // Notifications are not wired yet in this branch; return sensible defaults
+        resp.setNotificationsUnread(0L);
+        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
+        return resp;
     }
 
     public AuthResponse register(User newUser) {
@@ -113,7 +124,7 @@ public class AuthService {
 
         User savedUser = userRepository.save(newUser);
 
-        // JWT generation
+    // JWT generation
         UserDetails userDetails = org.springframework.security.core.userdetails.User
             .withUsername(savedUser.getEmail())
             .password(savedUser.getPassword())
@@ -130,8 +141,16 @@ public class AuthService {
             "/api/tasks"
         );
 
-        return new AuthResponse(token, routes, userInfo);
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
+        // Notifications are not wired yet in this branch; return sensible defaults
+        resp.setNotificationsUnread(0L);
+        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
+        return resp;
     }
+
     public void updatePassword(String email, String newPassword) {
         // Usamos findByEmailIgnoreCase para consistência com o resto do service
         User user = userRepository.findByEmailIgnoreCase(email)

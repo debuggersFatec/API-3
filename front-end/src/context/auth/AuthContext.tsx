@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { AuthContext } from "./AuthContextInstance";
 import { userService } from "@/services/userServices";
 import type { User } from "@/types/user";
-import type { TaskUser, Priority, Status } from "@/types/task";
 import { normalizeUser } from "./authUtils";
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -42,19 +41,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const setUser = (newUser: User | null) => {
-    setUserState(newUser);
-    if (newUser) {
-      try {
-        localStorage.setItem("user", JSON.stringify(newUser));
-      } catch (e) {
-        console.warn("Falha ao salvar user no localStorage:", e);
-      }
-    } else {
+  // Accept unknown envelopes and normalize here so callers don't need to remember
+  const setUser = (incoming: unknown) => {
+    if (!incoming) {
+      setUserState(null);
       try {
         localStorage.removeItem("user");
       } catch (e) {
         console.warn("Falha ao remover user do localStorage:", e);
+      }
+      return;
+    }
+
+    // Normalize any API envelope or user-like object
+    try {
+      const normalized = normalizeUser(incoming);
+      setUserState(normalized);
+      try {
+        localStorage.setItem("user", JSON.stringify(normalized));
+      } catch (e) {
+        console.warn("Falha ao salvar user no localStorage:", e);
+      }
+    } catch (e) {
+      console.warn("Falha ao normalizar user antes de salvar:", e);
+      // Fallback: clear user to avoid inconsistent state
+      setUserState(null);
+      try {
+        localStorage.removeItem("user");
+      } catch (err) {
+        console.warn("Falha ao remover user do localStorage:", err);
       }
     }
   };
@@ -63,101 +78,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (!token) return;
     try {
       const response = await userService.getCurrentUser();
-      type Rec = Record<string, unknown>;
-      const isRec = (v: unknown): v is Rec => typeof v === "object" && v !== null;
-      const str = (v: unknown): string | undefined => (typeof v === "string" ? v : undefined);
-      const arr = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-
-      // Modelos básicos da API (conforme OpenAPI)
-      type ApiTeamInfo = { uuid: string; name: string };
-      type ApiTaskInfo = {
-        uuid: string;
-        title: string;
-        due_date?: string;
-        status?: string;
-        priority?: string;
-        team_uuid?: string;
-        equip_uuid?: string;
-        teamUuid?: string;
-        project_uuid?: string;
-        projectUuid?: string;
-        responsible?: { uuid: string; name: string; img?: string };
-      };
-      type ApiUserInfo = {
-        uuid: string;
-        name: string;
-        email: string;
-        img?: string;
-        teams?: ApiTeamInfo[];
-        tasks?: ApiTaskInfo[];
-      };
-
-      const data = response.data as unknown;
-      let apiUser: ApiUserInfo | null = null;
-      if (isRec(data) && isRec((data as Rec).user)) {
-        const d = (data as Rec).user as Rec;
-        apiUser = {
-          uuid: str(d.uuid) ?? "",
-          name: str(d.name) ?? "",
-          email: str(d.email) ?? "",
-          img: str(d.img),
-          teams: arr(d.teams) as ApiTeamInfo[],
-          tasks: arr(d.tasks) as ApiTaskInfo[],
-        };
-      } else if (isRec(data)) {
-        apiUser = {
-          uuid: str((data as Rec).uuid) ?? "",
-          name: str((data as Rec).name) ?? "",
-          email: str((data as Rec).email) ?? "",
-          img: str((data as Rec).img),
-          teams: arr((data as Rec).teams) as ApiTeamInfo[],
-          tasks: arr((data as Rec).tasks) as ApiTaskInfo[],
-        };
-      }
-
-      if (!apiUser) {
-        console.warn("refreshUser: resposta inesperada de /users/me", data);
-        return;
-      }
-
-      const toStatus = (s?: string): Status => {
-        if (!s) return "NOT_STARTED";
-        const v = s.toUpperCase();
-        if (v === "NOT_STARTED") return "NOT_STARTED";
-        if (v === "IN_PROGRESS") return "IN_PROGRESS";
-        if (v === "COMPLETED") return "COMPLETED";
-        if (v === "DELETED") return "DELETED";
-        return "NOT_STARTED";
-      };
-      const toPriority = (p?: string): Priority => {
-        if (!p) return "LOW";
-        const v = p.toUpperCase();
-        if (v === "LOW") return "LOW";
-        if (v === "MEDIUM") return "MEDIUM";
-        if (v === "HIGH") return "HIGH";
-        return "LOW";
-      };
-
-      const tasks: TaskUser[] = (apiUser.tasks ?? []).map((t) => ({
-        uuid: t.uuid,
-        title: t.title,
-        due_date: t.due_date,
-        status: toStatus(t.status),
-        priority: toPriority(t.priority),
-        team_uuid: t.team_uuid ?? t.equip_uuid ?? t.teamUuid ?? "",
-        project_uuid: t.project_uuid ?? t.projectUuid ?? "",
-        responsible: t.responsible ? { uuid: t.responsible.uuid, name: t.responsible.name, img: t.responsible.img } : undefined,
-      }));
-
-      const userNormalized: User = {
-        uuid: apiUser.uuid,
-        name: apiUser.name,
-        email: apiUser.email,
-        img: apiUser.img,
-        teams: (apiUser.teams ?? []).map((tm) => ({ uuid: tm.uuid, name: tm.name })),
-        tasks,
-      };
-
+      // Use central normalizer to ensure fields like notificationsRecent are present
+      const userNormalized = normalizeUser(response.data);
       setUser(userNormalized);
     } catch (err) {
       console.error("Erro ao atualizar dados do usuário:", err);

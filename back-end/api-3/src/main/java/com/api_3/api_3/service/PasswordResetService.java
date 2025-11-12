@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.auth.AuthService;
 
 @Service
 public class PasswordResetService {

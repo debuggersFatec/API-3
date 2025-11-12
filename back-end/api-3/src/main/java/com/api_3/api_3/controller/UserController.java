@@ -14,12 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.dto.request.UpdateUserRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
+import com.api_3.api_3.dto.response.NotificationDto;
 import com.api_3.api_3.dto.response.UserResponse;
 import com.api_3.api_3.mapper.UserMapper;
 import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.repository.NotificationRepository;
+import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
-import com.api_3.api_3.service.GetUserService;
-import com.api_3.api_3.service.UpdateUserService;
+import com.api_3.api_3.service.notification.NotificationQueryService;
+import com.api_3.api_3.service.user.GetUserService;
+import com.api_3.api_3.service.user.UpdateUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -42,6 +46,13 @@ public class UserController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Autowired
+    private NotificationRepository notificationRepository;
+    @Autowired
+    private NotificationQueryService notificationQueryService;
+    @Autowired
+    private UserRepository userRepository;
+
     @GetMapping("/debug/user-teams")
     public ResponseEntity<List<UserResponse>> debugUserTeams() {
         List<User> users = getUserService.findAllUsersForDebug();
@@ -61,7 +72,20 @@ public class UserController {
         );
         // Gerar token também para /me a pedido do cliente
         String token = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(token, routes, userInfo));
+
+        // Preencher notificações
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(token);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
+        com.api_3.api_3.model.entity.User u = userRepository.findByEmailIgnoreCase(userDetails.getUsername()).orElse(null);
+        if (u != null) {
+            long unread = notificationQueryService.countUnreadByUserUuid(u.getUuid());
+            java.util.List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(u.getUuid());
+            resp.setNotificationsUnread(unread);
+            resp.setNotificationsRecent(recent);
+        }
+        return ResponseEntity.ok(resp);
     }
 
     // Atualiza o usuário autenticado (nome e imagem)
