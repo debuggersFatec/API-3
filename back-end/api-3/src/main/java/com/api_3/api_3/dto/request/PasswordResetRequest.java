@@ -1,14 +1,6 @@
 package com.api_3.api_3.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-public record PasswordResetRequest(
-    @NotBlank @Size(min = 6, message = "A senha deve ter pelo menos 6 caracteres") String newPassword
-) {}
-package com.api_3.api_3.dto.request;
-
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
