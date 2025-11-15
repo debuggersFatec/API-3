@@ -1,7 +1,8 @@
-package com.api_3.api_3.security;
+package com.api_3.auth_service.security;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,18 +23,16 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    public JwtAuthFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-    }
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
+        
         final String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
@@ -43,16 +42,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(token);
             } catch (IllegalArgumentException e) {
-                logger.error("Não foi possível extrair o token JWT", e);
-            } catch (ExpiredJwtException | SignatureException | MalformedJwtException | UnsupportedJwtException e) {
-                logger.warn("Token JWT inválido", e);
-            } catch (Exception e) {
-                logger.error("Falha ao processar token JWT", e);
+                logger.error("Não foi possível obter o token JWT.", e);
+            } catch (ExpiredJwtException e) {
+                logger.warn("O token JWT expirou.", e);
+                request.setAttribute("exception", e);
+            } catch (SignatureException e) {
+                logger.error("Assinatura JWT inválida.", e);
+                request.setAttribute("exception", e);
+            } catch (MalformedJwtException e) {
+                logger.error("Token JWT malformado.", e);
+                request.setAttribute("exception", e);
+            } catch (UnsupportedJwtException e) {
+                logger.error("Token JWT não suportado.", e);
+                request.setAttribute("exception", e);
             }
         }
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
+
             if (jwtUtil.validateToken(token, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -60,7 +68,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         }
-
+        
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        return request.getServletPath().startsWith("/api/auth");
     }
 }

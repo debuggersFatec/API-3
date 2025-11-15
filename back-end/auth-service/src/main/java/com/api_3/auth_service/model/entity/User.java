@@ -1,16 +1,18 @@
-package com.api_3.api_3.model.entity;
+package com.api_3.auth_service.model.entity;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.TypeAlias;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Document(collection = "users")
+@TypeAlias("com.api_3.api_3.model.entity.User")
 @Data
 @NoArgsConstructor
 public class User {
@@ -21,11 +23,11 @@ public class User {
     private String password;
     private String img;
 
-    // Teams and tasks (lightweight) to satisfy existing mappers
+    // Teams and tasks mirrors from the core API so legacy mappers continue to work
     private List<Teams.TeamRef> teams = new ArrayList<>();
     private List<Task.TaskUser> tasks = new ArrayList<>();
 
-    public User(String name, String email, String password, String img) {
+    public User(String name, String email , String password , String img){
         this.name = name;
         this.email = email;
         this.password = password;
@@ -41,7 +43,7 @@ public class User {
 
     public UserRef toRef() { return new UserRef(this.uuid, this.name, this.img); }
 
-    // Legacy compatibility for getEquipeIds/setEquipeIds
+    // Legacy compatibility for getEquipeIds/setEquipeIds used by the old AuthService
     public List<String> getEquipeIds() {
         if (this.teams == null) return List.of();
         return this.teams.stream()

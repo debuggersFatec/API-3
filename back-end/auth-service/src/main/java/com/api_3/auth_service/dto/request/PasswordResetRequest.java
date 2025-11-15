@@ -1,4 +1,4 @@
-package com.api_3.api_3.dto.request;
+package com.api_3.auth_service.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

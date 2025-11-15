@@ -1,16 +1,18 @@
 package com.api_3.api_3.security;
 
-import java.security.Key;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
 
+import javax.crypto.SecretKey;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -19,80 +21,84 @@ import io.jsonwebtoken.security.Keys;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private static final Logger log = LoggerFactory.getLogger(JwtUtil.class);
 
-    @Value("${jwt.expiration}")
-    private long expiration;
+    private final SecretKey key;
+    private final long expirationMs;
+
+    public JwtUtil(
+        @Value("${jwt.secret:dev-secret-change}") String secret,
+        @Value("${jwt.expiration-ms:604800000}") long expirationMs
+    ) {
+        // For jjwt 0.11.x, we can build key from bytes; in production prefer Base64-encoded key
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(secret);
+        } catch (IllegalArgumentException ex) {
+            keyBytes = secret.getBytes(StandardCharsets.UTF_8);
+        }
+        this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.expirationMs = expirationMs;
+    }
 
     public String generateToken(UserDetails userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        return createToken(claims, userDetails.getUsername());
-    }
-
-    private String createToken(Map<String, Object> claims, String subject) {
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + expirationMs);
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 1000))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-    }
-
-    public String generateInviteToken(String teamUuid) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("invite_team_id", teamUuid);
-        
-        long inviteExpiration = 86400;
-        
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject("TEAM_INVITE_" + teamUuid) 
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + inviteExpiration * 1000))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 
     public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+        return extractAllClaims(token).getSubject();
     }
 
-    public String extractInviteTeamId(String token) {
-        final Claims claims = extractAllClaims(token);
-        return claims.get("invite_team_id", String.class);
+    public boolean validateToken(String token, UserDetails userDetails) {
+        try {
+            String username = extractUsername(token);
+            boolean valid = username != null && username.equalsIgnoreCase(userDetails.getUsername()) && !isTokenExpired(token);
+            if (!valid) {
+                log.debug("JWT inválido para usuário {}. sujeito extraído={} expirada={}",
+                        userDetails.getUsername(), username, isTokenExpired(token));
+            }
+            return valid;
+        } catch (Exception ex) {
+            log.warn("Falha ao validar token JWT", ex);
+            return false;
+        }
+    }
+
+    // Invite tokens for TeamsController
+    public String generateInviteToken(String teamUuid) {
+        Date now = new Date();
+        Date exp = new Date(now.getTime() + 24 * 60 * 60 * 1000L); // 24h
+        return Jwts.builder()
+                .claim("invite_team", teamUuid)
+                .setIssuedAt(now)
+                .setExpiration(exp)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String extractInviteTeamId(String token) throws ExpiredJwtException {
+        Claims claims = extractAllClaims(token);
+        Object v = claims.get("invite_team");
+        return v != null ? v.toString() : null;
     }
 
     private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
-    }
-
-    public Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+        Date expiration = extractAllClaims(token).getExpiration();
+        return expiration != null && expiration.before(new Date());
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts
-                .parserBuilder()
-                .setSigningKey(getSigningKey())
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-    }
-
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }

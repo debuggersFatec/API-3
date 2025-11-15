@@ -1,4 +1,4 @@
-package com.api_3.api_3.controller;
+package com.api_3.auth_service.controller;
 
 import java.util.Map;
 
@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.api_3.api_3.dto.request.AuthRequest;
-import com.api_3.api_3.dto.request.PasswordRequestEmailDto;
-import com.api_3.api_3.dto.request.PasswordResetRequest;
-import com.api_3.api_3.dto.response.AuthResponse;
-import com.api_3.api_3.exception.EmailAlreadyExistsException;
-import com.api_3.api_3.model.entity.User;
-import com.api_3.api_3.service.PasswordResetService;
-import com.api_3.api_3.service.auth.AuthService;
+import com.api_3.auth_service.dto.request.AuthRequest;
+import com.api_3.auth_service.dto.request.PasswordRequestEmailDto;
+import com.api_3.auth_service.dto.request.PasswordResetRequest;
+import com.api_3.auth_service.dto.response.AuthResponse;
+import com.api_3.auth_service.exception.EmailAlreadyExistsException;
+import com.api_3.auth_service.model.entity.User;
+import com.api_3.auth_service.service.AuthService;
+import com.api_3.auth_service.service.PasswordResetService;
 
 import jakarta.validation.Valid;
 
@@ -59,7 +59,6 @@ public class AuthController {
     public ResponseEntity<?> recoverPassword(@Valid @RequestBody PasswordRequestEmailDto request) {
         try {
             passwordResetService.recoverPassword(request.email());
-            // Always return OK to avoid leaking whether the email exists
             return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado, um link de redefinição será enviado."));
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado, um link de redefinição será enviado."));

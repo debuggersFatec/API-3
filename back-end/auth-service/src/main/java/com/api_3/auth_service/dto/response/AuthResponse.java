@@ -1,10 +1,11 @@
-package com.api_3.api_3.dto.response;
+package com.api_3.auth_service.dto.response;
 
 import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Data
 @AllArgsConstructor
@@ -15,7 +16,7 @@ public class AuthResponse {
     private UserInfo user;
     private Long notificationsUnread;
     private List<NotificationDto> notificationsRecent;
-
+    
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -28,12 +29,15 @@ public class AuthResponse {
         private List<ProjectInfo> projects;
         private List<TaskInfo> tasks;
     }
-
+    
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class TeamInfo { private String uuid; private String name; }
-
+    public static class TeamInfo {
+        private String uuid;
+        private String name;
+    }
+    
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
@@ -51,13 +55,19 @@ public class AuthResponse {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class ProjectInfo {
-        private String uuid; private String name; private boolean active; private String team_uuid;
+        private String uuid;
+        private String name;
+        private boolean active;
+        private String team_uuid;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Routes {
-        private String teams; private String projects; private String members; private String tasks;
+        private String teams;     // e.g., /api/teams
+        private String projects;  // e.g., /api/projects
+        private String members;   // e.g., /api/teams/{teamUuid}/members
+        private String tasks;     // e.g., /api/tasks
     }
 }

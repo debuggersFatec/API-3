@@ -1,20 +1,32 @@
 import axios from "axios";
+import type { AxiosInstance } from "axios";
 
-export const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api",
-  timeout: 10000,
-});
-
-axiosInstance.interceptors.request.use((config) => {
-  const stored = localStorage.getItem("token");
-  if (stored) {
-    try {
-      const decoded = atob(stored);
-      if (decoded) config.headers.Authorization = `Bearer ${decoded}`;
-    } catch {
-      // fallback if stored value is not base64
-      config.headers.Authorization = `Bearer ${stored}`;
+const attachAuthInterceptor = (instance: AxiosInstance) => {
+  instance.interceptors.request.use((config) => {
+    const stored = localStorage.getItem("token");
+    if (stored) {
+      try {
+        const decoded = atob(stored);
+        if (decoded) config.headers.Authorization = `Bearer ${decoded}`;
+      } catch {
+        config.headers.Authorization = `Bearer ${stored}`;
+      }
     }
-  }
-  return config;
-});
+    return config;
+  });
+  return instance;
+};
+
+export const axiosInstance = attachAuthInterceptor(
+  axios.create({
+    baseURL: "http://localhost:8080/api",
+    timeout: 10000,
+  })
+);
+
+export const axiosAuthInstance = attachAuthInterceptor(
+  axios.create({
+    baseURL: "http://localhost:8081/api",
+    timeout: 10000,
+  })
+);

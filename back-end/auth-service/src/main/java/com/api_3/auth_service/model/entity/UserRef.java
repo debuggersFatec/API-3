@@ -1,6 +1,9 @@
-package com.api_3.api_3.model.entity;
+package com.api_3.auth_service.model.entity;
 
 public class UserRef {
+    public UserRef() {
+    }
+
     private String uuid;
     private String name;
     private String img;

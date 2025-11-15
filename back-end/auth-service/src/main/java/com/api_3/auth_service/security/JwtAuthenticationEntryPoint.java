@@ -1,4 +1,4 @@
-package com.api_3.api_3.security;
+package com.api_3.auth_service.security;
 
 import java.io.IOException;
 import java.io.Serializable;
