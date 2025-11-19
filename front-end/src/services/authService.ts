@@ -1,4 +1,4 @@
-import { axiosAuthInstance } from "./axiosInstance";
+import { axiosAuthInstance , axiosRegisterInstance } from "./axiosInstance";
 
 type LoginPayload = { email: string; password: string };
 type RegisterPayload = { name: string; email: string; password: string };
@@ -10,7 +10,7 @@ export const authService = {
   login: (payload: LoginPayload) =>
     axiosAuthInstance.post("/auth/login", payload),
   register: (payload: RegisterPayload) =>
-    axiosAuthInstance.post("/auth/register", payload),
+    axiosRegisterInstance.post("/auth/register", payload),
   forgotPassword: (payload: ForgotPasswordPayload) =>
     axiosAuthInstance.post("/auth/recover-password", payload),
   validateResetToken: (token: string) =>

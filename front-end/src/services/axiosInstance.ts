@@ -17,6 +17,13 @@ const attachAuthInterceptor = (instance: AxiosInstance) => {
   return instance;
 };
 
+export const axiosRegisterInstance = attachAuthInterceptor(
+  axios.create({
+    baseURL: "http://localhost:8082/api",
+    timeout: 10000,
+  })
+);
+
 export const axiosInstance = attachAuthInterceptor(
   axios.create({
     baseURL: "http://localhost:8080/api",
