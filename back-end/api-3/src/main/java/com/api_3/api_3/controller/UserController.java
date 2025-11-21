@@ -3,14 +3,18 @@ package com.api_3.api_3.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api_3.api_3.dto.request.UpdateUserRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
@@ -88,11 +92,19 @@ public class UserController {
         return ResponseEntity.ok(resp);
     }
 
-    // Atualiza o usuário autenticado (nome e imagem)
+    // Atualiza o usuário autenticado (nome e imagem via string/link)
     @PutMapping("/me")
     @Operation(summary = "Atualizar nome e imagem do usuário autenticado", security = {@SecurityRequirement(name = "bearerAuth")})
     public ResponseEntity<UserResponse> updateCurrentUser(@Valid @RequestBody UpdateUserRequest request) {
         User updated = updateUserService.updateCurrentUser(request);
+        return ResponseEntity.ok(userMapper.toUserResponse(updated));
+    }
+
+    // NOVA ROTA: Upload de imagem de perfil
+    @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Upload de nova foto de perfil", description = "Envia uma imagem (jpg, png, webp) de até 50MB para atualizar o perfil.", security = {@SecurityRequirement(name = "bearerAuth")})
+    public ResponseEntity<UserResponse> updateProfileImage(@RequestParam("file") MultipartFile file) {
+        User updated = updateUserService.updateProfilePicture(file);
         return ResponseEntity.ok(userMapper.toUserResponse(updated));
     }
 }

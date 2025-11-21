@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.core.io.Resource;
@@ -20,6 +22,14 @@ import com.api_3.api_3.model.embedded.FileAttachment;
 public class FileStorageService {
 
     private final Path fileStorageLocation;
+    
+    // Lista de tipos MIME permitidos para imagem
+    private final List<String> ALLOWED_IMAGE_TYPES = Arrays.asList(
+        "image/jpeg", 
+        "image/png", 
+        "image/jpg", 
+        "image/webp"
+    );
 
     public FileStorageService() {
         // Define a pasta de upload como "uploads" no diretório atual de execução
@@ -30,6 +40,15 @@ public class FileStorageService {
             Files.createDirectories(this.fileStorageLocation);
         } catch (Exception ex) {
             throw new RuntimeException("Não foi possível criar o diretório 'uploads' para armazenar os arquivos.", ex);
+        }
+    }
+
+    // Novo método para validar se o arquivo é uma imagem
+    public void validateImage(MultipartFile file) {
+        String contentType = file.getContentType();
+        
+        if (contentType == null || !ALLOWED_IMAGE_TYPES.contains(contentType)) {
+            throw new RuntimeException("Formato de arquivo inválido. Apenas imagens (JPEG, PNG, WEBP) são permitidas.");
         }
     }
 

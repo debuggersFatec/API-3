@@ -8,8 +8,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.api_3.api_3.dto.request.UpdateUserRequest;
+import com.api_3.api_3.model.embedded.FileAttachment;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Teams;
@@ -18,6 +20,7 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository; 
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository; 
+import com.api_3.api_3.service.FileStorageService;
 
 
 @Service
@@ -27,15 +30,18 @@ public class UpdateUserService {
     private final TeamsRepository teamsRepository;
     private final ProjectsRepository projectsRepository; 
     private final TaskRepository taskRepository; 
+    private final FileStorageService fileStorageService;
 
     public UpdateUserService(UserRepository userRepository,
                              TeamsRepository teamsRepository,
                              ProjectsRepository projectsRepository,
-                             TaskRepository taskRepository) {
+                             TaskRepository taskRepository,
+                             FileStorageService fileStorageService) {
         this.userRepository = userRepository;
         this.teamsRepository = teamsRepository;
         this.projectsRepository = projectsRepository;
         this.taskRepository = taskRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     @Transactional
@@ -46,7 +52,7 @@ public class UpdateUserService {
         }
         String email = auth.getName();
         User user = userRepository.findByEmailIgnoreCase(email)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado.")); // Considerar UserNotFoundException
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
 
         boolean nameChanged = false;
         boolean imgChanged = false;
@@ -70,6 +76,36 @@ public class UpdateUserService {
         return updatedUser;
     }
 
+    // Atualizado para salvar o PATH (uploads/nome)
+    @Transactional
+    public User updateProfilePicture(MultipartFile file) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getName() == null) {
+            throw new RuntimeException("Usuário não autenticado.");
+        }
+        String email = auth.getName();
+        User user = userRepository.findByEmailIgnoreCase(email)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado."));
+
+        // 1. Valida se é imagem
+        fileStorageService.validateImage(file);
+
+        // 2. Salva o arquivo
+        FileAttachment attachment = fileStorageService.storeFile(file, user.getUuid());
+
+        // 3. Atualiza o campo img com o PATH relativo (ex: "uploads/uuid.png")
+        // Isso facilita para o front-end encontrar a imagem estática
+        String imagePath = "uploads/" + attachment.getStoredName();
+        user.setImg(imagePath);
+
+        User updatedUser = userRepository.save(user);
+
+        // 4. Atualiza referências
+        updateUserReferences(updatedUser);
+
+        return updatedUser;
+    }
+
     private void updateUserReferences(User updatedUser) {
         String userId = updatedUser.getUuid();
         User.UserRef updatedUserRef = updatedUser.toRef(); 
@@ -80,7 +116,6 @@ public class UpdateUserService {
             List<User.UserRef> updatedMembers = team.getMembers().stream()
                 .map(member -> {
                     if (userId.equals(member.uuid())) {
-                        
                         return updatedUserRef;
                     }
                     return member; 
