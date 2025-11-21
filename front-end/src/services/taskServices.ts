@@ -3,6 +3,23 @@ import type { Task } from "../types/task";
 
 export const taskService = {
 
+  async getTasks(token: string | null): Promise<Task[]> {
+    if (!token) {
+      throw new Error("Acesso negado: token não fornecido");
+    }
+    try {
+      const response = await axiosInstance.get("/tasks", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar tasks:", error);
+      throw error;
+    }
+  },
+
   async getTaskById(taskUuid: string, token: string | null): Promise<Task> {
     if (!token) {
       throw new Error("Acesso negado: token não fornecido");

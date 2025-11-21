@@ -16,4 +16,5 @@ export interface UserRef {
   uuid: string;
   name: string;
   img?: string;
+  token?: string;
 }

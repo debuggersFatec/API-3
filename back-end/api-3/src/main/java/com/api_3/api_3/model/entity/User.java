@@ -73,4 +73,12 @@ public class User {
                 .map(id -> new Teams.TeamRef(id, null))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
+
+    public String getGoogleAccessToken() {
+        return googleAccessToken;
+    }
+
+    public void setGoogleAccessToken(String googleAccessToken) {
+        this.googleAccessToken = googleAccessToken;
+    }
 }

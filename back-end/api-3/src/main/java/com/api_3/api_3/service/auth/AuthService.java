@@ -94,6 +94,67 @@ public class AuthService {
         resp.setToken(token);
         resp.setRoutes(routes);
         resp.setUser(userInfo);
+        resp.setNotificationsUnread(0L);
+        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
+
+        return resp;
+    }
+
+    public AuthResponse googleLogin(String googleAccessToken, String email, String name, String picture) {
+
+        if (email == null || googleAccessToken == null) {
+            throw new IllegalArgumentException("Token de acesso ou e-mail inválidos");
+        }
+
+        Optional<User> existingUserOpt = userRepository.findByEmailIgnoreCase(email);
+        User user;
+
+        if (existingUserOpt.isPresent()) {
+            user = existingUserOpt.get();
+            user.setGoogleAccessToken(googleAccessToken);
+            userRepository.save(user);
+
+        } else {
+            user = new User();
+            user.setUuid(UUID.randomUUID().toString());
+            user.setName(name != null ? name : email.split("@")[0]);
+            user.setEmail(email);
+            user.setImg(picture);
+            user.setGoogleAccessToken(googleAccessToken);
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+
+            user.setEquipeIds(Collections.emptyList());
+            user.setTasks(new java.util.ArrayList<>());
+
+            userRepository.save(user);
+        }
+
+        UserDetails userDetails = org.springframework.security.core.userdetails.User
+                .withUsername(user.getEmail())
+                .password(user.getPassword())
+                .authorities("USER")
+                .build();
+
+        String jwtToken = jwtUtil.generateToken(userDetails);
+
+        List<Teams> teams = teamsRepository.findAllById(user.getEquipeIds());
+        List<Task> tasks = taskRepository.findByResponsibleUuid(user.getUuid());
+
+        AuthResponse.UserInfo userInfo = userMapper.toUserInfo(user, teams, tasks);
+
+        AuthResponse.Routes routes = new AuthResponse.Routes(
+            "/api/teams",
+            "/api/projects",
+            "/api/teams/{teamUuid}/members",
+            "/api/tasks"
+        );
+
+        log.info("Usuário autenticado via Google: {}", user.getEmail());
+
+        AuthResponse resp = new AuthResponse();
+        resp.setToken(jwtToken);
+        resp.setRoutes(routes);
+        resp.setUser(userInfo);
         // Notifications are not wired yet in this branch; return sensible defaults
         resp.setNotificationsUnread(0L);
         resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
@@ -159,4 +220,5 @@ public class AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
+    
 }
