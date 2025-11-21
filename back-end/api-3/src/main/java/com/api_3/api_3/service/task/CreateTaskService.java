@@ -45,8 +45,7 @@ public class CreateTaskService {
         newTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : Task.Status.NOT_STARTED);
         newTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : Task.Priority.LOW);
         newTask.setEquip_uuid(project.getTeamUuid());
-        newTask.setProjectUuid(request.getProject_uuid());
-        newTask.setRequiredFile(request.getRequiredFile());
+        newTask.setProjectUuid(request.getProject_uuid());        
         newTask.setIsRequiredFile(request.getIsRequiredFile());
         
         if (request.getResponsible() != null) {
@@ -73,7 +72,7 @@ public class CreateTaskService {
     }
 
     private void validateResponsible(Task task, Teams team) {
-    if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
+        if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
             String responsibleUuid = task.getResponsible().uuid();
             userRepository.findById(responsibleUuid)
                     .orElseThrow(() -> new InvalidResponsibleException("Usuário responsável com ID " + responsibleUuid + " não encontrado."));

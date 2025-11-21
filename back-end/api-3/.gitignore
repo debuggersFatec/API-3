@@ -5,6 +5,8 @@ target/
 !**/src/test/**/target/
 .env
 
+/uploads
+
 equipe.json
 task.json
 usuario.json

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-
+import com.api_3.api_3.model.embedded.FileAttachment;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,7 +24,7 @@ public class Task {
     private Priority priority;
     private String fileUrl;
     private Boolean isRequiredFile;
-    private String requiredFile;
+    private List<FileAttachment> requiredFile = new ArrayList<>();
     private String teamUuid;
     private String projectUuid;
     private User.UserRef responsible;

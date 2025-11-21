@@ -3,6 +3,8 @@ package com.api_3.api_3.dto.response;
 import java.util.Date;
 import java.util.List; 
 import com.api_3.api_3.model.entity.Responsible;
+import com.api_3.api_3.model.embedded.FileAttachment;
+
 import lombok.Data;
 
 @Data 
@@ -14,8 +16,9 @@ public class TaskResponse {
     private String status;
     private String priority;
     private Boolean isRequiredFile;
-    private String requiredFile;
+    private List<FileAttachment> requiredFile;
     private String team_uuid;
+
     @Deprecated
     private String equip_uuid; 
     private String project_uuid;

@@ -2,7 +2,7 @@ package com.api_3.api_3.service.task;
 
 import java.util.ArrayList;
 import java.util.Objects;
-import java.util.Optional; 
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ import com.api_3.api_3.exception.InvalidResponsibleException;
 import com.api_3.api_3.exception.ProjectNotFoundException;
 import com.api_3.api_3.exception.TaskNotFoundException;
 import com.api_3.api_3.exception.TeamNotFoundException;
-import com.api_3.api_3.model.entity.Projects; 
+import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.Teams;
 import com.api_3.api_3.model.entity.User;
@@ -40,17 +40,27 @@ public class UpdateTaskService {
         String oldResponsibleUuid = (existingTask.getResponsible() != null) ? existingTask.getResponsible().uuid() : null;
         String newResponsibleUuid = (request.getResponsible() != null) ? request.getResponsible().getUuid() : null;
 
-    String oldTitle = existingTask.getTitle();
-    java.util.Date oldDue = existingTask.getDue_date();
+        String oldTitle = existingTask.getTitle();
+        java.util.Date oldDue = existingTask.getDue_date();
 
+        // Atualiza campos básicos
         existingTask.setTitle(request.getTitle());
         existingTask.setDescription(request.getDescription());
         existingTask.setDue_date(request.getDue_date());
+        
+        // Atualiza Status e Prioridade com tratamento de Enum
         existingTask.setStatus(request.getStatus() != null ? Task.Status.valueOf(request.getStatus().toUpperCase().replace('-', '_')) : existingTask.getStatus());
         existingTask.setPriority(request.getPriority() != null ? Task.Priority.valueOf(request.getPriority().toUpperCase()) : existingTask.getPriority());
+        
+        // Atualiza flag de arquivo obrigatório
         if (request.getIsRequiredFile() != null) {
             existingTask.setIsRequiredFile(request.getIsRequiredFile());
         }
+
+        // Nota: O campo 'requiredFile' (lista de arquivos) não é atualizado aqui.
+        // Ele é gerenciado exclusivamente pelo endpoint de upload de arquivos.
+
+        // Atualiza Responsável
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             User.UserRef newResponsibleRef = new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img());
@@ -59,11 +69,14 @@ public class UpdateTaskService {
             existingTask.setResponsible(null);
         }
 
+        // Valida se o novo responsável (se houver mudança) é válido
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
              validateResponsible(existingTask);
         }
-    Task savedTask = taskRepository.save(existingTask);
 
+        Task savedTask = taskRepository.save(existingTask);
+
+        // Sincroniza as mudanças com o Projeto (embedded tasks)
         if (savedTask.getProjectUuid() != null) {
             projectsRepository.findById(savedTask.getProjectUuid()).ifPresent(project -> {
                 boolean changed = false;
@@ -95,9 +108,10 @@ public class UpdateTaskService {
             });
         }
 
-
+        // Gerencia a atribuição da tarefa no lado do Usuário (embedded tasks)
         manageUserTaskAssignment(savedTask, oldResponsibleUuid, newResponsibleUuid);
 
+        // Notificações
         if (!Objects.equals(oldResponsibleUuid, newResponsibleUuid)) {
             if (oldResponsibleUuid == null && newResponsibleUuid != null) {
                 notificationService.notifyTaskUpdatedBroadcast(savedTask);
@@ -110,8 +124,9 @@ public class UpdateTaskService {
             }
         }
 
-    boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
-    boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
+        boolean changedTitle = request.getTitle() != null && !request.getTitle().equals(oldTitle);
+        boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
+        
         if (changedTitle || changedDue) {
             notificationService.notifyTaskUpdatedScoped(savedTask);
         }
