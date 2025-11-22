@@ -58,7 +58,7 @@ export const ModalEditTask = ({
   const [isDropdownOpenPriority, setIsDropdownOpenPriority] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isRequiredFile, setIsRequiredFile] = useState(task.isRequiredFile);
+  const [isRequiredFile, setIsRequiredFile] = useState(task.is_required_file);
 
   const [formData, setFormData] = useState(task);
 

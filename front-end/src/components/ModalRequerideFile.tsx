@@ -80,7 +80,7 @@ export const ModalRequerideFile = ({
         status: "COMPLETED",
         priority: task.priority,
         responsible: task.responsible,
-        requiredFile: task.required_file,
+        requiredFile: task.requiredFile,
         isRequiredFile: task.is_required_file,
       };
       await taskService.updateTask(taskUuid, updatePayload as unknown as Task, token);

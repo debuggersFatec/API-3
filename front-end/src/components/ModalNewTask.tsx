@@ -50,7 +50,7 @@ export function ModalNewTask() {
     // file_required: "",
     // file_finish: "",
     responsible: undefined,
-    isRequiredFile: false,
+    is_required_file: false,
   });
 
   const { token, refreshUser } = useAuth();
@@ -109,7 +109,7 @@ export function ModalNewTask() {
       project_uuid: project?.uuid || "",
       team_uuid: teamData?.uuid || "",
       responsible: undefined,
-      isRequiredFile: false,
+      is_required_file: false,
     });
     onClose();
   };
