@@ -7,15 +7,18 @@ import {
   CloseButton,
   Dialog,
   Field,
+  FileUpload,
   Input,
   Portal,
   useDisclosure,
   VStack,
+  useFileUploadContext,
 } from "@chakra-ui/react";
-import { useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { AvatarUser } from "./AvatarUser";
 import { Navigate } from "react-router-dom";
 import { toast } from "@/utils/toast";
+import { HiUpload } from "react-icons/hi";
 
 export const ModalEditUser = () => {
   const { user, refreshUser } = useAuth();
@@ -24,17 +27,53 @@ export const ModalEditUser = () => {
   const { open, onOpen, onClose } = useDisclosure();
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    img: user?.img || "",
   });
+  const filesRef = useRef<File[]>([]);
+
+  type FileUploadContextLike = {
+    getFiles?: () => File[];
+    files?: File[];
+    acceptedFiles?: File[];
+  };
+
+  function FileUploadConsumer({
+    targetRef,
+  }: {
+    targetRef: React.MutableRefObject<File[]>;
+  }) {
+    const ctx = useFileUploadContext() as FileUploadContextLike | undefined;
+
+    useEffect(() => {
+      if (!ctx) return;
+      const currentFiles = ctx.getFiles
+        ? ctx.getFiles()
+        : ctx.files ?? ctx.acceptedFiles ?? [];
+      targetRef.current = Array.from(currentFiles);
+    }, [ctx, ctx?.files, ctx?.acceptedFiles, targetRef]);
+
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await userService.updateUser(formData.name, formData.img);
-    toast("success", "Usuário atualizado com sucesso!");
-    await refreshUser();
-    await refreshProject();
-    await refreshTeam();
-    onClose();
+    try {
+      await userService.updateUser(formData.name, user?.img || "");
+      const files = filesRef.current;
+      if (files && files.length > 0) {
+        const form = new FormData();
+        form.append("file", files[0], files[0].name);
+        await userService.updateImageUser(form);
+      }
+
+      toast("success", "Usuário atualizado com sucesso!");
+      await refreshUser();
+      await refreshProject();
+      await refreshTeam();
+      onClose();
+    } catch (err) {
+      console.error("Erro ao atualizar usuário:", err);
+      toast("error", "Falha ao atualizar usuário. Veja o console.");
+    }
   };
 
   if (user === null) {
@@ -74,16 +113,19 @@ export const ModalEditUser = () => {
                         }
                       />
                     </Field.Root>
-                    <Field.Root>
-                      <Field.Label>Imagem de perfil</Field.Label>
-                      <Input
-                        name="img"
-                        value={formData.img}
-                        onChange={(e) => {
-                          setFormData({ ...formData, img: e.target.value });
-                        }}
-                      />
-                    </Field.Root>
+                    <FileUpload.Root
+                      maxFiles={1}
+                      accept={["image/jpeg", "image/png", "image/jpg"]}
+                    >
+                      <FileUpload.HiddenInput />
+                      <FileUpload.Trigger asChild>
+                        <Button variant="outline" size="sm">
+                          <HiUpload /> Atualizar imagem
+                        </Button>
+                      </FileUpload.Trigger>
+                      <FileUpload.List />
+                      <FileUploadConsumer targetRef={filesRef} />
+                    </FileUpload.Root>
                     <Button type="submit">Salvar</Button>
                   </VStack>
                 </form>
