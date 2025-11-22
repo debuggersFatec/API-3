@@ -155,7 +155,7 @@ export const CheckListItem = ({
       </Box>
 
       {taskData &&
-        (isTeashcan ? (
+        (isTeashcan || taskData.status === "COMPLETED" ? (
           <ModalDisplayTask
             task={taskData}
             open={modalOpen}

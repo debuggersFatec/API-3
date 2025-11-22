@@ -221,7 +221,7 @@ export const ModalDisplayTask = ({
                       <Text fontWeight={600} mb={2}>
                         Arquivo necessário
                       </Text>
-                      <Text>{task.isRequiredFile ? "Sim" : "Não"}</Text>
+                      <Text>{task.is_required_file ? "Sim" : "Não"}</Text>
                     </Box>
 
                     <Box>
@@ -259,6 +259,28 @@ export const ModalDisplayTask = ({
                         </Flex>
                       </Box>
                     </Box>
+                    
+                    {task.requiredFile && task.requiredFile.length > 0 && (
+                      <Box>
+                        <Text fontWeight={600} mb={2}>
+                          Arquivos de entrega
+                        </Text>
+                        {task.requiredFile.map((file) => {
+                          console.log("Arquivo necessário:", file);
+                          return (
+                            <Box key={file.storedName} mb={2}>
+                              <a
+                                href={`http://localhost:8080/uploads/${file.storedName}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {file.originalName}
+                              </a>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    )}
                   </Box>
                 </Box>
               </Flex>
