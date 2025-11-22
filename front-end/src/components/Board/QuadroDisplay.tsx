@@ -12,6 +12,7 @@ import { useAuth } from "@/context/auth/useAuth";
 import { taskService } from "@/services";
 import { toast } from "@/utils/toast";
 import type { Task } from "../../types/task";
+import { ModalRequerideFile } from "../ModalRequerideFile";
 
 export interface Column {
   id: string;
@@ -37,6 +38,9 @@ export const QuadroDisplay = ({ tasks }: QuadroDisplayProps) => {
     columns: {},
     columnOrder: [],
   });
+
+  const [riquiredFileTaskUuid, setRiquiredFileTaskUuid] = useState<string>();
+  const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
     setBoardData(organizarTarefas(tasks));
@@ -65,6 +69,14 @@ export const QuadroDisplay = ({ tasks }: QuadroDisplayProps) => {
 
     // snapshot para rollback
     const prevData = boardData;
+    if (
+      destColumnId === "concluida" &&
+      tasks.filter((task) => task.uuid === taskId)[0].is_required_file
+    ) {
+      setRiquiredFileTaskUuid(taskId);
+      setOpen(true);
+      return;
+    }
 
     // montar novo estado otimista
     const newStartTaskIds = prevData.columns[startColumnId].taskIds.filter(
@@ -114,23 +126,27 @@ export const QuadroDisplay = ({ tasks }: QuadroDisplayProps) => {
   };
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <Flex gap={5} p={5} w="100%">
-        {boardData.columnOrder.map((columnId) => {
-          const column = boardData.columns[columnId];
-          if (!column) return null;
-          const columnTasks = column.taskIds.map(
-            (taskId) => boardData.tasks[taskId]
-          );
-          return (
-            <Column
-              key={column.id}
-              column={column}
-              tasks={columnTasks}
-            />
-          );
-        })}
-      </Flex>
-    </DndContext>
+    <>
+      <ModalRequerideFile
+        isOpen={isOpen}
+        onClose={() => setOpen(false)}
+        taskUuid={riquiredFileTaskUuid!}
+        
+      />
+      <DndContext onDragEnd={handleDragEnd}>
+        <Flex gap={5} p={5} w="100%">
+          {boardData.columnOrder.map((columnId) => {
+            const column = boardData.columns[columnId];
+            if (!column) return null;
+            const columnTasks = column.taskIds.map(
+              (taskId) => boardData.tasks[taskId]
+            );
+            return (
+              <Column key={column.id} column={column} tasks={columnTasks} />
+            );
+          })}
+        </Flex>
+      </DndContext>
+    </>
   );
 };
