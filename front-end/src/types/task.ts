@@ -12,6 +12,13 @@ export interface TaskComment {
   author: UserRef;
 }
 
+export interface RequiredFile {
+  originalName: string;
+  storedName: string;
+  uploaderUUID: string;
+  uploadeDate: string;
+}
+
 export interface Task {
   uuid: string;
   title: string;
@@ -21,7 +28,7 @@ export interface Task {
   priority: Priority;
   file_url?: string;
   is_required_file: boolean;
-  required_file?: string;
+  requiredFile?: RequiredFile[];
   team_uuid: string;
   project_uuid: string;
   responsible?: UserRef;
