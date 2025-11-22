@@ -78,6 +78,7 @@ public class Task {
         String title,
         Date dueDate,
         Status status,
+        Boolean isRequiredFile,
         Priority priority,
         String teamUuid,
         String projectUuid,
@@ -88,6 +89,7 @@ public class Task {
         public String getTitle() { return title; }
         public Date getDueDate() { return dueDate; }
         public Status getStatus() { return status; }
+        public Boolean getIsRequiredFile() { return isRequiredFile; }
         public Priority getPriority() { return priority; }
         public String getTeamUuid() { return teamUuid; }
         public String getProjectUuid() { return projectUuid; }
@@ -99,7 +101,7 @@ public class Task {
     }
 
     public TaskProject toProjectRef() {
-        return new TaskProject(this.uuid, this.title, this.dueDate, this.status, this.priority, this.teamUuid, this.projectUuid, this.responsible);
+       return new TaskProject(this.uuid, this.title, this.dueDate, this.status, this.isRequiredFile, this.priority, this.teamUuid, this.projectUuid, this.responsible);
     }
 
     // Legacy compatibility methods for underscore naming convention

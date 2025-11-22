@@ -41,6 +41,7 @@ public class ProjectMapper {
             ts.setTitle(tp.getTitle());
             ts.setDue_date(tp.getDueDate());
             ts.setStatus(tp.getStatus() != null ? tp.getStatus().name() : null);
+            ts.setIs_required_file(tp.getIsRequiredFile());
             ts.setPriority(tp.getPriority() != null ? tp.getPriority().name() : null);
             ts.setEquip_uuid(tp.getTeamUuid()); // Mantendo nome antigo por compatibilidade DTO
             ts.setProject_uuid(tp.getProjectUuid());

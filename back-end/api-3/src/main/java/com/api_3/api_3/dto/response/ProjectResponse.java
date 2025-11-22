@@ -67,6 +67,7 @@ public class ProjectResponse {
         private java.util.Date due_date;
         private String status;
         private String priority;
+        private Boolean is_required_file;
         private String equip_uuid; // team id
         private String project_uuid;
         private ResponsibleSummary responsible;
@@ -79,6 +80,8 @@ public class ProjectResponse {
         public void setDue_date(java.util.Date due_date) { this.due_date = due_date; }
         public String getStatus() { return status; }
         public void setStatus(String status) { this.status = status; }
+        public Boolean getIs_required_file() { return is_required_file; }
+        public void setIs_required_file(Boolean is_required_file) { this.is_required_file = is_required_file; }
         public String getPriority() { return priority; }
         public void setPriority(String priority) { this.priority = priority; }
         public String getEquip_uuid() { return equip_uuid; }
