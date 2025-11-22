@@ -10,7 +10,7 @@ export const AvatarUser = ({ user, size }: AvatarUserProps) => {
   return (
     <Avatar.Root size={size || "md"} colorPalette="blue">
       <Avatar.Fallback name={user.name} />
-      <Avatar.Image src={user.img} />
+      <Avatar.Image src={`http://localhost:8080/${user.img}`} />
     </Avatar.Root>
   );
 };
