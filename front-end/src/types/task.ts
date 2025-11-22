@@ -20,7 +20,7 @@ export interface Task {
   status: Status;
   priority: Priority;
   file_url?: string;
-  isRequiredFile: boolean;
+  is_required_file: boolean;
   required_file?: string;
   team_uuid: string;
   project_uuid: string;
@@ -48,4 +48,5 @@ export interface TaskProject {
   team_uuid: string;
   project_uuid: string;
   responsible?: UserRef;
+  is_required_file: boolean;
 }
