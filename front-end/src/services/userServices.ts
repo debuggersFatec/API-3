@@ -4,7 +4,6 @@ import type { AxiosResponse } from 'axios';
 import type { User } from '../types/user';
 
 export const userService = {
-
   async getUserById(userUuid: string, token: string | null): Promise<User> {
     if (!token) {
       throw new Error("Acesso negado: token não fornecido");
@@ -42,5 +41,17 @@ export const userService = {
       console.error("Erro ao atualizar usuário:", error);
       throw error;
     }
-  }
+  },
+
+  async updateImageUser(img: File | FormData): Promise<void> {
+    try {
+      // Envia como multipart/form-data para o endpoint PATCH /users/me/image
+      // Se 'img' for File, o chamador deve enviar um FormData; aqui aceitamos ambos.
+      const body = img instanceof FormData ? img : (() => { const f = new FormData(); f.append('file', img); return f; })();
+      await axiosInstance.patch(`/users/me/image`, body);
+    } catch (error) {
+      console.error("Erro ao atualizar imagem do usuário:", error);
+      throw error;
+    }
+  },
 };
