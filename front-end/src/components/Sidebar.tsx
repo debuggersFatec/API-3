@@ -30,7 +30,7 @@ export const Sidebar = () => {
   }, [activeTab, user?.teams, fetchTeam]);
 
   return (
-    <Flex>
+    <Flex h="100vh">
       <Tabs.Root
         value={activeTab}
         onValueChange={(details) => setActiveTab(details.value)}
@@ -39,6 +39,8 @@ export const Sidebar = () => {
         flexDir={"row"}
         display={"flex"}
         w={"100%"}
+        h="100%"
+        
       >
         <Tabs.List
           pr={"16px"}
@@ -46,14 +48,45 @@ export const Sidebar = () => {
           flexDir={"column"}
           display={"flex"}
           pl={"24px"}
+          justifyContent="space-between"
+          h="100%"
+          position="relative"
         >
-          <h1>Tarefas</h1>
+          <Flex 
+            flexDir="column" 
+            gap={2} 
+            overflowY="auto" 
+            flex="1"
+            css={{
+              '&::-webkit-scrollbar': {
+                width: '6px',
+              },
+              '&::-webkit-scrollbar-track': {
+                background: 'transparent',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                background: '#CBD5E0',
+                borderRadius: '3px',
+              },
+              '&::-webkit-scrollbar-thumb:hover': {
+                background: '#A0AEC0',
+              },
+            }}
+          >
+            <h1 style={{ fontSize: '14px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', marginTop: '16px', marginBottom: '8px' }}>Tarefas</h1>
           <Tabs.Trigger
             value="minhasTasks"
             justifyContent={"space-between"}
             onClick={() => setProject(undefined)}
+            px={3}
+            py={2}
+            borderRadius="md"
+            _hover={{ bg: "blue.50" }}
+            cursor="pointer"
+            transition="all 0.2s"
+            fontWeight={500}
           >
-            Minhas Tasks
+            Minhas tarefas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {filteredTasks.length}
             </span>
@@ -62,6 +95,13 @@ export const Sidebar = () => {
             value="vencidas"
             justifyContent={"space-between"}
             onClick={() => setProject(undefined)}
+            px={3}
+            py={2}
+            borderRadius="md"
+            _hover={{ bg: "blue.50" }}
+            cursor="pointer"
+            transition="all 0.2s"
+            fontWeight={500}
           >
             Vencidas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
@@ -86,22 +126,21 @@ export const Sidebar = () => {
               }
             </span>
           </Tabs.Trigger>
-          <Flex alignItems={"center"} justify={"space-between"}>
-            <h1>Teams</h1>
-            <Dialog.Root
-              placement={"center"}
-              open={modalOpen}
-              onOpenChange={() => setModalOpen(!modalOpen)}
+          <Flex alignItems={"center"} justify={"space-between"} mb={2} mt={4}>
+            <h1 style={{ fontSize: '14px', fontWeight: 600, color: '#6B7280', textTransform: 'uppercase' }}>Teams</h1>
+            <Button
+              size="xs"
+              variant="solid"
+              bg="#3B82F6"
+              color="white"
+              px={2}
+              py={1}
+              _hover={{ bg: "#2563EB" }}
+              borderRadius="md"
+              onClick={() => setModalOpen(true)}
             >
-              <Dialog.Trigger asChild>
-                <Box bg="blue.500" borderRadius="md" mr={2.5} p={0.5} border="none">
-                  <FaPlus color="white" />
-                </Box>
-              </Dialog.Trigger>
-              {modalOpen && (
-                <ModalNewTeam onClose={() => setModalOpen(false)} />
-              )}
-            </Dialog.Root>
+              <FaPlus size={12} />
+            </Button>
           </Flex>
           {user?.teams &&
             user?.teams.map((team) => {
@@ -114,6 +153,13 @@ export const Sidebar = () => {
                   value={team.uuid}
                   justifyContent={"space-between"}
                   onClick={() => setProject(undefined)}
+                  px={3}
+                  py={2}
+                  borderRadius="md"
+                  _hover={{ bg: "blue.50" }}
+                  cursor="pointer"
+                  transition="all 0.2s"
+                  fontWeight={500}
                 >
                   {team.name}
                   <span
@@ -124,25 +170,47 @@ export const Sidebar = () => {
                 </Tabs.Trigger>
               );
             })}
-          <Separator maxW={"200px"} />
+          <Separator maxW={"200px"} my={2} />
           <Tabs.Trigger
             value="completas"
             justifyContent={"space-between"}
             onClick={() => setProject(undefined)}
+            px={3}
+            py={2}
+            borderRadius="md"
+            _hover={{ bg: "blue.50" }}
+            cursor="pointer"
+            transition="all 0.2s"
+            fontWeight={500}
           >
             Completas
             <span style={{ marginLeft: 6, color: "#888", fontWeight: 500 }}>
               {filteredTasks.filter((t) => t.status === "COMPLETED").length}
             </span>
           </Tabs.Trigger>
-          <Button
-            onClick={() => logout()}
-            variant="plain"
-            color={"red.500"}
-            justifyContent={"flex-start"}
+          </Flex>
+          
+          <Box 
+            pb={4} 
+            pt={3} 
+            borderTop="1px solid" 
+            borderColor="border.muted"
+            bg="surface.base"
+            position="sticky"
+            bottom={0}
           >
-            Logout <RiLogoutCircleRLine color="red" size={22} />
-          </Button>
+            <Button
+              onClick={() => logout()}
+              variant="ghost"
+              colorPalette="red"
+              justifyContent={"flex-start"}
+              w="100%"
+              gap={2}
+            >
+              <RiLogoutCircleRLine size={20} />
+              Sair
+            </Button>
+          </Box>
         </Tabs.List>
         <Tabs.Content value="minhasTasks">
           <MyTasks />
@@ -160,6 +228,15 @@ export const Sidebar = () => {
             </Tabs.Content>
           ))}
       </Tabs.Root>
+      
+      <Dialog.Root
+        open={modalOpen}
+        onOpenChange={(e) => setModalOpen(e.open)}
+        placement="center"
+        motionPreset="slide-in-bottom"
+      >
+        <ModalNewTeam onClose={() => setModalOpen(false)} />
+      </Dialog.Root>
     </Flex>
   );
 };

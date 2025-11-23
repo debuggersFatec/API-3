@@ -13,7 +13,6 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
   const [projectName, setProjectName] = useState("");
   const { user, token, refreshUser } = useAuth();
   const { teamData } = useTeam();
-  const [open, setOpen] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -28,7 +27,6 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
     try {
       await projectServices.createProject(projectName, teamData.uuid, token);
       toast("success", "Projeto criado com sucesso!");
-      setOpen(false);
       if (onClose) onClose();
       setProjectName("");
       refreshUser();
@@ -39,20 +37,18 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
   };
 
   return (
-    <Dialog.Root
-      placement="center"
-      motionPreset="slide-in-bottom"
-      open={open}
-      onOpenChange={() => setOpen(!open)}
-    >
-      <Dialog.Trigger asChild>
-        <Button variant="outline" size="sm">
-          Criar
-        </Button>
-      </Dialog.Trigger>
-      <Dialog.Backdrop />
-      <Dialog.Positioner>
-        <Dialog.Content>
+    <>
+      <Dialog.Backdrop 
+        bg="blackAlpha.600" 
+        backdropFilter="blur(4px)"
+      />
+      <Dialog.Positioner zIndex={1500}>
+        <Dialog.Content
+          maxW="500px"
+          bg="surface.base"
+          shadow="2xl"
+          borderRadius="lg"
+        >
           <Dialog.Header>
             <Dialog.Title>Criar um novo projeto</Dialog.Title>
           </Dialog.Header>
@@ -69,13 +65,19 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
                 />
               </Field.Root>
             </Dialog.Body>
-            <Dialog.Footer>
+            <Dialog.Footer gap={2}>
               <Dialog.ActionTrigger asChild>
-                <Button type="button" variant="outline" onClick={onClose}>
-                  Cancel
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => {
+                    if (onClose) onClose();
+                  }}
+                >
+                  Cancelar
                 </Button>
               </Dialog.ActionTrigger>
-              <Button type="submit">Criar</Button>
+              <Button type="submit" colorPalette="blue">Criar</Button>
             </Dialog.Footer>
           </form>
           <Dialog.CloseTrigger asChild>
@@ -83,6 +85,6 @@ export const ModalNewProject = ({ onClose }: ModalNewProjectProps) => {
           </Dialog.CloseTrigger>
         </Dialog.Content>
       </Dialog.Positioner>
-    </Dialog.Root>
+    </>
   );
 };

@@ -4,7 +4,6 @@ import {
   CloseButton,
   Field,
   Input,
-  Portal,
 } from "@chakra-ui/react";
 import { useAuth } from "@/context/auth/useAuth";
 import { useState } from "react";
@@ -41,41 +40,51 @@ export const ModalNewTeam = ({ onClose }: ModalNewTeamProps) => {
 
   return (
     <>
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Dialog.Header>
-              <Dialog.Title>Criar uma nova equipe</Dialog.Title>
-            </Dialog.Header>
-            <form onSubmit={handleSubmit}>
-              <Dialog.Body>
-                <Field.Root mb={"16px"}>
-                  <Input
-                    name="title"
-                    value={teamName}
-                    onChange={(e) => setTeamName(e.target.value)}
-                    placeholder={"Nome da equipe"}
-                    variant={"flushed"}
-                    required
-                  />
-                </Field.Root>
-              </Dialog.Body>
-              <Dialog.Footer>
-                <Dialog.ActionTrigger asChild>
-                  <Button type="button" variant="outline" onClick={onClose}>
-                    Cancel
-                  </Button>
-                </Dialog.ActionTrigger>
-                <Button type="submit">Criar</Button>
-              </Dialog.Footer>
-            </form>
-            <Dialog.CloseTrigger asChild>
-              <CloseButton size="sm" />
-            </Dialog.CloseTrigger>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
+      <Dialog.Backdrop 
+        bg="blackAlpha.600" 
+        backdropFilter="blur(4px)"
+      />
+      <Dialog.Positioner zIndex={1500}>
+        <Dialog.Content
+          maxW="500px"
+          bg="surface.base"
+          shadow="2xl"
+          borderRadius="lg"
+        >
+          <Dialog.Header>
+            <Dialog.Title>Criar uma nova equipe</Dialog.Title>
+          </Dialog.Header>
+          <form onSubmit={handleSubmit}>
+            <Dialog.Body>
+              <Field.Root mb={"16px"}>
+                <Input
+                  name="title"
+                  value={teamName}
+                  onChange={(e) => setTeamName(e.target.value)}
+                  placeholder={"Nome da equipe"}
+                  variant={"flushed"}
+                  required
+                />
+              </Field.Root>
+            </Dialog.Body>
+            <Dialog.Footer gap={2}>
+              <Dialog.ActionTrigger asChild>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={onClose}
+                >
+                  Cancelar
+                </Button>
+              </Dialog.ActionTrigger>
+              <Button type="submit" colorPalette="blue">Criar</Button>
+            </Dialog.Footer>
+          </form>
+          <Dialog.CloseTrigger asChild>
+            <CloseButton size="sm" />
+          </Dialog.CloseTrigger>
+        </Dialog.Content>
+      </Dialog.Positioner>
     </>
   );
 };

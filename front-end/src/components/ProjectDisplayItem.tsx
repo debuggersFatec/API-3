@@ -3,7 +3,7 @@ import { useProject } from "@/context/project/useProject";
 import { useTeam } from "@/context/team/useTeam";
 import { projectServices } from "@/services/ProjectServices";
 import type { ProjectRef } from "@/types/project";
-import { Heading, Card, Button } from "@chakra-ui/react";
+import { Heading, Card, Button, Badge, Flex } from "@chakra-ui/react";
 import { toast } from "@/utils/toast";
 
 interface ProjectDisplayItemProps {
@@ -15,12 +15,32 @@ export const ProjectCard = ({ project }: ProjectDisplayItemProps) => {
   const { fetchProject } = useProject();
 
   return (
-    <Card.Root bgColor={project.active ? "#10B981" : "#E53E3E"}>
-      <Card.Header>
-        <Heading size="md">{project.name}</Heading>
+    <Card.Root 
+      bg="surface.base"
+      borderWidth="1px"
+      borderColor="border.muted"
+      _hover={{ 
+        shadow: "lg",
+        transform: "translateY(-2px)",
+        borderColor: "border.emphasized"
+      }}
+      transition="all 0.2s"
+      minH="200px"
+    >
+      <Card.Header pb={2}>
+        <Flex alignItems="center" justifyContent="space-between">
+          <Heading size="md" fontWeight="600">{project.name}</Heading>
+          <Badge 
+            colorPalette={project.active ? "green" : "red"}
+            variant="subtle"
+            fontSize="xs"
+          >
+            {project.active ? "Ativo" : "Inativo"}
+          </Badge>
+        </Flex>
       </Card.Header>
-      <Card.Body />
-      <Card.Footer>
+      <Card.Body py={3} />
+      <Card.Footer pt={3} gap={2} flexWrap="wrap">
         {project.active && (
           <Button
             onClick={async () => {
@@ -31,7 +51,10 @@ export const ProjectCard = ({ project }: ProjectDisplayItemProps) => {
               }
               await refreshUser();
             }}
-            variant="outline"
+            variant="solid"
+            colorPalette="blue"
+            size="sm"
+            flex="1"
           >
             Ver detalhes
           </Button>
@@ -50,6 +73,9 @@ export const ProjectCard = ({ project }: ProjectDisplayItemProps) => {
               await refreshTeam();
             }}
             variant="outline"
+            colorPalette="red"
+            size="sm"
+            flex="1"
           >
             Desativar
           </Button>
@@ -65,7 +91,10 @@ export const ProjectCard = ({ project }: ProjectDisplayItemProps) => {
               await refreshUser();
               await refreshTeam();
             }}
-            variant="outline"
+            variant="solid"
+            colorPalette="green"
+            size="sm"
+            flex="1"
           >
             Ativar
           </Button>
