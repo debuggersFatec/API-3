@@ -71,15 +71,15 @@ public class UpdateUserService {
     }
 
     private void updateUserReferences(User updatedUser) {
-        String userId = updatedUser.getUuid();
+        String userUuid = updatedUser.getUuid();
         User.UserRef updatedUserRef = updatedUser.toRef(); 
 
-        List<Teams> teamsToUpdate = teamsRepository.findByMembersUuid(userId);
+        List<Teams> teamsToUpdate = teamsRepository.findByMembersUuid(userUuid);
         List<Teams> modifiedTeams = new ArrayList<>();
         for (Teams team : teamsToUpdate) {
             List<User.UserRef> updatedMembers = team.getMembers().stream()
                 .map(member -> {
-                    if (userId.equals(member.uuid())) {
+                    if (userUuid.equals(member.uuid())) {
                         
                         return updatedUserRef;
                     }
@@ -97,11 +97,11 @@ public class UpdateUserService {
         }
 
 
-        List<Projects> projectsToUpdate = projectsRepository.findByMembersUuid(userId);
+        List<Projects> projectsToUpdate = projectsRepository.findByMembersUuid(userUuid);
          List<Projects> modifiedProjects = new ArrayList<>();
         for (Projects project : projectsToUpdate) {
              List<User.UserRef> updatedMembers = project.getMembers().stream()
-                .map(member -> userId.equals(member.uuid()) ? updatedUserRef : member)
+                .map(member -> userUuid.equals(member.uuid()) ? updatedUserRef : member)
                 .collect(Collectors.toList());
 
              if (!updatedMembers.equals(project.getMembers())) {
@@ -113,7 +113,7 @@ public class UpdateUserService {
             projectsRepository.saveAll(modifiedProjects);
         }
 
-        List<Task> tasksToUpdate = taskRepository.findByResponsibleUuid(userId);
+        List<Task> tasksToUpdate = taskRepository.findByResponsibleUuid(userUuid);
          List<Task> modifiedTasks = new ArrayList<>();
         for (Task task : tasksToUpdate) {
             task.setResponsible(updatedUserRef);

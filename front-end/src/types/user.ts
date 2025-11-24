@@ -7,6 +7,7 @@ export interface User {
   name: string;
   email: string;
   img?: string;
+  googleCalendar: GoogleCalendarInfo;
   teams: TeamRef[];
   tasks: TaskUser[];
   notificationsRecent: AppNotification[];
@@ -17,4 +18,12 @@ export interface UserRef {
   name: string;
   img?: string;
   token?: string;
+}
+
+export interface GoogleCalendarInfo {
+  connected: boolean;
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  calendarId: string;
 }

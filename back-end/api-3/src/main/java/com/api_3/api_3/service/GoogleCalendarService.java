@@ -1,129 +1,144 @@
 package com.api_3.api_3.service;
 
-import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.model.entity.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.api_3.api_3.repository.UserRepository;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpRequestInitializer;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.Events;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.*;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.time.Instant;
+import java.util.List;
 
 @Service
 public class GoogleCalendarService {
 
-    private final HttpClient client = HttpClient.newHttpClient();
-    private final ObjectMapper mapper = new ObjectMapper();
+    @Value("${google.client.id}")
+    private String clientId;
 
-    private static final String BASE_URL = "https://www.googleapis.com/calendar/v3/calendars/%s/events";
+    @Value("${google.client.secret}")
+    private String clientSecret;
 
-    private String calendarId(User user) {
-        return "primary";
+    @Value("${google.redirect.uri}")
+    private String redirectUri;
+
+    private final UserRepository userRepository;
+
+    public GoogleCalendarService(UserRepository userRepository) {
+        this.userRepository = userRepository;
     }
 
-    public String createOrUpdateEvent(User user, Task task) throws IOException, InterruptedException {
-        if (user == null || user.getGoogleAccessToken() == null)
-            return null;
-
-        String url = String.format(BASE_URL, calendarId(user));
-        Map<String, Object> body = new HashMap<>();
-        body.put("summary", task.getTitle());
-        body.put("description", task.getDescription());
-
-        Date due = task.getDueDate();
-        if (due != null) {
-            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
-            String dueIso = isoFormat.format(due);
-
-            Map<String, String> start = new HashMap<>();
-            Map<String, String> end = new HashMap<>();
-
-            start.put("dateTime", dueIso);
-            end.put("dateTime", dueIso);
-
-            String zone = ZoneId.systemDefault().toString();
-            start.put("timeZone", zone);
-            end.put("timeZone", zone);
-
-            body.put("start", start);
-            body.put("end", end);
+    // -----------------------------
+    // REFRESH TOKEN AUTOMÁTICO
+    // -----------------------------
+    private String refreshAccessToken(User user) throws Exception {
+        if (user.getGoogleCalendar().getRefreshToken() == null) {
+            throw new RuntimeException("Usuário não possui refresh token. Faça a sincronização novamente.");
         }
 
-        HttpRequest request;
-        if (task.getGoogleEventId() != null && !task.getGoogleEventId().isBlank()) {
-            request = HttpRequest.newBuilder()
-                    .uri(URI.create(url + "/" + task.getGoogleEventId()))
-                    .header("Authorization", "Bearer " + user.getGoogleAccessToken())
-                    .header("Content-Type", "application/json")
-                    .PUT(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
-                    .build();
-        } else {
-            request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .header("Authorization", "Bearer " + user.getGoogleAccessToken())
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(body)))
-                    .build();
-        }
+        GoogleCredential credential = new GoogleCredential.Builder()
+                .setTransport(GoogleNetHttpTransport.newTrustedTransport())
+                .setJsonFactory(JacksonFactory.getDefaultInstance())
+                .setClientSecrets(clientId, clientSecret)
+                .build()
+                .setRefreshToken(user.getGoogleCalendar().getRefreshToken());
 
-        HttpResponse<String> resp = client.send(request, HttpResponse.BodyHandlers.ofString());
-        if (resp.statusCode() >= 200 && resp.statusCode() < 300) {
-            Map<String, Object> json = mapper.readValue(
-                    resp.body(),
-                    new com.fasterxml.jackson.core.type.TypeReference<Map<String, Object>>() {
-                    });
+        credential.refreshToken(); // aqui ele troca o refresh token por access token
 
-            Object id = json.get("id");
-            return id != null ? id.toString() : null;
-        }
+        user.getGoogleCalendar().setAccessToken(credential.getAccessToken());
+        user.getGoogleCalendar().setExpiresAt(Instant.now().plusSeconds(credential.getExpiresInSeconds()));
+        userRepository.save(user);
 
-        System.err.println("GoogleCalendarService error: " + resp.statusCode() + " - " + resp.body());
-        return null;
+        return credential.getAccessToken();
     }
 
-    public void deleteEvent(User user, String eventId) throws IOException, InterruptedException {
-        if (user == null || user.getGoogleAccessToken() == null || eventId == null || eventId.isBlank())
-            return;
+    // -----------------------------
+    // SERVIÇO DO CALENDAR
+    // -----------------------------
+    private Calendar getCalendarService(User user) throws Exception {
 
-        String deleteUrl = String.format(BASE_URL, calendarId(user)) + "/" + eventId;
+        if (user.getGoogleCalendar().getAccessToken() == null) {
+            throw new RuntimeException("Usuário não possui token de acesso. Faça a sincronização.");
+        }
 
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(deleteUrl))
-                .header("Authorization", "Bearer " + user.getGoogleAccessToken())
-                .DELETE()
-                .build();
+        // Se o token expirou, gera um novo automaticamente
+        if (user.getGoogleCalendar().getExpiresAt() != null &&
+            user.getGoogleCalendar().getExpiresAt().isBefore(Instant.now())) {
+            refreshAccessToken(user);
+        }
 
-        HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
+        HttpRequestInitializer initializer = request ->
+                request.getHeaders().setAuthorization("Bearer " + user.getGoogleCalendar().getAccessToken());
 
-        if (res.statusCode() >= 300) {
-            System.err.println("GoogleCalendarService delete error: " + res.statusCode() + " - " + res.body());
+        return new Calendar.Builder(
+                GoogleNetHttpTransport.newTrustedTransport(),
+                JacksonFactory.getDefaultInstance(),
+                initializer
+        ).setApplicationName("API-3").build();
+    }
+
+    // -----------------------------
+    // OBTER OU CRIAR CALENDÁRIO DO SITE
+    // -----------------------------
+    private String obterOuCriarCalendarApp(User user) throws Exception {
+        if (user.getGoogleCalendar().getCalendarId() != null) {
+            return user.getGoogleCalendar().getCalendarId();
+        }
+
+        Calendar service = getCalendarService(user);
+
+        com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
+        calendar.setSummary("Debuggers API-3");
+        calendar.setTimeZone("America/Sao_Paulo"); // ajuste conforme necessário
+
+        com.google.api.services.calendar.model.Calendar createdCalendar = service.calendars().insert(calendar).execute();
+
+        user.getGoogleCalendar().setCalendarId(createdCalendar.getId());
+        userRepository.save(user);
+
+        return createdCalendar.getId();
+    }
+
+    public List<Event> listarEventos(String userUuid) throws Exception {
+        User user = userRepository.findById(userUuid)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        try {
+            Calendar service = getCalendarService(user);
+            String calendarId = obterOuCriarCalendarApp(user);
+            Events events = service.events().list(calendarId).execute();
+            return events.getItems();
+        } catch (com.google.api.client.googleapis.json.GoogleJsonResponseException e) {
+            if (e.getStatusCode() == 401) {
+                throw new RuntimeException("Token inválido ou expirado. Faça a sincronização novamente.");
+            }
+            throw e;
         }
     }
 
-    public String listEvents(User user, String timeMin, String timeMax) throws IOException, InterruptedException {
-        if (user == null || user.getGoogleAccessToken() == null)
-            return "[]";
+    public Event criarEvento(String userUuid, Event event) throws Exception {
+        User user = userRepository.findById(userUuid).orElseThrow();
+        Calendar service = getCalendarService(user);
+        String calendarId = obterOuCriarCalendarApp(user);
+        return service.events().insert(calendarId, event).execute();
+    }
 
-        StringBuilder sb = new StringBuilder(String.format(BASE_URL, calendarId(user)))
-                .append("?singleEvents=true&orderBy=startTime");
+    public Event atualizarEvento(String userUuid, String eventId, Event novoEvento) throws Exception {
+        User user = userRepository.findById(userUuid).orElseThrow();
+        Calendar service = getCalendarService(user);
+        String calendarId = obterOuCriarCalendarApp(user);
+        return service.events().update(calendarId, eventId, novoEvento).execute();
+    }
 
-        if (timeMin != null && !timeMin.isBlank())
-            sb.append("&timeMin=").append(timeMin);
-        if (timeMax != null && !timeMax.isBlank())
-            sb.append("&timeMax=").append(timeMax);
-
-        HttpRequest req = HttpRequest.newBuilder()
-                .uri(URI.create(sb.toString()))
-                .header("Authorization", "Bearer " + user.getGoogleAccessToken())
-                .GET()
-                .build();
-
-        HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-        return res.body();
+    public void excluirEvento(String userUuid, String eventId) throws Exception {
+        User user = userRepository.findById(userUuid).orElseThrow();
+        Calendar service = getCalendarService(user);
+        String calendarId = obterOuCriarCalendarApp(user);
+        service.events().delete(calendarId, eventId).execute();
     }
 }

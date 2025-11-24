@@ -1,5 +1,6 @@
 package com.api_3.api_3.dto.response;
 
+import java.time.Instant;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -25,11 +26,23 @@ public class AuthResponse {
         private String name;
         private String email;
         private String img;
+        private GoogleCalendarInfo googleCalendar;
         private List<TeamInfo> teams;
         private List<ProjectInfo> projects;
         private List<TaskInfo> tasks;
     }
-    
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class GoogleCalendarInfo {
+        private boolean connected;
+        private String accessToken;
+        private String refreshToken;
+        private Instant expiresAt;
+        private String calendarId;
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor

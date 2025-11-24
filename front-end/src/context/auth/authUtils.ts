@@ -29,14 +29,36 @@ export const normalizeUser = (raw: unknown): User => {
       name: "",
       email: "",
       img: undefined,
+      googleCalendar: {
+        connected: false,
+        accessToken: "",
+        refreshToken: "",
+        expiresAt: "",
+        calendarId: "",
+      },
       teams: [],
       tasks: [],
       notificationsRecent: [],
     };
   }
 
-  // o payload da API às vezes vem com wrapper { user: { ... } } ou no nível raiz.
-  const base = isObj((raw as UnknownRecord).user) ? (raw as UnknownRecord).user as UnknownRecord : (raw as UnknownRecord);
+  const base = isObj((raw as UnknownRecord).user)
+    ? ((raw as UnknownRecord).user as UnknownRecord)
+    : (raw as UnknownRecord);
+
+  const calendarRaw: UnknownRecord = isObj(base.googleCalendar)
+    ? (base.googleCalendar as UnknownRecord)
+    : isObj(base.calendar)
+      ? (base.calendar as UnknownRecord)
+      : isObj((base as UnknownRecord).google_calendar)
+        ? ((base as UnknownRecord).google_calendar as UnknownRecord)
+        : {};
+
+  const connected = Boolean(calendarRaw.connected);
+  const accessToken = getStr(calendarRaw.accessToken) ?? "";
+  const refreshToken = getStr(calendarRaw.refreshToken) ?? "";
+  const expiresAt = getStr(calendarRaw.expiresAt) ?? "";
+  const calendarId = getStr(calendarRaw.calendarId) ?? "";
 
   const teamsRaw = getArr(base.teams ?? base.equipes);
   const teams: TeamRef[] = teamsRaw.map((t) => {
@@ -130,6 +152,13 @@ export const normalizeUser = (raw: unknown): User => {
     name: getStr(base.name) ?? "",
     email: getStr(base.email) ?? "",
     img: getStr(base.img),
+    googleCalendar: {
+      connected,
+      accessToken,
+      refreshToken,
+      expiresAt,
+      calendarId,
+    },
     teams,
     tasks,
     notificationsRecent: notifications,

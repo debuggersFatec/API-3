@@ -9,5 +9,15 @@ public class UserResponse {
     private String name;
     private String email;
     private String img;
-    private List<String> equipeIds; // Incluído para o endpoint de debug
+    private GoogleCalendarInfo googleCalendar;
+    private List<String> equipeIds;
+
+    @Data
+    public static class GoogleCalendarInfo {
+        private boolean connected;
+        private String accessToken;
+        private String refreshToken;
+        private java.time.Instant expiresAt;
+        private String calendarId;
+    }
 }

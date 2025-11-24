@@ -24,7 +24,8 @@ public class User {
     private String email;
     private String password;
     private String img;
- 
+
+    private GoogleCalendarRef googleCalendar = new GoogleCalendarRef();
     private List<TeamRef> teams = new ArrayList<>(); 
     private List<TaskUser> tasks = new ArrayList<>();
     private List<Object> notification = new ArrayList<>();
@@ -34,6 +35,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.img = img;
+        this.googleCalendar = new GoogleCalendarRef();
     }
     
     public record UserRef(String uuid, String name, String img) {
@@ -72,13 +74,5 @@ public class User {
                 .filter(id -> id != null && !id.isBlank())
                 .map(id -> new Teams.TeamRef(id, null))
                 .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public String getGoogleAccessToken() {
-        return googleAccessToken;
-    }
-
-    public void setGoogleAccessToken(String googleAccessToken) {
-        this.googleAccessToken = googleAccessToken;
     }
 }

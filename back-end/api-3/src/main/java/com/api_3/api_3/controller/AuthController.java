@@ -22,7 +22,6 @@ import com.api_3.api_3.service.PasswordResetService;
 import com.api_3.api_3.service.auth.AuthService;
 
 import jakarta.validation.Valid;
-import lombok.Data;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -54,25 +53,6 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("message", "Erro ao registrar usuário."));
         }
-    }
-
-    @PostMapping("/google-login")
-    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleAuthRequest request) {
-        AuthResponse response = authService.googleLogin(
-                request.getAccessToken(),
-                request.getEmail(),
-                request.getName(),
-                request.getPicture());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @Data
-    public static class GoogleAuthRequest {
-        private String accessToken;
-        private String email;
-        private String name;
-        private String picture;
     }
 
     @PostMapping("/recover-password")

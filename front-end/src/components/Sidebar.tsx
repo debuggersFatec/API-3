@@ -10,6 +10,7 @@ import { useAuth } from "@/context/auth/useAuth";
 import { RiLogoutCircleRLine } from "react-icons/ri";
 import { useTeam } from "@/context/team/useTeam";
 import { useProject } from "@/context/project/useProject";
+import { CalendarioTab } from "./CalendarioTab";
 
 export const Sidebar = () => {
   const { user, logout } = useAuth();
@@ -86,6 +87,13 @@ export const Sidebar = () => {
               }
             </span>
           </Tabs.Trigger>
+          <Tabs.Trigger
+            value="calendario"
+            justifyContent={"space-between"}
+            onClick={() => setProject(undefined)}
+          >
+            Calendário
+          </Tabs.Trigger>
           <Flex alignItems={"center"} justify={"space-between"}>
             <h1>Teams</h1>
             <Dialog.Root
@@ -152,6 +160,9 @@ export const Sidebar = () => {
         </Tabs.Content>
         <Tabs.Content value="completas">
           <CompletasTab tasks={filteredTasks} />
+        </Tabs.Content>
+        <Tabs.Content value="calendario">
+          <CalendarioTab active={activeTab === "calendario"} />
         </Tabs.Content>
         {user?.teams &&
           user?.teams.map((team) => (
