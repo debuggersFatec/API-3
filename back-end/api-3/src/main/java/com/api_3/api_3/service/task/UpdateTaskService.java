@@ -152,7 +152,7 @@ public class UpdateTaskService {
                         }
                     } else {
                         createdEvent = googleCalendarService.criarEvento(newResponsibleUuid, event);
-                        if (oldDue == null) {
+                        if (oldDue != null) {
                             googleCalendarService.excluirEvento(oldResponsibleUuid, savedTask.getGoogleEventId());
                         }
                     }
