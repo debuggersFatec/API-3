@@ -21,6 +21,7 @@ import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.NotificationRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
+import com.api_3.api_3.service.AuthResponseBuilder;
 import com.api_3.api_3.service.notification.NotificationQueryService;
 import com.api_3.api_3.service.user.GetUserService;
 import com.api_3.api_3.service.user.UpdateUserService;
@@ -48,10 +49,15 @@ public class UserController {
 
     @Autowired
     private NotificationRepository notificationRepository;
+
     @Autowired
     private NotificationQueryService notificationQueryService;
+
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AuthResponseBuilder authResponseBuilder;
 
     @GetMapping("/debug/user-teams")
     public ResponseEntity<List<UserResponse>> debugUserTeams() {
@@ -64,28 +70,10 @@ public class UserController {
     public ResponseEntity<AuthResponse> getCurrentUser(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         AuthResponse.UserInfo userInfo = getUserService.findCurrentUserProfile(userDetails.getUsername());
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-        // Gerar token também para /me a pedido do cliente
-        String token = jwtUtil.generateToken(userDetails);
 
-        // Preencher notificações
-        AuthResponse resp = new AuthResponse();
-        resp.setToken(token);
-        resp.setRoutes(routes);
-        resp.setUser(userInfo);
-        com.api_3.api_3.model.entity.User u = userRepository.findByEmailIgnoreCase(userDetails.getUsername()).orElse(null);
-        if (u != null) {
-            long unread = notificationQueryService.countUnreadByUserUuid(u.getUuid());
-            java.util.List<NotificationDto> recent = notificationQueryService.findRecentTop20DtosByUserUuid(u.getUuid());
-            resp.setNotificationsUnread(unread);
-            resp.setNotificationsRecent(recent);
-        }
-        return ResponseEntity.ok(resp);
+        String token = jwtUtil.generateToken(userDetails);
+        
+        return ResponseEntity.ok(authResponseBuilder.build(token, userInfo, userInfo.getUuid()));
     }
 
     // Atualiza o usuário autenticado (nome e imagem)
