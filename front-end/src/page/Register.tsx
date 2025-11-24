@@ -66,7 +66,9 @@ export default function Register() {
   useEffect(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
     if (!clientId) {
-      setError("VITE_GOOGLE_CLIENT_ID não configurado no frontend.");
+      const errorMsg = "VITE_GOOGLE_CLIENT_ID não configurado no frontend.";
+      console.error(errorMsg);
+      setError(errorMsg);
       return;
     }
     if (!window.google?.accounts?.id) {
