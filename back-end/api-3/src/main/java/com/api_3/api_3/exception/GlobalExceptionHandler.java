@@ -6,14 +6,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import com.api_3.api_3.dto.response.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    // --- Tratamento para Tamanho de Arquivo Excedido ---
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException ex) {
+        ErrorResponse error = new ErrorResponse(
+            HttpStatus.PAYLOAD_TOO_LARGE.value(), 
+            "O arquivo enviado excede o tamanho máximo permitido de 50MB."
+        );
+        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(error);
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    
 
     // --- Exceções de Utilizador e Autenticação ---
     @ExceptionHandler(UserNotFoundException.class)

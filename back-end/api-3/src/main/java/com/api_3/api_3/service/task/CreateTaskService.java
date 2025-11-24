@@ -48,6 +48,12 @@ public class CreateTaskService {
         newTask.setProjectUuid(request.getProject_uuid());        
         newTask.setIsRequiredFile(request.getIsRequiredFile());
         
+        if (request.getRequiredFile() != null && !request.getRequiredFile().isEmpty()) {
+            newTask.setRequiredFile(request.getRequiredFile());
+        } else {
+            newTask.setRequiredFile(new ArrayList<>());
+        }
+        
         if (request.getResponsible() != null) {
             var r = request.getResponsible();
             newTask.setResponsible(new User.UserRef(r.getUuid(), r.getName(), r.getUrl_img()));
@@ -58,7 +64,7 @@ public class CreateTaskService {
         validateResponsible(newTask, team);
         Task savedTask = taskRepository.save(newTask);
 
-        if (project.getTasks() == null) project.setTasks(new java.util.ArrayList<>());
+        if (project.getTasks() == null) project.setTasks(new ArrayList<>());
         project.getTasks().add(savedTask.toProjectRef());
         projectsRepository.save(project);
 

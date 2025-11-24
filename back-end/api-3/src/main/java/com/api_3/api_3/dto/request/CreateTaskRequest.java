@@ -1,7 +1,11 @@
 package com.api_3.api_3.dto.request;
 
 import java.util.Date;
+import java.util.List;
+
+import com.api_3.api_3.model.embedded.FileAttachment;
 import com.api_3.api_3.model.entity.Responsible;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -22,7 +26,7 @@ public class CreateTaskRequest {
     private String equip_uuid; 
     private Responsible responsible;
 
-
     private Boolean isRequiredFile; 
-    private String requiredFile;
+    
+    private List<FileAttachment> requiredFile;
 }
