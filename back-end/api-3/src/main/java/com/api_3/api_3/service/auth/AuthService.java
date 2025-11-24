@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
-import com.api_3.api_3.dto.response.NotificationDto;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
@@ -29,6 +28,7 @@ import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
 import com.api_3.api_3.security.JwtUtil;
+import com.api_3.api_3.service.AuthResponseBuilder;
 // import com.api_3.api_3.service.notification.NotificationQueryService;
 
 @Service
@@ -56,8 +56,9 @@ public class AuthService {
 
     @Autowired
     private UserMapper userMapper;
-    // Notifications service is not available in this branch; default values will be returned in the response for now.
-    // private NotificationQueryService notificationQueryService;
+    
+    @Autowired
+    private AuthResponseBuilder authResponseBuilder;
 
     public AuthResponse login(AuthRequest authRequest) {
         Authentication authentication;
@@ -83,21 +84,7 @@ public class AuthService {
         }
 
         AuthResponse.UserInfo userInfo = userMapper.toUserInfo(user, teams, tasks);
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-
-        AuthResponse resp = new AuthResponse();
-        resp.setToken(token);
-        resp.setRoutes(routes);
-        resp.setUser(userInfo);
-        // Notifications are not wired yet in this branch; return sensible defaults
-        resp.setNotificationsUnread(0L);
-        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
-        return resp;
+        return authResponseBuilder.build(token, userInfo, user.getUuid());
     }
 
     public AuthResponse register(User newUser) {
@@ -134,21 +121,7 @@ public class AuthService {
 
         List<Teams> teams = teamsRepository.findAllById(savedUser.getEquipeIds());
         AuthResponse.UserInfo userInfo = userMapper.toUserInfo(savedUser, teams, Collections.emptyList());
-        AuthResponse.Routes routes = new AuthResponse.Routes(
-            "/api/teams",
-            "/api/projects",
-            "/api/teams/{teamUuid}/members",
-            "/api/tasks"
-        );
-
-        AuthResponse resp = new AuthResponse();
-        resp.setToken(token);
-        resp.setRoutes(routes);
-        resp.setUser(userInfo);
-        // Notifications are not wired yet in this branch; return sensible defaults
-        resp.setNotificationsUnread(0L);
-        resp.setNotificationsRecent(Collections.<NotificationDto>emptyList());
-        return resp;
+        return authResponseBuilder.build(token, userInfo, savedUser.getUuid());
     }
 
     public void updatePassword(String email, String newPassword) {

@@ -3,19 +3,13 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 
 export default defineConfig({
-  plugins: [react()],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
+  plugins: [react(), tsconfigPaths()],
   server: {
-    proxy: {
-      "/api": {
-        target: "http://localhost:8080",
-        changeOrigin: true,
-        secure: false,
-      },
-    },
+    port: 5173,
+    strictPort: true, // fail if 5173 is busy to keep OAuth origin stable
   },
-});
+  preview: {
+    port: 5173,
+    strictPort: true,
+  },
+})
