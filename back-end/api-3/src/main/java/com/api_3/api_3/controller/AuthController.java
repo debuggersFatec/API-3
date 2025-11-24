@@ -13,11 +13,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.api_3.api_3.dto.request.AuthRequest;
+import com.api_3.api_3.dto.request.GoogleLoginRequest;
 import com.api_3.api_3.dto.request.PasswordRequestEmailDto;
 import com.api_3.api_3.dto.request.PasswordResetRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.model.entity.User;
+import com.api_3.api_3.service.GoogleAuthService;
 import com.api_3.api_3.service.PasswordResetService;
 import com.api_3.api_3.service.auth.AuthService;
 
@@ -32,6 +34,9 @@ public class AuthController {
 
     @Autowired
     private PasswordResetService passwordResetService;
+
+    @Autowired
+    private GoogleAuthService googleAuthService;
 
     @PostMapping("/login")
     public AuthResponse authenticateAndGetToken(@Valid @RequestBody AuthRequest authRequest) {
@@ -59,7 +64,6 @@ public class AuthController {
     public ResponseEntity<?> recoverPassword(@Valid @RequestBody PasswordRequestEmailDto request) {
         try {
             passwordResetService.recoverPassword(request.email());
-            // Always return OK to avoid leaking whether the email exists
             return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado, um link de redefinição será enviado."));
         } catch (Exception e) {
             return ResponseEntity.ok(Map.of("message", "Se o e-mail estiver cadastrado, um link de redefinição será enviado."));
@@ -86,5 +90,10 @@ public class AuthController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<AuthResponse> googleLogin(@Valid @RequestBody GoogleLoginRequest req) {
+        return ResponseEntity.ok(googleAuthService.loginWithIdToken(req.getIdToken()));
     }
 }

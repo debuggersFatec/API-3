@@ -115,6 +115,7 @@ export const JoinTeamPage = () => {
             >
               Criar Conta
             </Button>
+            
           </HStack>
         </VStack>
       </Center>
