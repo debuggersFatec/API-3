@@ -1,4 +1,4 @@
-import { axiosInstance } from "./axiosInstance";
+import { axiosInstance } from "./axiosInstanceCalendar";
 import type { GoogleEvent } from "../types/calendar";
 
 export const CalendarService = {
@@ -23,7 +23,7 @@ export const CalendarService = {
 
   syncGoogle: (userUuid: string) => {
     const w = window.open(
-      `http://localhost:8080/api/calendar/auth/google/${userUuid}`,
+      `http://localhost:8080/calendar/auth/google/${userUuid}`,
       "googleAuth",
       "width=600,height=700,resizable=yes,scrollbars=yes"
     );

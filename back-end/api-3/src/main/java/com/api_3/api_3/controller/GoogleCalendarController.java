@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/calendar")
+@RequestMapping("/calendar")
 public class GoogleCalendarController {
 
     private final GoogleAuthService authService;
@@ -33,9 +33,6 @@ public class GoogleCalendarController {
         this.userRepository = userRepository;
     }
 
-    // -----------------------------
-    // Helper para validar UUID do usuário logado
-    // -----------------------------
     private User getValidatedUser(String userUuid, Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User loggedUser = userRepository.findByEmail(userDetails.getUsername())
@@ -47,35 +44,33 @@ public class GoogleCalendarController {
         return loggedUser;
     }
 
-    // -----------------------------
-    // 1️⃣ Redirecionar para OAuth do Google
-    // -----------------------------
     @GetMapping("/auth/google/{userUuid}")
-    public void redirectToGoogleAuth(@PathVariable String userUuid, 
-                                     Authentication authentication,
-                                     HttpServletResponse response) throws Exception {
-
-        getValidatedUser(userUuid, authentication);
-
-        String url = authService.gerarUrlAutenticacao(userUuid);
-        response.sendRedirect(url);
+    public void redirectToGoogleAuth(@PathVariable String userUuid, HttpServletResponse response) {
+        try {
+            String url = authService.gerarUrlAutenticacao(userUuid);
+            response.sendRedirect(url);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    // -----------------------------
-    // 2️⃣ Callback OAuth2
-    // -----------------------------
     @GetMapping("/auth/callback")
     public void callback(@RequestParam String code,
-                         @RequestParam String state,
-                         HttpServletResponse response) throws Exception {
-
-        authService.salvarTokens(state, code);
-        response.sendRedirect("http://localhost:5173"); 
+                        @RequestParam String state,
+                        HttpServletResponse response) {
+        try {
+            authService.salvarTokens(state, code);
+            response.sendRedirect("http://localhost:5173?status=success");
+        } catch (Exception e) {
+            System.err.println("Erro no callback: " + e.getMessage());
+            try {
+                response.sendRedirect("http://localhost:5173?status=error&msg=" + e.getMessage());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
-    // -----------------------------
-    // 3️⃣ Listar eventos
-    // -----------------------------
     @GetMapping("/events/{userUuid}")
     public ResponseEntity<?> listar(@PathVariable String userUuid, Authentication authentication) {
         try {
@@ -92,10 +87,6 @@ public class GoogleCalendarController {
             return ResponseEntity.status(500).body("Erro ao acessar Google Calendar: " + e.getMessage());
         }
     }
-
-    // -----------------------------
-    // 4️⃣ Criar evento
-    // -----------------------------
     @PostMapping("/events/{userUuid}")
     public ResponseEntity<?> criar(@PathVariable String userUuid,
                                    @RequestBody CalendarResponse eventDTO,
@@ -113,9 +104,6 @@ public class GoogleCalendarController {
         }
     }
 
-    // -----------------------------
-    // 5️⃣ Atualizar evento
-    // -----------------------------
     @PutMapping("/events/{userUuid}/{eventId}")
     public ResponseEntity<?> atualizar(@PathVariable String userUuid,
                                        @PathVariable String eventId,
@@ -134,9 +122,6 @@ public class GoogleCalendarController {
         }
     }
 
-    // -----------------------------
-    // 6️⃣ Excluir evento
-    // -----------------------------
     @DeleteMapping("/events/{userUuid}/{eventId}")
     public ResponseEntity<?> excluir(@PathVariable String userUuid,
                                      @PathVariable String eventId,

@@ -37,7 +37,7 @@ public class GoogleConfig {
                 secrets,
                 List.of("https://www.googleapis.com/auth/calendar")
         )
-                .setAccessType("offline") // gera refresh token
+                .setAccessType("offline")
                 .setApprovalPrompt("force")
                 .build();
     }

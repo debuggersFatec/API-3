@@ -33,9 +33,6 @@ public class GoogleCalendarService {
         this.userRepository = userRepository;
     }
 
-    // -----------------------------
-    // REFRESH TOKEN AUTOMÁTICO
-    // -----------------------------
     private String refreshAccessToken(User user) throws Exception {
         if (user.getGoogleCalendar().getRefreshToken() == null) {
             throw new RuntimeException("Usuário não possui refresh token. Faça a sincronização novamente.");
@@ -57,9 +54,6 @@ public class GoogleCalendarService {
         return credential.getAccessToken();
     }
 
-    // -----------------------------
-    // SERVIÇO DO CALENDAR
-    // -----------------------------
     private Calendar getCalendarService(User user) throws Exception {
 
         if (user.getGoogleCalendar().getAccessToken() == null) {
@@ -82,9 +76,6 @@ public class GoogleCalendarService {
         ).setApplicationName("API-3").build();
     }
 
-    // -----------------------------
-    // OBTER OU CRIAR CALENDÁRIO DO SITE
-    // -----------------------------
     private String obterOuCriarCalendarApp(User user) throws Exception {
         if (user.getGoogleCalendar().getCalendarId() != null) {
             return user.getGoogleCalendar().getCalendarId();
