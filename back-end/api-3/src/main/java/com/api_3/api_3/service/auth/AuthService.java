@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.api_3.api_3.dto.request.AuthRequest;
 import com.api_3.api_3.dto.response.AuthResponse;
-import com.api_3.api_3.dto.response.NotificationDto;
 import com.api_3.api_3.exception.EmailAlreadyExistsException;
 import com.api_3.api_3.exception.InvalidCredentialsException;
 import com.api_3.api_3.exception.UserNotFoundException;
