@@ -28,7 +28,14 @@ public class UserMapper {
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
         dto.setImg(user.getImg());
-    dto.setEquipeIds(user.getEquipeIds());
+        UserResponse.GoogleCalendarInfo calendar = new UserResponse.GoogleCalendarInfo();
+        calendar.setConnected(user.getGoogleCalendar().isConnected());
+        calendar.setAccessToken(user.getGoogleCalendar().getAccessToken());
+        calendar.setRefreshToken(user.getGoogleCalendar().getRefreshToken());
+        calendar.setExpiresAt(user.getGoogleCalendar().getExpiresAt());
+        calendar.setCalendarId(user.getGoogleCalendar().getCalendarId());
+        dto.setGoogleCalendar(calendar);
+        dto.setEquipeIds(user.getEquipeIds());
         return dto;
     }
 
@@ -44,49 +51,55 @@ public class UserMapper {
                 .map(t -> new AuthResponse.TeamInfo(t.getUuid(), t.getName()))
                 .collect(Collectors.toList());
 
+        AuthResponse.GoogleCalendarInfo calendar = new AuthResponse.GoogleCalendarInfo();
+        calendar.setConnected(user.getGoogleCalendar().isConnected());
+        calendar.setAccessToken(user.getGoogleCalendar().getAccessToken());
+        calendar.setRefreshToken(user.getGoogleCalendar().getRefreshToken());
+        calendar.setExpiresAt(user.getGoogleCalendar().getExpiresAt());
+        calendar.setCalendarId(user.getGoogleCalendar().getCalendarId());
+
         List<AuthResponse.TaskInfo> taskInfos;
         if (tasks != null && !tasks.isEmpty()) {
             taskInfos = tasks.stream()
-                .map(task -> new AuthResponse.TaskInfo(
-                    task.getUuid(),
-                    task.getTitle(),
-                    task.getStatus() != null ? task.getStatus().name() : null,
-                    task.getPriority() != null ? task.getPriority().name() : null,
-                    task.getEquip_uuid(),
-                    task.getProjectUuid(),
-                    task.getDue_date()
-                ))
-                .collect(Collectors.toList());
+                    .map(task -> new AuthResponse.TaskInfo(
+                            task.getUuid(),
+                            task.getTitle(),
+                            task.getStatus() != null ? task.getStatus().name() : null,
+                            task.getPriority() != null ? task.getPriority().name() : null,
+                            task.getEquip_uuid(),
+                            task.getProjectUuid(),
+                            task.getDue_date()))
+                    .collect(Collectors.toList());
         } else if (user.getTasks() != null && !user.getTasks().isEmpty()) {
-            // Fallback: map embedded TaskUser refs directly if repository didn't return tasks
+            // Fallback: map embedded TaskUser refs directly if repository didn't return
+            // tasks
             taskInfos = user.getTasks().stream()
-                .map(tu -> new AuthResponse.TaskInfo(
-                    tu.getUuid(),
-                    tu.getTitle(),
-                    tu.getStatus() != null ? tu.getStatus().name() : null,
-                    tu.getPriority() != null ? tu.getPriority().name() : null,
-                    tu.getTeamUuid(),
-                    tu.getProjectUuid(),
-                    tu.getDueDate()
-                ))
-                .collect(Collectors.toList());
+                    .map(tu -> new AuthResponse.TaskInfo(
+                            tu.getUuid(),
+                            tu.getTitle(),
+                            tu.getStatus() != null ? tu.getStatus().name() : null,
+                            tu.getPriority() != null ? tu.getPriority().name() : null,
+                            tu.getTeamUuid(),
+                            tu.getProjectUuid(),
+                            tu.getDueDate()))
+                    .collect(Collectors.toList());
         } else {
             taskInfos = java.util.List.of();
         }
 
         List<AuthResponse.ProjectInfo> projectInfos = teams.stream()
-            .flatMap(t -> projectsRepository.findByTeamUuid(t.getUuid()).stream())
-            .map(p -> new AuthResponse.ProjectInfo(p.getUuid(), p.getName(), p.isActive(), p.getTeamUuid()))
-            .collect(Collectors.toList());
+                .flatMap(t -> projectsRepository.findByTeamUuid(t.getUuid()).stream())
+                .map(p -> new AuthResponse.ProjectInfo(p.getUuid(), p.getName(), p.isActive(), p.getTeamUuid()))
+                .collect(Collectors.toList());
 
         return new AuthResponse.UserInfo(
                 user.getUuid(),
                 user.getName(),
                 user.getEmail(),
                 user.getImg(),
+                calendar,
                 teamInfos,
                 projectInfos,
-                taskInfos
-        );
+                taskInfos);
     }
 }

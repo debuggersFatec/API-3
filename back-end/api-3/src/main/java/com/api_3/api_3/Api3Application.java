@@ -73,6 +73,32 @@ public class Api3Application {
 		if (emailPass != null && !emailPass.isBlank()) {
 			System.setProperty("SENHA_APP_EMAIL", emailPass);
 		}
+		String googleClientId = System.getenv("GOOGLE_CLIENT_ID");
+		if (googleClientId == null) googleClientId = dotenv.get("GOOGLE_CLIENT_ID");
+		if ((googleClientId == null || googleClientId.isBlank())) {
+			Dotenv parentEnv = Dotenv.configure()
+				.directory("../")
+				.ignoreIfMalformed()
+				.ignoreIfMissing()
+				.load();
+			googleClientId = parentEnv.get("GOOGLE_CLIENT_ID");
+		}
+		if (googleClientId != null && !googleClientId.isBlank()) {
+			System.setProperty("GOOGLE_CLIENT_ID", googleClientId);
+		}
+		String googleClientSecret = System.getenv("GOOGLE_CLIENT_SECRET");
+		if (googleClientSecret == null) googleClientSecret = dotenv.get("GOOGLE_CLIENT_SECRET");
+		if ((googleClientSecret == null || googleClientSecret.isBlank())) {
+			Dotenv parentEnv = Dotenv.configure()
+				.directory("../")
+				.ignoreIfMalformed()
+				.ignoreIfMissing()
+				.load();
+			googleClientSecret = parentEnv.get("GOOGLE_CLIENT_SECRET");
+		}
+		if (googleClientSecret != null && !googleClientSecret.isBlank()) {
+			System.setProperty("GOOGLE_CLIENT_SECRET", googleClientSecret);
+		}
 
 		SpringApplication.run(Api3Application.class, args);
 	}

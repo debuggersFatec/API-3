@@ -35,6 +35,7 @@ public class TaskMapper {
         dto.setProject_uuid(task.getProjectUuid());
         dto.setRequiredFile(task.getRequiredFile());
         dto.setIsRequiredFile(task.getIsRequiredFile());
+        dto.setGoogleEventId(task.getGoogleEventId());
         
         if (task.getResponsible() != null) {
           

@@ -1,5 +1,7 @@
 package com.api_3.api_3.service.task;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -19,7 +21,11 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.GoogleCalendarService;
 import com.api_3.api_3.service.NotificationService;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 @Service
 public class CreateTaskService {
@@ -28,6 +34,7 @@ public class CreateTaskService {
     @Autowired private TeamsRepository teamsRepository;
     @Autowired private UserRepository userRepository;
     @Autowired private NotificationService notificationService;
+    @Autowired private GoogleCalendarService googleCalendarService;
 
     @Transactional
     public Task execute(CreateTaskRequest request) {
@@ -107,5 +114,36 @@ public class CreateTaskService {
             user.getTasks().add(taskUser);
             userRepository.save(user);
         });
+        if (task.getDue_date() != null) {
+            addTaskToGoogleCalendar(task, userRepository.findById(userUuid).orElse(null));
+        }
     }
+
+    private void addTaskToGoogleCalendar(Task task, User user) {
+        if (user.getGoogleCalendar() == null || !user.getGoogleCalendar().isConnected()) {
+            return;
+        }
+
+        try {
+            Event event = new Event()
+                .setSummary(task.getTitle())
+                .setDescription(task.getDescription());
+
+            LocalDate localDate = task.getDue_date().toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDate();
+
+            event.setStart(new EventDateTime().setDate(new DateTime(localDate.toString())));
+            event.setEnd(new EventDateTime().setDate(new DateTime(localDate.plusDays(1).toString())));
+
+            Event createdEvent = googleCalendarService.criarEvento(user.getUuid(), event);
+            if (createdEvent != null) {
+                task.setGoogleEventId(createdEvent.getId());
+                taskRepository.save(task);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

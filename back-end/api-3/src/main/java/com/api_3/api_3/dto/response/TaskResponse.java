@@ -20,6 +20,7 @@ public class TaskResponse {
     private String equip_uuid; 
     private String project_uuid;
     private Responsible responsible;
+    private String googleEventId;
 
     private List<CommentResponse> comments;
 }

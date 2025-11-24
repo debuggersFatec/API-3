@@ -4,26 +4,36 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.api_3.api_3.exception.CalendarIntegrationException;
 import com.api_3.api_3.exception.TaskNotFoundException;
 import com.api_3.api_3.model.entity.Projects;
 import com.api_3.api_3.model.entity.Task;
 import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.GoogleCalendarService;
 import com.api_3.api_3.service.NotificationService;
 
 @Service
 public class DeleteTaskService {
 
-    @Autowired private TaskRepository taskRepository;
-    @Autowired private ProjectsRepository projectsRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired private NotificationService notificationService;
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(DeleteTaskService.class);
+
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private ProjectsRepository projectsRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private NotificationService notificationService;
+    @Autowired
+    private GoogleCalendarService googleCalendarService;
 
     @Transactional
     public Task execute(String uuid) {
         Task task = taskRepository.findById(uuid)
-            .orElseThrow(() -> new TaskNotFoundException("Falha ao apagar a tarefa com o ID: " + uuid));
+                .orElseThrow(() -> new TaskNotFoundException("Falha ao apagar a tarefa com o ID: " + uuid));
 
         moveTaskToProjectTrashcan(task);
         if (task.getResponsible() != null && task.getResponsible().uuid() != null) {
@@ -33,17 +43,39 @@ public class DeleteTaskService {
         task.setStatus(Task.Status.DELETED);
         Task saved = taskRepository.save(task);
 
+        if (hasGoogleEvent(task)) {
+            try {
+                googleCalendarService.excluirEvento(task.getResponsible().uuid(), task.getGoogleEventId());
+            } catch (CalendarIntegrationException e) {
+                log.warn("Falha ao excluir evento do Google Calendar", task.getUuid(),
+                        e.getMessage());
+            } catch (Exception e) {
+                log.error("Erro inesperado ao excluir evento Google Calendar", task.getUuid(),
+                        e.getMessage(), e);
+            }
+        }
+
         notificationService.notifyTaskDeletedScoped(saved);
         return saved;
     }
 
+    private boolean hasGoogleEvent(Task task) {
+        return task.getGoogleEventId() != null
+                && !task.getGoogleEventId().isBlank()
+                && task.getResponsible() != null
+                && task.getResponsible().uuid() != null;
+    }
+
     private void moveTaskToProjectTrashcan(Task task) {
         String projectUuid = task.getProjectUuid();
-        if (projectUuid == null || projectUuid.isBlank()) return;
+        if (projectUuid == null || projectUuid.isBlank())
+            return;
 
         projectsRepository.findById(projectUuid).ifPresent(project -> {
-            if (project.getTasks() == null) project.setTasks(new java.util.ArrayList<>());
-            if (project.getTrashcan() == null) project.setTrashcan(new java.util.ArrayList<>());
+            if (project.getTasks() == null)
+                project.setTasks(new java.util.ArrayList<>());
+            if (project.getTrashcan() == null)
+                project.setTrashcan(new java.util.ArrayList<>());
 
             project.getTasks().removeIf(ref -> ref != null && safeEq(ref.uuid(), task.getUuid()));
 
@@ -62,7 +94,8 @@ public class DeleteTaskService {
         userRepository.findById(userUuid).ifPresent(user -> {
             if (user.getTasks() != null && !user.getTasks().isEmpty()) {
                 boolean removed = user.getTasks().removeIf(tu -> tu != null && safeEq(tu.uuid(), taskUuid));
-                if (removed) userRepository.save(user);
+                if (removed)
+                    userRepository.save(user);
             }
         });
     }

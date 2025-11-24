@@ -6,16 +6,21 @@ import { App } from "./App";
 import { ColorModeProvider } from "./components/ui/color-mode";
 import { AuthProvider } from "./context/auth/AuthContext";
 import { Toaster } from "@/components/ui/toaster";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <Provider>
         <ColorModeProvider>
-          <BrowserRouter>
-            <App />
-            <Toaster />
-          </BrowserRouter>
+          <GoogleOAuthProvider clientId={clientId}>
+            <BrowserRouter>
+              <App />
+              <Toaster />
+            </BrowserRouter>
+          </GoogleOAuthProvider>
         </ColorModeProvider>
       </Provider>
     </AuthProvider>

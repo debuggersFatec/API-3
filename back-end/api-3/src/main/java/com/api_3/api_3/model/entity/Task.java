@@ -29,6 +29,7 @@ public class Task {
     private String projectUuid;
     private User.UserRef responsible;
     private List<TaskComment> comments = new ArrayList<>();
+    private String googleEventId;
 
     public Task(String title, Status status, Priority priority, String teamUuid, String projectUuid , Boolean isRequiredFile) {
         this.title = title;

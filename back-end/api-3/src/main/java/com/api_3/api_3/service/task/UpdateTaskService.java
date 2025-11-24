@@ -1,5 +1,7 @@
 package com.api_3.api_3.service.task;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Optional; 
@@ -21,7 +23,11 @@ import com.api_3.api_3.repository.ProjectsRepository;
 import com.api_3.api_3.repository.TaskRepository;
 import com.api_3.api_3.repository.TeamsRepository;
 import com.api_3.api_3.repository.UserRepository;
+import com.api_3.api_3.service.GoogleCalendarService;
 import com.api_3.api_3.service.NotificationService;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventDateTime;
 
 @Service
 public class UpdateTaskService {
@@ -31,6 +37,7 @@ public class UpdateTaskService {
     @Autowired private UserRepository userRepository;
     @Autowired private ProjectsRepository projectsRepository;
     @Autowired private NotificationService notificationService;
+    @Autowired private GoogleCalendarService googleCalendarService;
 
     @Transactional
     public Task execute(String uuid, UpdateTaskRequest request) {
@@ -114,6 +121,57 @@ public class UpdateTaskService {
     boolean changedDue = request.getDue_date() != null && (oldDue == null || !request.getDue_date().equals(oldDue));
         if (changedTitle || changedDue) {
             notificationService.notifyTaskUpdatedScoped(savedTask);
+        }
+
+        try {
+            if (savedTask.getDueDate() == null && oldDue != null) {
+                googleCalendarService.excluirEvento(oldResponsibleUuid, savedTask.getGoogleEventId());
+                savedTask.setGoogleEventId(null);
+                taskRepository.save(savedTask);
+            }
+            if (savedTask.getDueDate() != null) {
+                Event event = new Event()
+                    .setSummary(savedTask.getTitle())
+                    .setDescription(savedTask.getDescription());
+
+                LocalDate localDate = savedTask.getDue_date().toInstant()
+                                        .atZone(ZoneId.systemDefault())
+                                        .toLocalDate();
+
+                event.setStart(new EventDateTime().setDate(new DateTime(localDate.toString())));
+                event.setEnd(new EventDateTime().setDate(new DateTime(localDate.plusDays(1).toString())));
+                Event createdEvent = null;
+                if (savedTask.getGoogleEventId() == null) {
+                    if (newResponsibleUuid != null) {
+                        createdEvent = googleCalendarService.criarEvento(newResponsibleUuid, event);
+                    }
+                } else if (oldResponsibleUuid != null && newResponsibleUuid != null) {
+                    if (oldResponsibleUuid.equals(newResponsibleUuid)) {
+                        if (oldDue != null) {
+                            googleCalendarService.atualizarEvento(oldResponsibleUuid, savedTask.getGoogleEventId(), event);
+                        }
+                    } else {
+                        createdEvent = googleCalendarService.criarEvento(newResponsibleUuid, event);
+                        if (oldDue != null) {
+                            googleCalendarService.excluirEvento(oldResponsibleUuid, savedTask.getGoogleEventId());
+                        }
+                    }
+                }
+                else if (oldResponsibleUuid != null && newResponsibleUuid == null) {
+                    if (oldDue == null) {
+                        googleCalendarService.excluirEvento(oldResponsibleUuid, savedTask.getGoogleEventId());
+                    }
+                }
+                else if (oldResponsibleUuid == null && newResponsibleUuid != null) {
+                    createdEvent = googleCalendarService.criarEvento(newResponsibleUuid, event);
+                }
+                if (createdEvent != null) {
+                    savedTask.setGoogleEventId(createdEvent.getId());
+                    taskRepository.save(savedTask);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return savedTask;
