@@ -3,7 +3,7 @@ package com.api_3.api_3.controller;
 import com.api_3.api_3.dto.response.CalendarResponse;
 import com.api_3.api_3.model.entity.User;
 import com.api_3.api_3.repository.UserRepository;
-import com.api_3.api_3.service.GoogleAuthService;
+import com.api_3.api_3.service.GoogleCalendarAuthService;
 import com.api_3.api_3.service.GoogleCalendarService;
 import com.google.api.services.calendar.model.Event;
 
@@ -21,11 +21,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/calendar")
 public class GoogleCalendarController {
 
-    private final GoogleAuthService authService;
+    private final GoogleCalendarAuthService authService;
     private final GoogleCalendarService calendarService;
     private final UserRepository userRepository;
 
-    public GoogleCalendarController(GoogleAuthService authService,
+    public GoogleCalendarController(GoogleCalendarAuthService authService,
                                     GoogleCalendarService calendarService,
                                     UserRepository userRepository) {
         this.authService = authService;

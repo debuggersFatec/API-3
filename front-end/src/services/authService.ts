@@ -4,13 +4,7 @@ type LoginPayload = { email: string; password: string };
 type RegisterPayload = { name: string; email: string; password: string };
 type ForgotPasswordPayload = { email: string };
 type ResetPasswordPayload = { newPassword: string };
-
-type GoogleLoginPayload = {
-  googleAccessToken: string;
-  email: string;
-  name?: string;
-  picture?: string;
-};
+type GoogleLoginPayload = { idToken: string };
 
 export const authService = {
   login: (payload: LoginPayload) =>
@@ -29,7 +23,7 @@ export const authService = {
     axiosInstance.post(`/auth/reset-password/${token}`, payload),
 
   googleLogin: (payload: GoogleLoginPayload) =>
-    axiosInstance.post("/auth/google-login", payload),
+    axiosInstance.post("/auth/google", payload),
 };
 
 export default authService;

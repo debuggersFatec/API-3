@@ -2,6 +2,7 @@ package com.api_3.api_3.dto.response;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Date;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,6 +47,26 @@ public class AuthResponse {
             this.name = name;
             this.email = email;
             this.img = img;
+            this.teams = teams;
+            this.projects = projects;
+            this.tasks = tasks;
+            this.notificationsUnread = 0L;
+            this.notificationsRecent = java.util.List.of();
+        }
+
+            public UserInfo(String uuid,
+                        String name,
+                        String email,
+                        String img,
+                        GoogleCalendarInfo googleCalendar,
+                        List<TeamInfo> teams,
+                        List<ProjectInfo> projects,
+                        List<TaskInfo> tasks) {
+            this.uuid = uuid;
+            this.name = name;
+            this.email = email;
+            this.img = img;
+            this.googleCalendar = googleCalendar;
             this.teams = teams;
             this.projects = projects;
             this.tasks = tasks;
